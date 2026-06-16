@@ -1,0 +1,165 @@
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Settings,
+  Shield,
+  ClipboardList,
+  CreditCard,
+  Bot,
+  CalendarCheck,
+  Users,
+  Stethoscope,
+  ClipboardCheck,
+  BarChart3,
+  FileText,
+} from 'lucide-react'
+
+export const navItems = [
+  {
+    label: 'Overview',
+    labelAr: 'الرئيسية',
+    path: '/dashboard',
+    icon: LayoutDashboard,
+    roles: ['admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist'],
+  },
+  {
+    label: 'Bookings',
+    labelAr: 'الحجوزات',
+    path: '/dashboard/bookings',
+    icon: CalendarDays,
+    roles: ['admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist'],
+  },
+  {
+    label: 'Settings',
+    labelAr: 'الإعدادات',
+    path: '/dashboard/settings',
+    icon: Settings,
+    roles: ['admin', 'director'],
+  },
+  {
+    label: 'Admin Panel',
+    labelAr: 'لوحة الإدارة',
+    path: '/dashboard/admin',
+    icon: Shield,
+    roles: ['admin', 'director'],
+  },
+  {
+    label: 'Medical Records',
+    labelAr: 'السجلات الطبية',
+    path: '/dashboard/medical-records',
+    icon: ClipboardList,
+    roles: ['admin', 'director', 'dept_manager', 'doctor', 'nurse'],
+  },
+  {
+    label: 'Billing',
+    labelAr: 'الفواتير',
+    path: '/dashboard/billing',
+    icon: CreditCard,
+    roles: ['admin', 'director', 'dept_manager'],
+  },
+  {
+    label: 'AI Triage',
+    labelAr: 'الفرز الذكي',
+    path: '/triage',
+    icon: Bot,
+    roles: ['admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist'],
+  },
+  {
+    label: 'My Schedule',
+    labelAr: 'جدولي',
+    path: '/doctor',
+    icon: CalendarCheck,
+    roles: ['doctor', 'nurse'],
+  },
+  {
+    label: 'Patient Queue',
+    labelAr: 'قائمة المرضى',
+    path: '/nurse/queue',
+    icon: Users,
+    roles: ['nurse'],
+  },
+  {
+    label: 'Triage',
+    labelAr: 'الفرز',
+    path: '/nurse/triage',
+    icon: Stethoscope,
+    roles: ['nurse'],
+  },
+  {
+    label: 'Walk-In Booking',
+    labelAr: 'حجز مباشر',
+    path: '/receptionist/walk-in',
+    icon: ClipboardList,
+    roles: ['receptionist'],
+  },
+  {
+    label: 'Patient Directory',
+    labelAr: 'دليل المرضى',
+    path: '/receptionist/patients',
+    icon: Users,
+    roles: ['receptionist'],
+  },
+  {
+    label: 'Check-In/Out',
+    labelAr: 'تسجيل الوصول/المغادرة',
+    path: '/receptionist/check-in-out',
+    icon: ClipboardCheck,
+    roles: ['receptionist'],
+  },
+  {
+    label: 'Analytics',
+    labelAr: 'التحليلات',
+    path: '/dashboard/analytics',
+    icon: BarChart3,
+    roles: ['admin', 'director'],
+  },
+  {
+    label: 'Audit Log',
+    labelAr: 'سجل النشاط',
+    path: '/dashboard/audit-log',
+    icon: FileText,
+    roles: ['admin', 'director'],
+  },
+]
+
+export const roleBadgeColors = {
+  admin: {
+    bg: 'bg-red-100',
+    text: 'text-red-700',
+    border: 'border-red-200',
+  },
+  director: {
+    bg: 'bg-purple-100',
+    text: 'text-purple-700',
+    border: 'border-purple-200',
+  },
+  dept_manager: {
+    bg: 'bg-blue-100',
+    text: 'text-blue-700',
+    border: 'border-blue-200',
+  },
+  doctor: {
+    bg: 'bg-green-100',
+    text: 'text-green-700',
+    border: 'border-green-200',
+  },
+  nurse: {
+    bg: 'bg-teal-100',
+    text: 'text-teal-700',
+    border: 'border-teal-200',
+  },
+  receptionist: {
+    bg: 'bg-orange-100',
+    text: 'text-orange-700',
+    border: 'border-orange-200',
+  },
+}
+
+export const roleLabels = {
+  admin: 'Admin',
+  director: 'Director',
+  dept_manager: 'Dept Manager',
+  doctor: 'Doctor',
+  nurse: 'Nurse',
+  receptionist: 'Receptionist',
+}
