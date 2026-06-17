@@ -6,11 +6,13 @@ import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function AdminPanel() {
   const navigate = useNavigate()
   const { role, hasPermission } = useAuth()
   const { toast, confirm } = useUI()
+  const { t, isRTL } = useLanguage()
   const [tab, setTab] = useState('users')
   const [users, setUsers] = useState([])
   const [roles, setRoles] = useState([])
@@ -123,13 +125,13 @@ export default function AdminPanel() {
   if (!hasPermission('users:manage')) {
     return (
       <div className="page">
-        <Navbar variant="dashboard" back="/dashboard" subtitle="Admin Panel" />
+        <Navbar variant="dashboard" back="/dashboard" subtitle={t.adminPanel} />
         <div className="flex-1 flex items-center justify-center p-10">
-          <div className="card p-12 text-center">
-            <div className="mb-4 flex justify-center"><Lock size={48} className="text-gray-300" /></div>
-            <h2 className="font-bold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-400 mb-6">Only administrators can access this page.</p>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-md">Back to Dashboard</button>
+          <div className="card" style={{ padding: 48, textAlign: 'center' }}>
+            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}><Lock size={48} style={{ color: 'var(--text-disabled)' }} /></div>
+            <h2 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t.back}</h2>
+            <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>{t.adminPanel}</p>
+            <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-md">{t.back}</button>
           </div>
         </div>
       </div>
@@ -138,20 +140,24 @@ export default function AdminPanel() {
 
   return (
     <div className="page">
-      <Navbar
-        variant="dashboard" back="/dashboard" subtitle="Admin Panel"
-      />
+      <Navbar variant="dashboard" back="/dashboard" subtitle={t.adminPanel} />
 
       <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-2 mb-6">
+          <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
             {[
-              { id: 'users', label: 'Users', icon: <Users size={16} className="mr-1.5" /> },
-              { id: 'roles', label: 'Roles & Permissions', icon: <Shield size={16} className="mr-1.5" /> },
-            ].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)}
-                className={`btn btn-md ${tab === t.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
-                {t.icon}{t.label}
+              { id: 'users', label: t.users, icon: <Users size={16} /> },
+              { id: 'roles', label: t.rolesPermissions, icon: <Shield size={16} /> },
+            ].map(tabItem => (
+              <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
+                className="btn btn-md"
+                style={{
+                  background: tab === tabItem.id ? 'var(--primary)' : 'var(--surface)',
+                  color: tab === tabItem.id ? '#fff' : 'var(--text-secondary)',
+                  border: `1.5px solid ${tab === tabItem.id ? 'var(--primary)' : 'var(--border)'}`,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                {tabItem.icon}{tabItem.label}
               </button>
             ))}
           </div>
@@ -169,17 +175,28 @@ export default function AdminPanel() {
                 ))}
               </div>
 
-              <div className="flex gap-3 mb-4 flex-wrap">
-                <div className="relative flex-1 min-w-[200px]">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Search size={16} /></span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} className="input pl-9" placeholder="Search by name..." />
+              <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+                  <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}><Search size={16} /></span>
+                  <input value={search} onChange={e => setSearch(e.target.value)} className="input" style={{ paddingInlineStart: 36 }} placeholder={t.searchByNameEmail} />
                 </div>
-                <div className="flex gap-1.5 flex-wrap">
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <button onClick={() => setFilterRole('all')}
-                    className={`btn btn-sm ${filterRole === 'all' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>All</button>
+                    className="btn btn-sm"
+                    style={{
+                      background: filterRole === 'all' ? 'var(--primary)' : 'var(--surface)',
+                      color: filterRole === 'all' ? '#fff' : 'var(--text-secondary)',
+                      border: `1.5px solid ${filterRole === 'all' ? 'var(--primary)' : 'var(--border)'}`,
+                    }}>{t.all}</button>
                   {roles.map(r => (
                     <button key={r.id} onClick={() => setFilterRole(r.name)}
-                      className={`btn btn-sm capitalize ${filterRole === r.name ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
+                      className="btn btn-sm"
+                      style={{
+                        background: filterRole === r.name ? 'var(--primary)' : 'var(--surface)',
+                        color: filterRole === r.name ? '#fff' : 'var(--text-secondary)',
+                        border: `1.5px solid ${filterRole === r.name ? 'var(--primary)' : 'var(--border)'}`,
+                        textTransform: 'capitalize',
+                      }}>
                       {r.name.replace('_', ' ')}
                     </button>
                   ))}
@@ -195,36 +212,35 @@ export default function AdminPanel() {
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-xs">
                       <thead>
-                        <tr className="border-b border-gray-100">
-                          {['Name', 'Role', 'Joined', 'Actions'].map(col => (
-                            <th key={col} className="px-4 py-3 text-left font-semibold text-gray-400 text-[11px] whitespace-nowrap">{col}</th>
+                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                          {[t.patient, t.role, t.date, t.actions].map(col => (
+                            <th key={col} style={{ padding: '10px 14px', textAlign: 'start', fontWeight: 600, color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>{col}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {filtered.map((u, i) => (
-                          <motion.tr key={u.id} className="border-b border-gray-100"
-                            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}
-                            whileHover={{ backgroundColor: 'rgba(243, 244, 246, 0.8)' }}>
-                            <td className="px-4 py-3 font-semibold text-gray-800">{u.full_name || 'No name'}</td>
-                            <td className="px-4 py-3">
+                          <motion.tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}
+                            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}>
+                            <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{u.full_name || '—'}</td>
+                            <td style={{ padding: '10px 14px' }}>
                               {editingUser === u.id ? (
-                                <div className="flex gap-1.5 items-center">
+                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                                   <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                    className="input py-1 px-2 text-xs w-[150px]">
+                                    className="input" style={{ padding: '4px 8px', fontSize: 12, width: 140 }}>
                                     {roles.map(r => <option key={r.id} value={r.id}>{r.name.replace('_', ' ')}</option>)}
                                   </select>
-                                  <button onClick={() => handleRoleChange(u.id, parseInt(newRole))} className="btn btn-primary btn-sm text-[11px]">Save</button>
-                                  <button onClick={() => setEditingUser(null)} className="btn btn-ghost btn-sm text-[11px]">Cancel</button>
+                                  <button onClick={() => handleRoleChange(u.id, parseInt(newRole))} className="btn btn-primary btn-sm" style={{ fontSize: 11 }}>{t.save}</button>
+                                  <button onClick={() => setEditingUser(null)} className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>{t.cancel}</button>
                                 </div>
                               ) : getRoleBadge(u.roles?.name)}
                             </td>
-                            <td className="px-4 py-3 text-gray-400 text-xs">{new Date(u.created_at).toLocaleDateString()}</td>
-                            <td className="px-4 py-3">
+                            <td style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: 12 }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                            <td style={{ padding: '10px 14px' }}>
                               {editingUser !== u.id && (
-                                <div className="flex gap-1.5">
-                                  <button onClick={() => { setEditingUser(u.id); setNewRole(u.role_id) }} className="btn btn-ghost btn-sm text-blue-600 text-xs"><Pencil size={12} className="mr-1 inline" />Edit Role</button>
-                                  <button onClick={() => handleDeleteUser(u.id)} className="btn btn-ghost btn-sm text-red-500 text-xs"><Trash2 size={12} className="mr-1 inline" />Delete</button>
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                  <button onClick={() => { setEditingUser(u.id); setNewRole(u.role_id) }} className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)', fontSize: 12 }}><Pencil size={12} /> {t.edit}</button>
+                                  <button onClick={() => handleDeleteUser(u.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: 12 }}><Trash2 size={12} /> {t.delete}</button>
                                 </div>
                               )}
                             </td>
@@ -233,8 +249,8 @@ export default function AdminPanel() {
                       </tbody>
                     </table>
                   </div>
-                  <div className="px-4 py-2.5 border-t border-gray-100 text-xs text-gray-400">
-                    Showing {filtered.length} of {users.length} users
+                  <div style={{ padding: '8px 14px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
+                    {t.showing} {filtered.length} {t.of} {users.length}
                   </div>
                 </div>
               )}
@@ -249,40 +265,51 @@ export default function AdminPanel() {
                 return (
                   <motion.div key={r.id} className="card p-6"
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="flex items-center gap-2.5">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         {getRoleBadge(r.name)}
-                        <span className="text-xs text-gray-400">{rpList.length} permissions</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{rpList.length} {t.permissions}</span>
                       </div>
                       {role === 'manager' && (
                         <button onClick={() => isEditing ? setEditingRolePerms(null) : startEditRolePerms(r.id)}
-                          className={`btn btn-sm ${isEditing ? 'bg-red-50 text-red-500 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>
-                          {isEditing ? 'Cancel' : 'Edit Permissions'}
+                          className="btn btn-sm"
+                          style={{
+                            background: isEditing ? 'var(--danger-light)' : 'var(--primary-light)',
+                            color: isEditing ? 'var(--danger)' : 'var(--primary)',
+                            border: `1.5px solid ${isEditing ? 'var(--danger-border)' : 'var(--primary-border)'}`,
+                          }}>
+                          {isEditing ? t.cancel : t.edit}
                         </button>
                       )}
                     </div>
 
                     {isEditing ? (
                       <div>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
                           {permissions.map(p => (
                             <button key={p.id} onClick={() => togglePerm(p.id)}
-                              className={`btn btn-sm text-[11px] ${selectedPerms.includes(p.id) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
+                              className="btn btn-sm"
+                              style={{
+                                fontSize: 11,
+                                background: selectedPerms.includes(p.id) ? 'var(--primary)' : 'var(--surface)',
+                                color: selectedPerms.includes(p.id) ? '#fff' : 'var(--text-secondary)',
+                                border: `1.5px solid ${selectedPerms.includes(p.id) ? 'var(--primary)' : 'var(--border)'}`,
+                              }}>
                               {p.name}
                             </button>
                           ))}
                         </div>
-                        <button onClick={() => handleUpdateRolePerms(r.id)} className="btn btn-primary btn-md">Save Permissions</button>
+                        <button onClick={() => handleUpdateRolePerms(r.id)} className="btn btn-primary btn-md">{t.save}</button>
                       </div>
                     ) : (
-                      <div className="flex flex-wrap gap-1.5">
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                         {rpList.length > 0 ? rpList.map(pId => {
                           const perm = permissions.find(p => p.id === pId)
                           return perm ? (
-                            <span key={pId} className="bg-gray-100 border border-gray-200 px-2 py-0.5 rounded text-[11px] text-gray-500">{perm.name}</span>
+                            <span key={pId} style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: 6, fontSize: 11, color: 'var(--text-secondary)' }}>{perm.name}</span>
                           ) : null
                         }) : (
-                          <span className="text-xs text-gray-400 italic">No permissions assigned</span>
+                          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t.noData}</span>
                         )}
                       </div>
                     )}

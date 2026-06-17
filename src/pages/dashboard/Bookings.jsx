@@ -6,11 +6,13 @@ import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function Bookings() {
   const navigate = useNavigate()
   const { user, hasPermission } = useAuth()
   const { confirm } = useUI()
+  const { t, isRTL } = useLanguage()
 
   const [bookings, setBookings] = useState([])
   const [loading, setLoading]   = useState(true)
@@ -20,7 +22,7 @@ export default function Bookings() {
   const fetchBookings = async () => {
     const { data } = await supabase
       .from('bookings')
-      .select('*, doctors(name), departments(name_en)')
+      .select('*, doctors(name), departments(name_en, name_ar)')
       .order('created_at', { ascending: false })
     setBookings(data || [])
     setLoading(false)
@@ -31,7 +33,7 @@ export default function Bookings() {
     const load = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select('*, doctors(name), departments(name_en)')
+        .select('*, doctors(name), departments(name_en, name_ar)')
         .order('created_at', { ascending: false })
       if (!ignore) { setBookings(data || []); setLoading(false) }
     }
@@ -40,8 +42,7 @@ export default function Bookings() {
   }, [])
 
   const handleCancel = async (id) => {
-    if (!await confirm('Cancel this booking?')) return
-    const booking = bookings.find(b => b.id === id)
+    if (!await confirm(t.cancel + '?')) return
     await supabase.from('bookings').update({ status: 'cancelled', cancelled_by: user?.id }).eq('id', id)
     fetchBookings()
   }
@@ -55,76 +56,82 @@ export default function Bookings() {
     return matchStatus && matchSearch
   })
 
+  const filterLabels = { all: t.all, active: t.statusActive, cancelled: t.statusCancelled }
+
   return (
     <div className="page">
-      <Navbar
-        variant="dashboard" back="/dashboard" subtitle="All Bookings"
-      />
+      <Navbar variant="dashboard" back="/dashboard" subtitle={t.allBookings} />
 
       <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-3 mb-5 flex-wrap">
-            <div className="flex-1 min-w-[200px] relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Search size={16} /></span>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+              <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
+                <Search size={16} />
+              </span>
               <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input pl-9" placeholder="Search by name, ref, or phone..." />
+                className="input" style={{ paddingInlineStart: 36 }}
+                placeholder={t.searchRefPatientDoctor} />
             </div>
-            <div className="flex gap-2">
+            <div style={{ display: 'flex', gap: 8 }}>
               {['all', 'active', 'cancelled'].map(f => (
                 <button key={f} onClick={() => setFilter(f)}
-                  className={`btn btn-md capitalize ${filter === f ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
-                  {f}
+                  className="btn btn-md"
+                  style={{
+                    background: filter === f ? 'var(--primary)' : 'var(--surface)',
+                    color: filter === f ? '#fff' : 'var(--text-secondary)',
+                    border: `1.5px solid ${filter === f ? 'var(--primary)' : 'var(--border)'}`,
+                  }}>
+                  {filterLabels[f]}
                 </button>
               ))}
             </div>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="spinner spinner-lg mx-auto mb-4" />
-                <p className="text-gray-400 font-medium">Loading…</p>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+              <div className="spinner spinner-lg mx-auto mb-4" />
             </div>
           ) : filtered.length === 0 ? (
             <div className="card empty-state">
-              <div className="empty-state-icon"><CalendarDays size={48} className="text-gray-300" /></div>
-              <p className="empty-state-title">No Bookings Found</p>
-              <p className="empty-state-desc">{search || filter !== 'all' ? 'Try adjusting your search or filter.' : 'No bookings have been made yet.'}</p>
+              <div className="empty-state-icon"><CalendarDays size={48} style={{ color: 'var(--text-disabled)' }} /></div>
+              <p className="empty-state-title">{t.noData}</p>
+              <p className="empty-state-desc">{t.searchRefPatientDoctor}</p>
             </div>
           ) : (
-            <div className="card p-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-xs">
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      {['Ref', 'Patient', 'Phone', 'Doctor', 'Department', 'Queue', 'Status', 'Action'].map(col => (
-                        <th key={col} className="px-4 py-3 text-left font-semibold text-gray-400 text-[11px] whitespace-nowrap">{col}</th>
+                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                      {[t.ref, t.patient, t.phone, t.doctor, t.department, t.queue, t.status, t.actions].map(col => (
+                        <th key={col} style={{ padding: '10px 14px', textAlign: 'start', fontWeight: 600, color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>{col}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.map((b, i) => (
                       <motion.tr key={b.id}
-                        className="border-b border-gray-100"
+                        style={{ borderBottom: '1px solid var(--border)' }}
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, delay: i * 0.03 }}
-                        whileHover={{ backgroundColor: 'rgba(243, 244, 246, 0.8)' }}>
-                        <td className="px-4 py-3 font-mono text-blue-600 font-semibold">{b.booking_ref}</td>
-                        <td className="px-4 py-3 font-semibold text-gray-800">{b.patient_name}</td>
-                        <td className="px-4 py-3 text-gray-400">{b.phone}</td>
-                        <td className="px-4 py-3 text-gray-500">{b.doctors?.name}</td>
-                        <td className="px-4 py-3 text-gray-400">{b.departments?.name_en}</td>
-                        <td className="px-4 py-3"><span className="badge badge-primary">#{b.queue_number}</span></td>
-                        <td className="px-4 py-3">
-                          <span className={`badge ${b.status === 'active' ? 'badge-success' : 'badge-danger'}`}>{b.status}</span>
+                        transition={{ duration: 0.25, delay: i * 0.03 }}>
+                        <td style={{ padding: '10px 14px', fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 600 }}>{b.booking_ref}</td>
+                        <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{b.patient_name}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>{b.phone}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{b.doctors?.name}</td>
+                        <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</td>
+                        <td style={{ padding: '10px 14px' }}><span className="badge badge-primary">#{b.queue_number}</span></td>
+                        <td style={{ padding: '10px 14px' }}>
+                          <span className={`badge ${b.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
+                            {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
+                          </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td style={{ padding: '10px 14px' }}>
                           {b.status === 'active' && hasPermission('bookings:update') && (
-                            <div className="flex gap-1">
-                              <button onClick={() => navigate(`/reschedule/${b.id}`)} className="btn btn-ghost btn-sm text-blue-500 text-xs">Reschedule</button>
-                              <button onClick={() => handleCancel(b.id)} className="btn btn-ghost btn-sm text-red-500 text-xs">Cancel</button>
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <button onClick={() => navigate(`/reschedule/${b.id}`)} className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)', fontSize: 12 }}>{t.reschedule}</button>
+                              <button onClick={() => handleCancel(b.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: 12 }}>{t.cancel}</button>
                             </div>
                           )}
                         </td>
@@ -133,8 +140,8 @@ export default function Bookings() {
                   </tbody>
                 </table>
               </div>
-              <div className="px-4 py-2.5 border-t border-gray-100 text-xs text-gray-400">
-                Showing {filtered.length} of {bookings.length} bookings
+              <div style={{ padding: '8px 14px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
+                {t.showing} {filtered.length} {t.of} {bookings.length}
               </div>
             </div>
           )}

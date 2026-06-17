@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Menu, X, LogOut, ArrowLeft, Building2 } from 'lucide-react'
+import { Menu, X, LogOut, ArrowLeft, ArrowRight, Building2, Sun, Moon, Globe } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import { navItems, roleBadgeColors, roleLabels } from '../config/navConfig'
 
 export default function Navbar({
@@ -15,7 +16,8 @@ export default function Navbar({
   const navigate = useNavigate()
   const location = useLocation()
   const { user, profile, role, signOut } = useAuth()
-  const isDark = variant === 'dashboard'
+  const { theme, toggleTheme, isDark } = useTheme()
+  const { lang, t, toggleLang, isRTL } = useLanguage()
 
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -26,7 +28,7 @@ export default function Navbar({
   const avatarInitial = (profile?.full_name || user?.email || 'U')[0].toUpperCase()
 
   const badgeColors = roleBadgeColors[role] || roleBadgeColors.admin
-  const roleLabel = roleLabels[role] || role
+  const roleLabel = t[role] || roleLabels[role] || role
 
   useEffect(() => {
     if (!dropdownOpen) return
@@ -57,68 +59,40 @@ export default function Navbar({
     navigate('/login')
   }
 
+  const ArrowIcon = isRTL ? ArrowRight : ArrowLeft
+
   return (
     <>
-      <nav
-        className="navbar"
-        style={isDark ? {
-          background: '#161B22',
-          borderBottomColor: '#30363D',
-        } : {}}
-      >
+      <nav className="navbar" style={{ background: 'var(--surface)' }}>
         <div className="navbar-inner">
-
           {back !== undefined && (
-            <button
-              onClick={handleBack}
-              className="btn-icon"
-              aria-label="Go back"
-              style={isDark ? {
-                background: '#21262D',
-                borderColor: '#30363D',
-                color: '#8B949E',
-              } : {}}
-            >
-              <ArrowLeft size={16} />
+            <button onClick={handleBack} className="btn-icon" aria-label={t.back}>
+              <ArrowIcon size={16} />
             </button>
           )}
 
           <a className="navbar-brand" onClick={() => navigate(isDark ? '/dashboard' : '/')} style={{ cursor: 'pointer' }}>
             <div className="navbar-logo">
-              <Building2 size={18} className="text-white" />
+              <Building2 size={18} style={{ color: '#fff' }} />
             </div>
             <div>
-              <p
-                className="navbar-title"
-                style={isDark ? { color: '#F0F6FC' } : {}}
-              >
-                MediBook
-              </p>
+              <p className="navbar-title">MediBook</p>
               {subtitle && (
-                <p
-                  className="navbar-subtitle"
-                  style={isDark ? { color: '#8B949E' } : {}}
-                >
-                  {subtitle}
-                </p>
+                <p className="navbar-subtitle">{subtitle}</p>
               )}
             </div>
           </a>
 
           {breadcrumbs.length > 0 && (
-            <div
-              className="navbar-breadcrumb"
-              style={isDark ? { color: '#484F58' } : {}}
-            >
+            <div className="navbar-breadcrumb">
               {breadcrumbs.map((crumb, i) => {
                 const isLast = i === breadcrumbs.length - 1
                 return (
                   <span key={crumb.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {i > 0 && <span style={{ opacity: 0.5 }}>›</span>}
+                    {i > 0 && <span style={{ opacity: 0.5 }}>{isRTL ? '‹' : '›'}</span>}
                     <span
                       className={isLast ? 'active' : ''}
                       onClick={() => !isLast && crumb.path && navigate(crumb.path)}
-                      style={isDark && !isLast ? { color: '#8B949E' } : isDark && isLast ? { color: '#3B82F6' } : {}}
                     >
                       {crumb.label}
                     </span>
@@ -128,156 +102,125 @@ export default function Navbar({
             </div>
           )}
 
-          {isDark ? (
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-              {right}
+          <div className="navbar-actions">
+            {right}
 
+            <button className="lang-toggle" onClick={toggleLang} title={lang === 'ar' ? 'Switch to English' : 'تحويل إلى العربية'}>
+              <Globe size={14} />
+              <span>{lang === 'ar' ? 'EN' : 'عربي'}</span>
+            </button>
+
+            <button className="theme-toggle" onClick={toggleTheme} title={isDark ? 'Light Mode' : 'Dark Mode'}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            <button
+              className="btn-icon md:hidden"
+              onClick={() => setMobileOpen(o => !o)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
+
+            <div ref={dropdownRef} className="relative hidden md:block">
               <button
-                className="btn-icon md:hidden"
-                onClick={() => setMobileOpen(o => !o)}
-                style={{ background: '#21262D', borderColor: '#30363D', color: '#8B949E' }}
-                aria-label="Toggle menu"
+                className="navbar-avatar"
+                onClick={() => setDropdownOpen(o => !o)}
+                aria-label="User menu"
               >
-                {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+                {avatarInitial}
               </button>
 
-              <div ref={dropdownRef} className="relative hidden md:block">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setDropdownOpen(o => !o)}
-                  className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blue-600 to-blue-800 border-2 border-white/20 text-white text-sm font-bold cursor-pointer flex items-center justify-center hover:scale-105 transition-all shrink-0"
-                  aria-label="User menu"
+              {dropdownOpen && (
+                <div
+                  className="navbar-dropdown"
+                  style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    boxShadow: 'var(--shadow-lg)',
+                  }}
                 >
-                  {avatarInitial}
-                </motion.button>
+                  <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+                    <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
+                      {profile?.full_name || 'User'}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {user?.email}
+                    </p>
+                    <span
+                      className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full mt-2 border ${badgeColors.bg} ${badgeColors.text} ${badgeColors.border}`}
+                    >
+                      {roleLabel}
+                    </span>
+                  </div>
 
-                {dropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-[44px] w-[280px] rounded-xl overflow-hidden"
-                    style={{
-                      background: '#161B22',
-                      border: '1px solid #30363D',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.50)',
-                      zIndex: 100,
-                    }}
-                  >
-                    <div className="px-4 py-3.5" style={{ borderBottom: '1px solid #30363D' }}>
-                      <p className="font-bold text-sm" style={{ color: '#F0F6FC' }}>
-                        {profile?.full_name || 'User'}
-                      </p>
-                      <p className="text-xs mt-0.5" style={{ color: '#8B949E' }}>
-                        {user?.email}
-                      </p>
-                      <span
-                        className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full mt-2 border ${badgeColors.bg} ${badgeColors.text} ${badgeColors.border}`}
-                      >
-                        {roleLabel}
-                      </span>
-                    </div>
+                  <div style={{ padding: '6px 0' }}>
+                    {allowedNav.map(item => {
+                      const Icon = item.icon
+                      const isActive = location.pathname === item.path
+                      return (
+                        <button
+                          key={item.path}
+                          onClick={() => navigate(item.path)}
+                          className="navbar-dropdown-item"
+                          style={{
+                            background: isActive ? 'var(--primary-light)' : 'transparent',
+                            color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
+                          }}
+                        >
+                          <Icon size={16} />
+                          <span className="flex-1">{item.labelAr}</span>
+                          <span style={{ fontSize: 11, opacity: 0.5 }}>{item.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
 
-                    <div className="py-1.5">
-                      {allowedNav.map(item => {
-                        const Icon = item.icon
-                        const isActive = location.pathname === item.path
-                        return (
-                          <button
-                            key={item.path}
-                            onClick={() => navigate(item.path)}
-                            className="w-full text-left px-4 py-2.5 text-[13px] font-medium flex items-center gap-3 transition-colors border-none cursor-pointer"
-                            style={{
-                              background: isActive ? 'rgba(59,130,246,0.12)' : 'transparent',
-                              color: isActive ? '#3B82F6' : '#8B949E',
-                            }}
-                            onMouseEnter={e => {
-                              if (!isActive) e.currentTarget.style.background = '#1C2230'
-                            }}
-                            onMouseLeave={e => {
-                              if (!isActive) e.currentTarget.style.background = 'transparent'
-                            }}
-                          >
-                            <Icon size={16} />
-                            <span className="flex-1">{item.labelAr}</span>
-                            <span className="text-[11px] opacity-60">{item.label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    <div style={{ borderTop: '1px solid #30363D' }} className="py-1.5">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-[13px] font-medium flex items-center gap-3 transition-colors border-none cursor-pointer"
-                        style={{ background: 'transparent', color: '#F87171' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.12)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-                      >
-                        <LogOut size={16} />
-                        <span>تسجيل الخروج</span>
-                        <span className="text-[11px] opacity-60">Logout</span>
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </div>
+                  <div style={{ borderTop: '1px solid var(--border)', padding: '6px 0' }}>
+                    <button
+                      onClick={handleLogout}
+                      className="navbar-dropdown-item"
+                      style={{ color: 'var(--danger)' }}
+                    >
+                      <LogOut size={16} />
+                      <span className="flex-1">{t.logout}</span>
+                      <span style={{ fontSize: 11, opacity: 0.5 }}>{t.logoutEn}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          ) : (
-            right && (
-              <div style={{ marginLeft: breadcrumbs.length ? 0 : 'auto' }}>
-                {right}
-              </div>
-            )
-          )}
+          </div>
         </div>
       </nav>
 
-      {isDark && mobileOpen && (
-        <div
-          className="fixed inset-0 md:hidden"
-          style={{ zIndex: 40 }}
-        >
+      {mobileOpen && (
+        <div className="navbar-overlay md:hidden" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => setMobileOpen(false)}>
           <div
-            className="absolute inset-0"
-            style={{ background: 'rgba(0,0,0,0.6)' }}
-            onClick={() => setMobileOpen(false)}
-          />
-
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.3 }}
-            className="absolute right-0 top-0 bottom-0 w-[300px] overflow-y-auto"
+            className="navbar-drawer"
+            onClick={e => e.stopPropagation()}
             style={{
-              background: '#161B22',
-              borderLeft: '1px solid #30363D',
-              boxShadow: '-4px 0 24px rgba(0,0,0,0.40)',
-              zIndex: 50,
+              background: 'var(--surface)',
+              borderInlineEnd: '1px solid var(--border)',
+              boxShadow: isRTL ? '-4px 0 24px rgba(0,0,0,0.15)' : '4px 0 24px rgba(0,0,0,0.15)',
             }}
           >
-            <div className="px-4 py-4" style={{ borderBottom: '1px solid #30363D' }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-blue-600 to-blue-800 border-2 border-white/20 text-white text-sm font-bold flex items-center justify-center">
+            <div style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="navbar-avatar" style={{ width: 38, height: 38, fontSize: 14 }}>
                     {avatarInitial}
                   </div>
                   <div>
-                    <p className="font-bold text-sm" style={{ color: '#F0F6FC' }}>
+                    <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
                       {profile?.full_name || 'User'}
                     </p>
-                    <p className="text-xs" style={{ color: '#8B949E' }}>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                       {user?.email}
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="btn-icon"
-                  style={{ background: '#21262D', borderColor: '#30363D', color: '#8B949E' }}
-                >
+                <button onClick={() => setMobileOpen(false)} className="btn-icon">
                   <X size={16} />
                 </button>
               </div>
@@ -288,7 +231,7 @@ export default function Navbar({
               </span>
             </div>
 
-            <div className="py-2">
+            <div style={{ padding: '8px 0' }}>
               {allowedNav.map(item => {
                 const Icon = item.icon
                 const isActive = location.pathname === item.path
@@ -296,32 +239,33 @@ export default function Navbar({
                   <button
                     key={item.path}
                     onClick={() => navigate(item.path)}
-                    className="w-full text-left px-4 py-3 text-[13px] font-medium flex items-center gap-3 transition-colors border-none cursor-pointer"
+                    className="navbar-dropdown-item"
                     style={{
-                      background: isActive ? 'rgba(59,130,246,0.12)' : 'transparent',
-                      color: isActive ? '#3B82F6' : '#8B949E',
+                      padding: '12px 16px',
+                      background: isActive ? 'var(--primary-light)' : 'transparent',
+                      color: isActive ? 'var(--primary)' : 'var(--text-secondary)',
                     }}
                   >
                     <Icon size={18} />
                     <span className="flex-1">{item.labelAr}</span>
-                    <span className="text-[11px] opacity-60">{item.label}</span>
+                    <span style={{ fontSize: 11, opacity: 0.5 }}>{item.label}</span>
                   </button>
                 )
               })}
             </div>
 
-            <div style={{ borderTop: '1px solid #30363D' }} className="py-2">
+            <div style={{ borderTop: '1px solid var(--border)', padding: '8px 0' }}>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-3 text-[13px] font-medium flex items-center gap-3 transition-colors border-none cursor-pointer"
-                style={{ background: 'transparent', color: '#F87171' }}
+                className="navbar-dropdown-item"
+                style={{ padding: '12px 16px', color: 'var(--danger)' }}
               >
                 <LogOut size={18} />
-                <span>تسجيل الخروج</span>
-                <span className="text-[11px] opacity-60">Logout</span>
+                <span className="flex-1">{t.logout}</span>
+                <span style={{ fontSize: 11, opacity: 0.5 }}>{t.logoutEn}</span>
               </button>
             </div>
-          </motion.div>
+          </div>
         </div>
       )}
     </>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { UserPlus, Users, ClipboardCheck, CalendarDays } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
-import { useLogout } from '../../hooks/useLogout'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function ReceptionistDashboard() {
   const navigate = useNavigate()
-  const handleLogout = useLogout('/login')
+  const { t, isRTL } = useLanguage()
 
   const [stats, setStats] = useState({ today: 0, waiting: 0, completed: 0 })
   const [todayBookings, setTodayBookings] = useState([])
@@ -18,7 +19,7 @@ export default function ReceptionistDashboard() {
       const today = new Date().toISOString().slice(0, 10)
       const { data } = await supabase
         .from('bookings')
-        .select('*, doctors(name), departments(name_en)')
+        .select('*, doctors(name), departments(name_en, name_ar)')
         .eq('booking_date', today)
         .order('slot_time')
 
@@ -39,7 +40,7 @@ export default function ReceptionistDashboard() {
 
   if (loading) return (
     <div className="page">
-      <Navbar variant="dashboard" subtitle="Receptionist" />
+      <Navbar variant="dashboard" subtitle={t.receptionDesk} />
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="spinner spinner-lg mx-auto mb-4" />
       </div>
@@ -50,86 +51,82 @@ export default function ReceptionistDashboard() {
     <div className="page">
       <Navbar
         variant="dashboard"
-        subtitle="Reception Desk"
+        subtitle={t.receptionDesk}
         right={
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/receptionist/walk-in')} className="btn btn-primary btn-sm">+ Walk-In</button>
-            <button onClick={handleLogout} className="btn btn-danger btn-sm">Logout</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => navigate('/receptionist/walk-in')} className="btn btn-primary btn-sm">
+              <UserPlus size={14} /> {t.walkInBooking}
+            </button>
           </div>
         }
       />
 
       <div className="page-content-lg">
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="card p-5">
-            <p className="text-xs text-gray-400 mb-1">Today's Appointments</p>
-            <p className="font-display text-3xl font-extrabold text-gray-800">{stats.today}</p>
-          </div>
-          <div className="card p-5 bg-yellow-50 border-yellow-200">
-            <p className="text-xs text-yellow-600 mb-1">Waiting</p>
-            <p className="font-display text-3xl font-extrabold text-yellow-600">{stats.waiting}</p>
-          </div>
-          <div className="card p-5 bg-green-50 border-green-200">
-            <p className="text-xs text-green-600 mb-1">Completed</p>
-            <p className="font-display text-3xl font-extrabold text-green-600">{stats.completed}</p>
-          </div>
+          {[
+            { label: t.todaysAppointments, value: stats.today, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
+            { label: t.waiting, value: stats.waiting, color: 'var(--warning-light)', borderColor: 'var(--warning-border)', textColor: 'var(--warning)', labelColor: 'var(--warning)' },
+            { label: t.completed, value: stats.completed, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
+          ].map((s) => (
+            <div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}>
+              <p style={{ fontSize: 12, color: s.labelColor, marginBottom: 4, fontWeight: 500 }}>{s.label}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: s.textColor }}>{s.value}</p>
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <button onClick={() => navigate('/receptionist/walk-in')}
-            className="card p-5 text-center hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-blue-200">
-            <div className="text-3xl mb-2">🚶</div>
-            <p className="font-semibold text-gray-900 text-sm">Walk-In Booking</p>
-            <p className="text-xs text-gray-400 mt-0.5">Book for a patient</p>
-          </button>
-          <button onClick={() => navigate('/receptionist/patients')}
-            className="card p-5 text-center hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-blue-200">
-            <div className="text-3xl mb-2">👥</div>
-            <p className="font-semibold text-gray-900 text-sm">Patient Directory</p>
-            <p className="text-xs text-gray-400 mt-0.5">Search patients</p>
-          </button>
-          <button onClick={() => navigate('/receptionist/check-in-out')}
-            className="card p-5 text-center hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-blue-200">
-            <div className="text-3xl mb-2">🏥</div>
-            <p className="font-semibold text-gray-900 text-sm">Check-In / Out</p>
-            <p className="text-xs text-gray-400 mt-0.5">Manage arrivals</p>
-          </button>
-          <button onClick={() => navigate('/dashboard/bookings')}
-            className="card p-5 text-center hover:shadow-md transition-all cursor-pointer border-2 border-transparent hover:border-blue-200">
-            <div className="text-3xl mb-2">📋</div>
-            <p className="font-semibold text-gray-900 text-sm">All Bookings</p>
-            <p className="text-xs text-gray-400 mt-0.5">View all appointments</p>
-          </button>
+          {[
+            { icon: <UserPlus size={24} style={{ color: 'var(--primary)', marginBottom: 8 }} />, label: t.walkInBooking, sub: t.bookForPatient, path: '/receptionist/walk-in' },
+            { icon: <Users size={24} style={{ color: 'var(--secondary)', marginBottom: 8 }} />, label: t.patientDirectory, sub: t.searchPatients, path: '/receptionist/patients' },
+            { icon: <ClipboardCheck size={24} style={{ color: 'var(--success)', marginBottom: 8 }} />, label: t.checkInOut, sub: t.manageArrivals, path: '/receptionist/check-in-out' },
+            { icon: <CalendarDays size={24} style={{ color: 'var(--info)', marginBottom: 8 }} />, label: t.allBookings, sub: t.viewAllAppointments, path: '/dashboard/bookings' },
+          ].map((item) => (
+            <button key={item.path} onClick={() => navigate(item.path)}
+              className="card" style={{ padding: 20, textAlign: 'center', cursor: 'pointer', border: '2px solid transparent', transition: 'all 150ms ease', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--primary-border)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.boxShadow = 'none' }}
+            >
+              {item.icon}
+              <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{item.label}</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{item.sub}</p>
+            </button>
+          ))}
         </div>
 
-        <div className="card p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-display text-base font-bold text-gray-900">Today's Queue ({todayBookings.length})</h2>
-            <button onClick={() => navigate('/receptionist/check-in-out')} className="text-xs text-blue-600 font-semibold">Manage →</button>
+        <div className="card" style={{ padding: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+              {t.todaysQueue} ({todayBookings.length})
+            </h2>
+            <button onClick={() => navigate('/receptionist/check-in-out')} style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>
+              {t.manage} →
+            </button>
           </div>
           {todayBookings.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No appointments today</p>
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '32px 0' }}>{t.noAppointmentsToday}</p>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {todayBookings.slice(0, 8).map((b, i) => (
-                <div key={b.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl animate-fadeIn"
-                  style={{ animationDelay: `${i * 30}ms` }}>
-                  <div className="flex items-center gap-3">
-                    <div className="text-center min-w-[50px]">
-                      <p className="text-sm font-bold text-blue-600">{b.slot_time}</p>
+                <div key={b.id} className="animate-fadeIn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: 'var(--surface-hover)', borderRadius: 12, animationDelay: `${i * 30}ms` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ textAlign: 'center', minWidth: 50 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{b.slot_time}</p>
                     </div>
-                    <div className="border-l border-gray-200 pl-3">
-                      <p className="font-semibold text-gray-900 text-sm">{b.patient_name}</p>
-                      <p className="text-xs text-gray-400">{b.doctors?.name} · {b.departments?.name_en}</p>
+                    <div style={{ borderInlineStart: '1px solid var(--border)', paddingInlineStart: 12 }}>
+                      <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{b.patient_name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        {b.doctors?.name} · {isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}
+                      </p>
                     </div>
                   </div>
                   <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                    {b.status}
+                    {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
                   </span>
                 </div>
               ))}
               {todayBookings.length > 8 && (
-                <p className="text-xs text-gray-400 text-center">+{todayBookings.length - 8} more</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>+{todayBookings.length - 8} {t.more}</p>
               )}
             </div>
           )}

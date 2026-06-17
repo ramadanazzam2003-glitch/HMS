@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FileText, Search } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
 import MedicalRecordCard from '../../components/medical/MedicalRecordCard'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function MedicalRecords() {
-  const navigate = useNavigate()
+  const { t } = useLanguage()
 
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,7 +18,7 @@ export default function MedicalRecords() {
     const load = async () => {
       const { data } = await supabase
         .from('medical_records')
-        .select('*, doctors(name), departments(name_en), prescriptions(*)')
+        .select('*, doctors(name), departments(name_en, name_ar), prescriptions(*)')
         .order('created_at', { ascending: false })
       if (!ignore) { setRecords(data || []); setLoading(false) }
     }
@@ -37,50 +37,43 @@ export default function MedicalRecords() {
 
   return (
     <div className="page">
-      <Navbar
-        variant="dashboard" back="/dashboard" subtitle="Medical Records"
-      />
+      <Navbar variant="dashboard" back="/dashboard" subtitle={t.medicalRecordsPage} />
 
       <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-3 mb-5 flex-wrap">
-            <div className="flex-1 min-w-[200px] relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Search size={16} /></span>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+              <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
+                <Search size={16} />
+              </span>
               <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input pl-9" placeholder="Search by patient, phone, diagnosis, doctor..." />
+                className="input" style={{ paddingInlineStart: 36 }}
+                placeholder={t.searchPatientPhoneDiag} />
             </div>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <div className="spinner spinner-lg mx-auto mb-4" />
-                <p className="text-gray-400 font-medium">Loading...</p>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
+              <div className="spinner spinner-lg mx-auto mb-4" />
             </div>
           ) : filtered.length === 0 ? (
             <div className="card empty-state">
-              <div className="empty-state-icon"><FileText size={48} className="text-gray-300" /></div>
-              <p className="empty-state-title">No Medical Records</p>
-              <p className="empty-state-desc">{search ? 'Try adjusting your search.' : 'No medical records have been created yet.'}</p>
+              <div className="empty-state-icon"><FileText size={48} style={{ color: 'var(--text-disabled)' }} /></div>
+              <p className="empty-state-title">{t.noRecordsFound}</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {filtered.map((record, i) => (
                 <motion.div key={record.id}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.04 }}
-                  whileHover={{ scale: 1.005 }}>
-                  <MedicalRecordCard
-                    record={record}
-                    onClick={() => {}}
-                  />
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.04 }}>
+                  <MedicalRecordCard record={record} onClick={() => {}} />
                 </motion.div>
               ))}
             </div>
           )}
 
-          <div className="px-4 py-2.5 text-xs text-gray-400 mt-4">
-            Showing {filtered.length} of {records.length} records
+          <div style={{ padding: '8px 14px', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
+            {t.showing} {filtered.length} {t.of} {records.length}
           </div>
         </motion.div>
       </div>

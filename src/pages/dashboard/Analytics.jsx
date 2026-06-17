@@ -4,9 +4,11 @@ import { motion } from 'framer-motion'
 import { BarChart3, CalendarDays, TrendingUp, DollarSign } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function Analytics() {
   const navigate = useNavigate()
+  const { t, isRTL } = useLanguage()
   const [stats, setStats] = useState({
     total: 0, active: 0, completed: 0, cancelled: 0,
     todayTotal: 0, todayActive: 0,
@@ -20,7 +22,7 @@ export default function Analytics() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: bookings } = await supabase.from('bookings').select('*, departments(name_en)')
+      const { data: bookings } = await supabase.from('bookings').select('*, departments(name_en, name_ar)')
       const { data: bills } = await supabase.from('bills').select('total, payment_status')
 
       if (ignore) return
@@ -41,7 +43,7 @@ export default function Analytics() {
 
       const deptMap = {}
       filteredBookings.forEach(b => {
-        const name = b.departments?.name_en || 'Unknown'
+        const name = isRTL ? (b.departments?.name_ar || b.departments?.name_en || 'Unknown') : (b.departments?.name_en || 'Unknown')
         if (!deptMap[name]) deptMap[name] = { total: 0, active: 0, completed: 0 }
         deptMap[name].total++
         if (b.status === 'active') deptMap[name].active++
@@ -75,72 +77,81 @@ export default function Analytics() {
     }
     load()
     return () => { ignore = true }
-  }, [period])
+  }, [period, isRTL])
 
   if (loading) return (
     <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle="Analytics" />
+      <Navbar variant="dashboard" back="/dashboard" subtitle={t.analyticsReports} />
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="spinner spinner-lg mx-auto mb-4" />
       </div>
     </div>
   )
 
+  const periodLabels = { all: t.allTimePeriod, week: t.thisWeek, month: t.thisMonth }
+
   return (
     <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle="Analytics & Reports" />
+      <Navbar variant="dashboard" back="/dashboard" subtitle={t.analyticsReports} />
       <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-2 mb-6">
+          <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
             {['all', 'week', 'month'].map(p => (
               <button key={p} onClick={() => setPeriod(p)}
-                className={`btn btn-md capitalize ${period === p ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
-                {p === 'all' ? 'All Time' : p === 'week' ? 'This Week' : 'This Month'}
+                className={`btn btn-md`}
+                style={{
+                  background: period === p ? 'var(--primary)' : 'var(--surface)',
+                  color: period === p ? '#fff' : 'var(--text-secondary)',
+                  border: `1.5px solid ${period === p ? 'var(--primary)' : 'var(--border)'}`,
+                }}>
+                {periodLabels[p]}
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             {[
-              { label: 'Total Bookings', value: stats.total, cardClass: 'card p-5', labelClass: 'text-gray-400', valueClass: 'text-gray-800', icon: <BarChart3 size={16} className="text-gray-400 mb-1" /> },
-              { label: 'Completed', value: stats.completed, cardClass: 'card p-5 bg-green-50 border-green-200', labelClass: 'text-green-600', valueClass: 'text-green-600', icon: <TrendingUp size={16} className="text-green-600 mb-1" /> },
-              { label: 'Today', value: stats.todayTotal, cardClass: 'card p-5 bg-blue-50 border-blue-200', labelClass: 'text-blue-600', valueClass: 'text-blue-600', icon: <CalendarDays size={16} className="text-blue-600 mb-1" /> },
-              { label: 'Cancelled', value: stats.cancelled, cardClass: 'card p-5 bg-red-50 border-red-200', labelClass: 'text-red-500', valueClass: 'text-red-500', icon: <BarChart3 size={16} className="text-red-500 mb-1" /> },
+              { label: t.totalBookings, value: stats.total, icon: <BarChart3 size={16} style={{ color: 'var(--text-muted)', marginBottom: 4 }} />, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
+              { label: t.completed, value: stats.completed, icon: <TrendingUp size={16} style={{ color: 'var(--success)', marginBottom: 4 }} />, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
+              { label: t.todaysBookings, value: stats.todayTotal, icon: <CalendarDays size={16} style={{ color: 'var(--primary)', marginBottom: 4 }} />, color: 'var(--primary-light)', borderColor: 'var(--primary-border)', textColor: 'var(--primary)', labelColor: 'var(--primary)' },
+              { label: t.cancelledBookings, value: stats.cancelled, icon: <BarChart3 size={16} style={{ color: 'var(--danger)', marginBottom: 4 }} />, color: 'var(--danger-light)', borderColor: 'var(--danger-border)', textColor: 'var(--danger)', labelColor: 'var(--danger)' },
             ].map((s, i) => (
-              <motion.div key={s.label} className={s.cardClass} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.1 }} whileHover={{ scale: 1.02 }}>
+              <motion.div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.1 }}>
                 {s.icon}
-                <p className={`text-xs ${s.labelClass} mb-1`}>{s.label}</p>
-                <p className={`font-display text-3xl font-extrabold ${s.valueClass}`}>{s.value}</p>
+                <p style={{ fontSize: 12, color: s.labelColor, marginBottom: 4, fontWeight: 500 }}>{s.label}</p>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: s.textColor }}>{s.value}</p>
               </motion.div>
             ))}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <motion.div className="card p-5 bg-green-50 border-green-200" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.4 }} whileHover={{ scale: 1.02 }}>
-              <p className="text-xs text-green-600 mb-1 flex items-center gap-1"><DollarSign size={14} /> Total Revenue</p>
-              <p className="font-display text-3xl font-extrabold text-green-600">EGP {stats.revenue.toFixed(2)}</p>
+            <motion.div className="stat-card" style={{ background: 'var(--success-light)', borderColor: 'var(--success-border)' }}
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.4 }}>
+              <p style={{ fontSize: 12, color: 'var(--success)', marginBottom: 4, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}><DollarSign size={14} /> {t.totalRevenue}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--success)' }}>EGP {stats.revenue.toFixed(2)}</p>
             </motion.div>
-            <motion.div className="card p-5 bg-red-50 border-red-200" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.5 }} whileHover={{ scale: 1.02 }}>
-              <p className="text-xs text-red-500 mb-1 flex items-center gap-1"><DollarSign size={14} /> Total Unpaid</p>
-              <p className="font-display text-3xl font-extrabold text-red-500">EGP {stats.unpaid.toFixed(2)}</p>
+            <motion.div className="stat-card" style={{ background: 'var(--danger-light)', borderColor: 'var(--danger-border)' }}
+              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.5 }}>
+              <p style={{ fontSize: 12, color: 'var(--danger)', marginBottom: 4, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}><DollarSign size={14} /> {t.totalUnpaid}</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--danger)' }}>EGP {stats.unpaid.toFixed(2)}</p>
             </motion.div>
           </div>
 
-          <div className="card p-6 mb-6">
-            <h2 className="font-display text-base font-bold text-gray-900 mb-5">Department Performance</h2>
+          <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>{t.departmentPerformanceSection}</h2>
             {stats.departments.length === 0 ? (
-              <p className="text-gray-400 text-center py-6">No data</p>
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0' }}>{t.noData}</p>
             ) : (
-              <div className="flex flex-col gap-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {stats.departments.map(dept => (
                   <div key={dept.name}>
-                    <div className="flex justify-between text-xs mb-1.5">
-                      <span className="text-gray-700 font-medium">{dept.name}</span>
-                      <span className="text-gray-400">{dept.completed} completed / {dept.total} total</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{dept.name}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>{dept.completed} {t.completedSmall} / {dept.total} {t.totalSmall}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-blue-600 rounded-full"
-                        style={{ width: `${Math.min((dept.completed / Math.max(dept.total, 1)) * 100, 100)}%` }} />
+                    <div style={{ width: '100%', height: 6, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', background: 'var(--primary)', borderRadius: 999, width: `${Math.min((dept.completed / Math.max(dept.total, 1)) * 100, 100)}%` }} />
                     </div>
                   </div>
                 ))}
@@ -149,21 +160,21 @@ export default function Analytics() {
           </div>
 
           {stats.dailyTrend.length > 0 && (
-            <div className="card p-6">
-              <h2 className="font-display text-base font-bold text-gray-900 mb-5">Daily Trend (Last 7 Days)</h2>
-              <div className="flex items-end gap-2 h-32">
+            <div className="card" style={{ padding: 24 }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>{t.dailyTrendLast7}</h2>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 128 }}>
                 {stats.dailyTrend.map((d, i) => {
                   const maxVal = Math.max(...stats.dailyTrend.map(x => x.total), 1)
                   return (
-                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="text-[10px] text-gray-400">{d.total}</span>
+                    <div key={d.date} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.total}</span>
                       <motion.div
-                        className="w-full bg-blue-600 rounded-t"
+                        style={{ width: '100%', background: 'var(--primary)', borderRadius: '4px 4px 0 0' }}
                         initial={{ height: 0 }}
                         animate={{ height: `${(d.total / maxVal) * 100}%`, minHeight: 4 }}
                         transition={{ duration: 0.5, delay: i * 0.1 }}
                       />
-                      <span className="text-[10px] text-gray-400">{d.date.slice(5)}</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.date.slice(5)}</span>
                     </div>
                   )
                 })}

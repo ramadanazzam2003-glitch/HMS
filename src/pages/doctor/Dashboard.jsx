@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
 import { useAuth } from '../../hooks/useAuth'
-import { useLogout } from '../../hooks/useLogout'
 import { calcEndTime } from '../../utils/booking'
 import { motion } from 'framer-motion'
 import { CalendarDays, Clock, CheckCircle, Stethoscope } from 'lucide-react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function DoctorDashboard() {
   const navigate = useNavigate()
   const { user, profile } = useAuth()
-  const handleLogout = useLogout('/login')
+  const { t, isRTL } = useLanguage()
 
   const [doctor, setDoctor] = useState(null)
   const [todayBookings, setTodayBookings] = useState([])
@@ -34,7 +34,7 @@ export default function DoctorDashboard() {
 
       const { data: bookings } = await supabase
         .from('bookings')
-        .select('*, departments(name_en)')
+        .select('*, departments(name_en, name_ar)')
         .eq('doctor_id', doctorData.id)
         .eq('booking_date', today)
         .order('slot_time', { ascending: true })
@@ -62,11 +62,11 @@ export default function DoctorDashboard() {
 
   if (loading) return (
     <div className="page">
-      <Navbar variant="dashboard" subtitle="Doctor Dashboard" />
+      <Navbar variant="dashboard" subtitle={t.doctorDashboard} />
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="text-center">
           <div className="spinner spinner-lg mx-auto mb-4" />
-          <p className="text-gray-400 font-medium">Loading...</p>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.loading}</p>
         </div>
       </div>
     </div>
@@ -76,11 +76,10 @@ export default function DoctorDashboard() {
     <div className="page">
       <Navbar
         variant="dashboard"
-        subtitle={`Dr. ${doctor?.name || profile?.full_name || 'Doctor'}`}
+        subtitle={`Dr. ${doctor?.name || profile?.full_name || ''}`}
         right={
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/dashboard')} className="btn btn-ghost btn-sm">Overview</button>
-            <button onClick={handleLogout} className="btn btn-danger btn-sm">Logout</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => navigate('/dashboard')} className="btn btn-ghost btn-sm">{t.back}</button>
           </div>
         }
       />
@@ -88,71 +87,56 @@ export default function DoctorDashboard() {
       <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <motion.div className="card p-6" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <div className="flex items-center gap-3 mb-2">
-                <CalendarDays size={18} className="text-gray-400" />
-                <p className="text-xs text-gray-400">Today's Appointments</p>
+            {[
+              { label: t.todaysAppointments, value: stats.today, icon: <CalendarDays size={18} style={{ color: 'var(--text-muted)' }} />, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
+              { label: t.active, value: stats.active, icon: <Stethoscope size={18} style={{ color: 'var(--success)' }} />, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
+              { label: t.completed, value: stats.completed, icon: <CheckCircle size={18} style={{ color: 'var(--primary)' }} />, color: 'var(--primary-light)', borderColor: 'var(--primary-border)', textColor: 'var(--primary)', labelColor: 'var(--primary)' },
+            ].map((s) => (
+              <div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  {s.icon}
+                  <p style={{ fontSize: 12, color: s.labelColor, fontWeight: 500 }}>{s.label}</p>
+                </div>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: s.textColor }}>{s.value}</p>
               </div>
-              <p className="font-display text-5xl font-extrabold text-gray-800 leading-none">{stats.today}</p>
-            </motion.div>
-            <motion.div className="card p-6 bg-green-50 border-green-200" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <div className="flex items-center gap-3 mb-2">
-                <Stethoscope size={18} className="text-green-600" />
-                <p className="text-xs text-green-600">Active</p>
-              </div>
-              <p className="font-display text-5xl font-extrabold text-green-600 leading-none">{stats.active}</p>
-            </motion.div>
-            <motion.div className="card p-6 bg-blue-50 border-blue-200" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <div className="flex items-center gap-3 mb-2">
-                <CheckCircle size={18} className="text-blue-600" />
-                <p className="text-xs text-blue-600">Completed</p>
-              </div>
-              <p className="font-display text-5xl font-extrabold text-blue-600 leading-none">{stats.completed}</p>
-            </motion.div>
+            ))}
           </div>
         </motion.div>
 
-        <div className="card p-6 mb-6">
-          <h2 className="font-display text-base font-bold text-gray-900 mb-5">Today's Schedule</h2>
+        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>{t.todaySchedule}</h2>
 
           {todayBookings.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No appointments today</p>
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '32px 0' }}>{t.noAppointments}</p>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {todayBookings.map(b => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
-                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(249,250,251,1)' }} whileTap={{ scale: 0.99 }}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 cursor-default">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center min-w-[60px]">
-                      <p className="text-sm font-bold text-blue-600">{b.slot_time}</p>
-                      <p className="text-xs text-gray-400">{calcEndTime(b.slot_time)}</p>
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, background: 'var(--surface-hover)', borderRadius: 12, border: '1px solid var(--border)', cursor: 'default' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ textAlign: 'center', minWidth: 56 }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{b.slot_time}</p>
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{calcEndTime(b.slot_time)}</p>
                     </div>
-                    <div className="border-l border-gray-200 pl-4">
-                      <p className="font-bold text-gray-900 text-sm">{b.patient_name}</p>
-                      <p className="text-xs text-gray-400">{b.phone} · Queue #{b.queue_number}</p>
-                      <p className="text-xs text-gray-400">{b.departments?.name_en}</p>
+                    <div style={{ borderInlineStart: '1px solid var(--border)', paddingInlineStart: 16 }}>
+                      <p style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{b.patient_name}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{b.phone} · #{b.queue_number}</p>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                      {b.status}
+                      {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
                     </span>
                     {b.status === 'active' && (
-                      <button
-                        onClick={() => navigate(`/doctor/consultation/${b.id}`)}
-                        className="btn btn-primary btn-sm text-xs"
-                      >
-                        Consult
+                      <button onClick={() => navigate(`/doctor/consultation/${b.id}`)} className="btn btn-primary btn-sm" style={{ fontSize: 12 }}>
+                        {t.consult}
                       </button>
                     )}
                     {b.status === 'active' && (
-                      <button
-                        onClick={() => handleComplete(b.id)}
-                        className="btn btn-ghost btn-sm text-green-600 text-xs"
-                      >
-                        Done
+                      <button onClick={() => handleComplete(b.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--success)', fontSize: 12 }}>
+                        {t.done}
                       </button>
                     )}
                   </div>
