@@ -16,20 +16,28 @@ export default function MyBookings() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return navigate('/login')
+      try {
+        const { data: { session } } = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+        ])
+        if (!session) return navigate('/login')
 
-      if (!ignore) setUser(session.user)
+        if (!ignore) setUser(session.user)
 
-      const { data } = await supabase
-        .from('bookings')
-        .select('*, doctors(name), departments(name_en)')
-        .eq('phone', session.user.user_metadata?.phone || '')
-        .order('created_at', { ascending: false })
+        const { data } = await supabase
+          .from('bookings')
+          .select('*, doctors(name), departments(name_en)')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
 
-      if (!ignore) {
-        setBookings(data || [])
-        setLoading(false)
+        if (!ignore) {
+          setBookings(data || [])
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error('MyBookings load error:', err)
+        if (!ignore) setLoading(false)
       }
     }
     load()
@@ -43,30 +51,11 @@ export default function MyBookings() {
 
   const handleCancel = async (id) => {
     if (!await confirm('Cancel this booking?')) return
-    const booking = bookings.find(b => b.id === id)
     await supabase
       .from('bookings')
       .update({ status: 'cancelled', cancelled_by: 'patient' })
       .eq('id', id)
     setBookings(bookings.map(b => b.id === id ? { ...b, status: 'cancelled' } : b))
-
-    if (booking) {
-      const { sendEmail, logNotification, bookingCancellationEmail } = await import('../../lib/resend')
-      const emailHtml = bookingCancellationEmail({
-        patientName: booking.patient_name,
-        doctorName: booking.doctors?.name,
-        date: booking.booking_date,
-        time: booking.slot_time,
-        bookingRef: booking.booking_ref,
-      })
-      sendEmail({
-        to: booking.phone,
-        subject: 'Booking Cancelled - MediBook',
-        html: emailHtml,
-      }).then(result => {
-        logNotification({ bookingId: id, recipientEmail: booking.phone, type: 'booking_cancellation', status: result.success ? 'sent' : 'failed', errorMessage: result.error })
-      })
-    }
   }
 
   return (

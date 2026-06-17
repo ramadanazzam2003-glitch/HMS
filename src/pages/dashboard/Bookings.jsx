@@ -44,24 +44,6 @@ export default function Bookings() {
     const booking = bookings.find(b => b.id === id)
     await supabase.from('bookings').update({ status: 'cancelled', cancelled_by: user?.id }).eq('id', id)
     fetchBookings()
-
-    if (booking) {
-      const { sendEmail, logNotification, bookingCancellationEmail } = await import('../../lib/resend')
-      const emailHtml = bookingCancellationEmail({
-        patientName: booking.patient_name,
-        doctorName: booking.doctors?.name,
-        date: booking.booking_date,
-        time: booking.slot_time,
-        bookingRef: booking.booking_ref,
-      })
-      sendEmail({
-        to: booking.phone,
-        subject: 'Booking Cancelled - MediBook',
-        html: emailHtml,
-      }).then(result => {
-        logNotification({ bookingId: id, recipientEmail: booking.phone, type: 'booking_cancellation', status: result.success ? 'sent' : 'failed', errorMessage: result.error })
-      })
-    }
   }
 
   const filtered = bookings.filter(b => {

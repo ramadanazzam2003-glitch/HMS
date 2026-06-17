@@ -79,25 +79,6 @@ const handleSubmit = async () => {
       return
     }
 
-    const { sendEmail, logNotification, bookingConfirmationEmail } = await import('../../lib/resend')
-    const { data: deptData } = await supabase.from('departments').select('name_en').eq('id', state.deptId).single()
-    const emailHtml = bookingConfirmationEmail({
-      patientName: form.patient_name,
-      doctorName: state.doctor?.name,
-      departmentName: deptData?.name_en || '',
-      date: state.selectedDate,
-      time: `${slotTime} - ${calcEndTime(slotTime)}`,
-      queueNumber: nextQueue,
-      bookingRef,
-    })
-    sendEmail({
-      to: form.phone,
-      subject: 'Booking Confirmed - MediBook',
-      html: emailHtml,
-    }).then(result => {
-      logNotification({ bookingId: null, recipientEmail: form.phone, type: 'booking_confirmation', status: result.success ? 'sent' : 'failed', errorMessage: result.error })
-    })
-
     navigate('/confirmation', {
       state: {
         bookingRef, doctorName: state.doctor?.name,

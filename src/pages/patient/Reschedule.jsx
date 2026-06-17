@@ -94,30 +94,6 @@ export default function Reschedule() {
 
     toast('Appointment rescheduled successfully', { type: 'success' })
 
-    if (booking.user_id) {
-      const { sendEmail, logNotification, bookingRescheduleEmail } = await import('../../lib/resend')
-      const emailHtml = bookingRescheduleEmail({
-        patientName: booking.patient_name,
-        doctorName: doctor?.name,
-        oldDate: booking.booking_date,
-        oldTime: booking.slot_time,
-        newDate: selectedDate,
-        newTime: selectedSlot,
-        bookingRef: booking.booking_ref,
-      })
-      const result = await sendEmail({
-        to: booking.phone,
-        subject: 'Appointment Rescheduled - MediBook',
-        html: emailHtml,
-      })
-      await logNotification({
-        bookingId: booking.id,
-        type: 'booking_reschedule',
-        status: result.success ? 'sent' : 'failed',
-        errorMessage: result.error,
-      })
-    }
-
     navigate(-1)
   }
 
