@@ -1,8 +1,7 @@
-import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
 export default function PatientRoute({ children }) {
-  const { user, loading } = useAuth()
+  const { loading } = useAuth()
 
   if (loading) {
     return (
@@ -10,10 +9,6 @@ export default function PatientRoute({ children }) {
         <div className="text-gray-400">Loading...</div>
       </div>
     )
-  }
-
-  if (!user) {
-    return <Navigate to="/login" replace />
   }
 
   return children
