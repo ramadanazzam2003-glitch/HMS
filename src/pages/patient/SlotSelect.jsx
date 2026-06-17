@@ -7,6 +7,7 @@ import { useUI } from '../../hooks/useUI'
 import Navbar from '../../components/Navbar'
 import SlotPicker from '../../components/SlotPicker'
 import StepIndicator from '../../components/StepIndicator'
+import { calcEndTime } from '../../utils/booking'  
 
 const isDateAllowed = (dateStr, workingDays) => {
   if (!workingDays || workingDays.length === 0) return true
