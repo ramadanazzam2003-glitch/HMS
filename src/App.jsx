@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { UIProvider } from './contexts/UIProvider'
 
+import NotFound from './pages/NotFound'
+
 // Patient Pages
 import Home from './pages/patient/Home'
 import BookingType from './pages/patient/BookingType'
@@ -132,6 +134,9 @@ function App() {
         <Route path="/nurse/triage" element={<ProtectedRoute><NurseTriage /></ProtectedRoute>} />
         <Route path="/nurse/queue" element={<ProtectedRoute><PatientQueue /></ProtectedRoute>} />
         <Route path="/nurse/medications" element={<ProtectedRoute><MedicationTracking /></ProtectedRoute>} />
+
+        {/* 404 Catch-All */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       </UIProvider>
     </BrowserRouter>
