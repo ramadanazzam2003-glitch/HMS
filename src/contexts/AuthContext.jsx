@@ -55,7 +55,7 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(cached.role)
   const [roleLevel, setRoleLevel] = useState(cached.roleLevel)
   const [permissions, setPermissions] = useState(cached.permissions)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!cached.role)
 
   const fetchingRef = useRef(false)
 
@@ -186,8 +186,7 @@ export function AuthProvider({ children }) {
 
         if (session?.user) {
           setUser(session.user)
-          setLoading(true)
-
+          if (!profile) setLoading(true)
           await fetchProfile(session.user.id)
 
           if (mounted) setLoading(false)
