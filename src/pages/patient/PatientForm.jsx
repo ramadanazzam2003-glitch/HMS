@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { User, Phone, CalendarDays, Clock, Stethoscope, Building2, AlertCircle, CheckCircle } from 'lucide-react'
+import { User, CalendarDays, Clock, Stethoscope, Building2, AlertCircle, CheckCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import Navbar from '../../components/Navbar'
 import { calcEndTime, generateBookingRef } from '../../utils/booking'
@@ -39,35 +39,39 @@ export default function PatientForm() {
     return errs
   }
 
-  const handleSubmit = async () => {
-    const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+const handleSubmit = async () => {
+  const errs = validate()
+  if (Object.keys(errs).length > 0) { setErrors(errs); return }
 
-    setLoading(true)
-    const bookingRef = generateBookingRef()
+  setLoading(true)
+  const bookingRef = generateBookingRef()
 
-    const { data: existing } = await supabase
-      .from('bookings').select('queue_number')
-      .eq('doctor_id', state.doctor?.id)
-      .neq('status', 'cancelled')
-      .order('queue_number', { ascending: false })
-      .limit(1)
+  // ✅ جيب الـ session
+  const { data: { session } } = await supabase.auth.getSession()
 
-    const nextQueue = (existing?.[0]?.queue_number || 0) + 1
-    const slotTime  = state.selectedSlot
+  const { data: existing } = await supabase
+    .from('bookings').select('queue_number')
+    .eq('doctor_id', state.doctor?.id)
+    .neq('status', 'cancelled')
+    .order('queue_number', { ascending: false })
+    .limit(1)
 
-    const { error } = await supabase.from('bookings').insert({
-      booking_ref:   bookingRef,
-      department_id: state.deptId,
-      doctor_id:     state.doctor?.id,
-      patient_name:  form.patient_name,
-      phone:         form.phone,
-      age:           form.age ? parseInt(form.age) : null,
-      queue_number:  nextQueue,
-      booking_date:  state.selectedDate,
-      slot_time:     slotTime,
-      status:        'active',
-    })
+  const nextQueue = (existing?.[0]?.queue_number || 0) + 1
+  const slotTime  = state.selectedSlot
+
+  const { error } = await supabase.from('bookings').insert({
+    booking_ref:   bookingRef,
+    department_id: state.deptId,
+    doctor_id:     state.doctor?.id,
+    patient_name:  form.patient_name,
+    phone:         form.phone,
+    age:           form.age ? parseInt(form.age) : null,
+    queue_number:  nextQueue,
+    booking_date:  state.selectedDate,
+    slot_time:     slotTime,
+    status:        'active',
+    user_id:       session?.user?.id || null, // ✅ أضف السطر ده
+  })
 
     if (error) {
       toast('Error creating booking: ' + error.message, { type: 'error' })
