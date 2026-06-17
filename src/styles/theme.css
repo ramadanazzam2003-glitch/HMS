@@ -106,7 +106,8 @@
 /* ══════════════════════════════════════════
    2. DARK MODE
 ══════════════════════════════════════════ */
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
   --primary:          #3B82F6;
   --primary-light:    rgba(59,130,246,0.12);
   --primary-dark:     #2563EB;
@@ -266,7 +267,8 @@ a {
   box-shadow: var(--shadow-md);
 }
 
-[data-theme="dark"] .glass-card {
+[data-theme="dark"] .glass-card,
+.dark .glass-card {
   background: rgba(22, 27, 34, 0.80);
   border-color: rgba(48, 54, 61, 0.60);
 }
@@ -497,9 +499,9 @@ a {
   border: 1px solid var(--border);
 }
 
-[data-theme="dark"] .badge-success { color: #34D399; }
-[data-theme="dark"] .badge-warning { color: #FBBF24; }
-[data-theme="dark"] .badge-danger  { color: #F87171; }
+[data-theme="dark"] .badge-success, .dark .badge-success { color: #34D399; }
+[data-theme="dark"] .badge-warning, .dark .badge-warning { color: #FBBF24; }
+[data-theme="dark"] .badge-danger,  .dark .badge-danger  { color: #F87171; }
 
 /* ══════════════════════════════════════════
    9. ALERT COMPONENTS
@@ -535,10 +537,10 @@ a {
   border: 1px solid var(--primary-border);
 }
 
-[data-theme="dark"] .alert-success { color: #6EE7B7; }
-[data-theme="dark"] .alert-error   { color: #FCA5A5; }
-[data-theme="dark"] .alert-warning { color: #FCD34D; }
-[data-theme="dark"] .alert-info    { color: #93C5FD; }
+[data-theme="dark"] .alert-success, .dark .alert-success { color: #6EE7B7; }
+[data-theme="dark"] .alert-error,   .dark .alert-error   { color: #FCA5A5; }
+[data-theme="dark"] .alert-warning, .dark .alert-warning { color: #FCD34D; }
+[data-theme="dark"] .alert-info,    .dark .alert-info    { color: #93C5FD; }
 
 /* ══════════════════════════════════════════
    10. STAT CARD
@@ -1158,10 +1160,12 @@ a {
 }
 
 /* Improved scrollbar for dark mode */
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
+[data-theme="dark"] ::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
   background: var(--border);
 }
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
 }
 
@@ -1219,34 +1223,34 @@ a {
 /* ══════════════════════════════════════════
    24. DARK MODE — FULL APP ENHANCEMENTS
 ══════════════════════════════════════════ */
-[data-theme="dark"] body {
+[data-theme="dark"] body, .dark body {
   background: var(--background);
   color: var(--text-primary);
 }
 
-[data-theme="dark"] .card {
+[data-theme="dark"] .card, .dark .card {
   background: var(--surface);
   border-color: var(--border);
 }
 
-[data-theme="dark"] .card-hover:hover {
+[data-theme="dark"] .card-hover:hover, .dark .card-hover:hover {
   border-color: var(--primary-border);
 }
 
-[data-theme="dark"] .btn-secondary {
+[data-theme="dark"] .btn-secondary, .dark .btn-secondary {
   background: var(--primary-light);
   border-color: var(--primary-border);
 }
 
-[data-theme="dark"] .btn-secondary:hover:not(:disabled) {
+[data-theme="dark"] .btn-secondary:hover:not(:disabled), .dark .btn-secondary:hover:not(:disabled) {
   background: rgba(59, 130, 246, 0.2);
 }
 
-[data-theme="dark"] .stat-card {
+[data-theme="dark"] .stat-card, .dark .stat-card {
   background: var(--surface);
 }
 
-[data-theme="dark"] .table th {
+[data-theme="dark"] .table th, .dark .table th {
   background: var(--surface-hover);
 }
 

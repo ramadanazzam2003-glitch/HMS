@@ -2,6 +2,17 @@ import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()
 
+function applyTheme(theme) {
+  const root = document.documentElement
+  if (theme === 'dark') {
+    root.classList.add('dark')
+    root.setAttribute('data-theme', 'dark')
+  } else {
+    root.classList.remove('dark')
+    root.setAttribute('data-theme', 'light')
+  }
+}
+
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('medibook-theme')
@@ -12,14 +23,14 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('medibook-theme', theme)
-    document.documentElement.setAttribute('data-theme', theme)
+    applyTheme(theme)
   }, [theme])
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e) => {
       const saved = localStorage.getItem('medibook-theme')
-      if (!saved || saved === 'auto') {
+      if (!saved) {
         setTheme(e.matches ? 'dark' : 'light')
       }
     }
@@ -31,18 +42,8 @@ export function ThemeProvider({ children }) {
     setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
 
-  const setThemeMode = (mode) => {
-    if (mode === 'auto') {
-      const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches
-      setTheme(prefersDark ? 'dark' : 'light')
-      localStorage.removeItem('medibook-theme')
-    } else {
-      setTheme(mode)
-    }
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme: setThemeMode, isDark: theme === 'dark' }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, isDark: theme === 'dark' }}>
       {children}
     </ThemeContext.Provider>
   )
