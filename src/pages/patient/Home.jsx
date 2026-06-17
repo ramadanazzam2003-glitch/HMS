@@ -40,8 +40,8 @@ export default function Home() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { navigate('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
+      if (!session) return
       if (!ignore) setUser(session.user)
 
       const today = new Date().toISOString().split('T')[0]

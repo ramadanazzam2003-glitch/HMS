@@ -11,8 +11,8 @@ export default function PatientPayments() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { navigate('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
+      if (!session) return
 
       const phone = session.user.user_metadata?.phone || ''
       if (!phone) { setLoading(false); return }

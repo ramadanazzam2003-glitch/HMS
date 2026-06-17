@@ -17,11 +17,8 @@ export default function MyBookings() {
     let ignore = false
     const load = async () => {
       try {
-        const { data: { session } } = await Promise.race([
-          supabase.auth.getSession(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
-        ])
-        if (!session) return navigate('/login')
+        const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
+        if (!session) return
 
         if (!ignore) setUser(session.user)
 

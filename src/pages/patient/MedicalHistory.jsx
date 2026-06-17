@@ -11,8 +11,8 @@ export default function PatientMedicalHistory() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { navigate('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }))
+      if (!session) return
 
       const { data } = await supabase
         .from('medical_records')
