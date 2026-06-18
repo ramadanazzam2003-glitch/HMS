@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, CalendarDays, Users, Stethoscope, FileText,
   Receipt, Bot, BarChart3, ScrollText, Settings, ChevronLeft,
   ChevronRight, LogOut, Bell, Search, Moon, Sun, Globe,
-  Menu, User, Hospital, CalendarCheck, ClipboardList, FlaskConical, CalendarPlus, Shield
+  Menu, User, Hospital, CalendarCheck, ClipboardList, FlaskConical, CalendarPlus, Shield, X, ArrowRight
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { Badge } from '../ui/badge'
@@ -56,11 +56,50 @@ export default function DashboardLayout({ children }) {
   const { lang, toggleLang } = useLanguage()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef(null)
   const isRTL = lang === 'ar'
 
   const filteredItems = useMemo(() => {
     return sidebarItems.filter(item => item.roles.includes(role))
   }, [role])
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const q = searchQuery.toLowerCase()
+    return filteredItems.filter(item =>
+      item.label.toLowerCase().includes(q) ||
+      item.labelEn.toLowerCase().includes(q)
+    )
+  }, [searchQuery, filteredItems])
+
+  const handleSearchSelect = useCallback((path) => {
+    navigate(path)
+    setSearchOpen(false)
+    setSearchQuery('')
+  }, [navigate])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchOpen(prev => !prev)
+      }
+      if (e.key === 'Escape') {
+        setSearchOpen(false)
+        setSearchQuery('')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus()
+    }
+  }, [searchOpen])
 
   return (
     <div className="min-h-screen bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -213,13 +252,16 @@ export default function DashboardLayout({ children }) {
               <Menu size={18} />
             </button>
             {/* Search */}
-            <div className="hidden md:flex items-center gap-2 h-9 px-3 rounded-xl bg-surface-hover text-txt-muted text-sm">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="hidden md:flex items-center gap-2 h-9 px-3 rounded-xl bg-surface-hover text-txt-muted text-sm cursor-pointer hover:bg-surface-hover/80 transition-colors"
+            >
               <Search size={15} />
-              <span className="text-txt-muted/60">بحث...</span>
+              <span className="text-txt-muted/60">{isRTL ? 'بحث...' : 'Search...'}</span>
               <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white border border-border text-[10px] text-txt-muted font-medium">
                 <span>Ctrl</span><span>K</span>
               </kbd>
-            </div>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
@@ -255,6 +297,91 @@ export default function DashboardLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Search Modal */}
+      <AnimatePresence>
+        {searchOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => { setSearchOpen(false); setSearchQuery('') }}
+              className="fixed inset-0 bg-black/50 z-[100]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              transition={{ duration: 0.15 }}
+              className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-lg z-[101]"
+            >
+              <div className="bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden">
+                <div className="flex items-center gap-3 px-4 h-14 border-b border-border">
+                  <Search size={18} className="text-txt-muted shrink-0" />
+                  <input
+                    ref={searchInputRef}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent text-txt-primary text-sm outline-none placeholder:text-txt-muted"
+                    placeholder={isRTL ? 'ابحث عن صفحة...' : 'Search for a page...'}
+                  />
+                  <button
+                    onClick={() => { setSearchOpen(false); setSearchQuery('') }}
+                    className="w-7 h-7 rounded-lg bg-surface-hover flex items-center justify-center text-txt-muted hover:text-txt-primary transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto p-2">
+                  {searchQuery.trim() === '' ? (
+                    <div className="py-8 text-center">
+                      <p className="text-txt-muted text-sm">{isRTL ? 'اكتب للبحث...' : 'Type to search...'}</p>
+                    </div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="py-8 text-center">
+                      <p className="text-txt-muted text-sm">{isRTL ? 'لا توجد نتائج' : 'No results found'}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {searchResults.map(item => {
+                        const Icon = item.icon
+                        return (
+                          <button
+                            key={item.path}
+                            onClick={() => handleSearchSelect(item.path)}
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm hover:bg-surface-hover transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center text-txt-muted group-hover:text-primary transition-colors">
+                              <Icon size={16} />
+                            </div>
+                            <span className="flex-1 text-start font-medium text-txt-primary">
+                              {isRTL ? item.label : item.labelEn}
+                            </span>
+                            <ArrowRight size={14} className="text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 px-4 py-2.5 border-t border-border text-[11px] text-txt-muted">
+                  <span className="flex items-center gap-1">
+                    <kbd className="px-1.5 py-0.5 rounded bg-surface-hover border border-border font-medium">Enter</kbd>
+                    {isRTL ? 'اختيار' : 'Select'}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <kbd className="px-1.5 py-0.5 rounded bg-surface-hover border border-border font-medium">Esc</kbd>
+                    {isRTL ? 'إغلاق' : 'Close'}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
