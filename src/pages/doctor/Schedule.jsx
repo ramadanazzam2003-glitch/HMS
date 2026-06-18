@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { motion } from 'framer-motion'
 import { CalendarDays, Clock } from 'lucide-react'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 const DAYS = [
   { name: 'Sunday', num: 0 },
@@ -75,70 +77,73 @@ export default function DoctorSchedule() {
   const isWorkingDay = doctor?.working_days?.includes(selectedDay)
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/doctor" subtitle="Weekly Schedule" />
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-2 mb-5 overflow-x-auto pb-2">
-            {DAYS.map(day => {
-              const date = getDayDate(day.num)
-              const count = weekBookings.filter(b => b.booking_date === date).length
-              const isToday = date === new Date().toISOString().slice(0, 10)
-              const isSelected = selectedDay === day.num
-              return (
-                <motion.button key={day.num} onClick={() => setSelectedDay(day.num)}
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                  className={`flex flex-col items-center min-w-[70px] py-3 px-2 rounded-xl border-2 transition-all ${
-                    isSelected
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-600 border-gray-100 hover:border-blue-200'
-                  }`}>
-                  <span className="text-xs font-medium">{day.name.slice(0, 3)}</span>
-                  <span className={`text-lg font-bold ${isToday ? 'text-blue-500' : ''}`}>{new Date(date).getDate()}</span>
-                  {count > 0 && <span className="text-[10px] mt-0.5">{count} appts</span>}
-                </motion.button>
-              )
-            })}
-          </div>
+    <DashboardLayout>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <h1 className="font-display text-lg font-bold text-txt-primary mb-4">Weekly Schedule</h1>
 
-          {!isWorkingDay && (
-            <div className="card p-6 mb-4 bg-yellow-50 border-yellow-200">
-              <p className="text-sm text-yellow-700 font-medium flex items-center gap-2"><CalendarDays size={16} /> Not a working day</p>
-              <p className="text-xs text-yellow-600 mt-1">Your working days: {doctor?.working_days?.map(d => DAYS[d]?.name?.slice(0, 3)).filter(Boolean).join(', ')}</p>
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-2">
+          {DAYS.map(day => {
+            const date = getDayDate(day.num)
+            const count = weekBookings.filter(b => b.booking_date === date).length
+            const isToday = date === new Date().toISOString().slice(0, 10)
+            const isSelected = selectedDay === day.num
+            return (
+              <motion.button key={day.num} onClick={() => setSelectedDay(day.num)}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                className={`flex flex-col items-center min-w-[70px] py-3 px-2 rounded-xl border-2 transition-all ${
+                  isSelected
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-surface text-txt-secondary border-border hover:border-primary/50'
+                }`}>
+                <span className="text-xs font-medium">{day.name.slice(0, 3)}</span>
+                <span className={`text-lg font-bold ${isToday ? 'text-primary' : ''}`}>{new Date(date).getDate()}</span>
+                {count > 0 && <span className="text-[10px] mt-0.5">{count} appts</span>}
+              </motion.button>
+            )
+          })}
+        </div>
+
+        {!isWorkingDay && (
+          <div className="rounded-2xl border border-yellow-200 bg-yellow-50 p-6 mb-4">
+            <p className="text-sm text-yellow-700 font-medium flex items-center gap-2"><CalendarDays size={16} /> Not a working day</p>
+            <p className="text-xs text-yellow-600 mt-1">Your working days: {doctor?.working_days?.map(d => DAYS[d]?.name?.slice(0, 3)).filter(Boolean).join(', ')}</p>
+          </div>
+        )}
+
+        <div className="rounded-2xl bg-surface border border-border p-6">
+          <h2 className="font-display text-base font-bold text-txt-primary mb-4">
+            {DAYS[selectedDay]?.name} — {dayBookings.length} appointments
+          </h2>
+          {loading ? (
+            <div className="space-y-2.5">
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+            </div>
+          ) : dayBookings.length === 0 ? (
+            <p className="text-txt-muted text-center py-6">No appointments scheduled</p>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {dayBookings.map(b => (
+                <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+                  whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-surface-hover border border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="text-center min-w-[55px]">
+                      <p className="text-sm font-bold text-primary flex items-center gap-1"><Clock size={12} />{b.slot_time}</p>
+                    </div>
+                    <div className="border-s border-border ps-3">
+                      <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
+                      <p className="text-xs text-txt-muted">{b.phone} · {b.departments?.name_en}</p>
+                    </div>
+                  </div>
+                  <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                    {b.status}
+                  </Badge>
+                </motion.div>
+              ))}
             </div>
           )}
-
-          <div className="card p-6">
-            <h2 className="font-display text-base font-bold text-gray-900 mb-4">
-              {DAYS[selectedDay]?.name} — {dayBookings.length} appointments
-            </h2>
-            {dayBookings.length === 0 ? (
-              <p className="text-gray-400 text-center py-6">No appointments scheduled</p>
-            ) : (
-              <div className="flex flex-col gap-2.5">
-                {dayBookings.map(b => (
-                  <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
-                    whileHover={{ scale: 1.01, backgroundColor: 'rgba(249,250,251,1)' }} whileTap={{ scale: 0.99 }}
-                    className="flex items-center justify-between p-3.5 bg-gray-50 rounded-xl border border-gray-100">
-                    <div className="flex items-center gap-3">
-                      <div className="text-center min-w-[55px]">
-                        <p className="text-sm font-bold text-blue-600 flex items-center gap-1"><Clock size={12} />{b.slot_time}</p>
-                      </div>
-                      <div className="border-l border-gray-200 pl-3">
-                        <p className="font-semibold text-gray-900 text-sm">{b.patient_name}</p>
-                        <p className="text-xs text-gray-400">{b.phone} · {b.departments?.name_en}</p>
-                      </div>
-                    </div>
-                    <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                      {b.status}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </div>
+        </div>
+      </motion.div>
+    </DashboardLayout>
   )
 }

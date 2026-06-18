@@ -23,5 +23,6 @@ export function formatApptDate(dateStr, timeStr) {
 }
 
 export function generateBookingRef() {
-  return 'BK-' + Date.now().toString().slice(-6)
+  const rand = crypto.randomUUID().slice(0, 8).toUpperCase()
+  return 'BK-' + rand
 }

@@ -3,7 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, CalendarDays, Clock, Stethoscope, Building2, AlertCircle, CheckCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
 import { calcEndTime, generateBookingRef } from '../../utils/booking'
 import { useUI } from '../../hooks/useUI'
 import StepIndicator from '../../components/StepIndicator'
@@ -46,7 +49,6 @@ const handleSubmit = async () => {
   setLoading(true)
   const bookingRef = generateBookingRef()
 
-  // ✅ جيب الـ session
   const { data: { session } } = await supabase.auth.getSession()
 
   const { data: existing } = await supabase
@@ -70,7 +72,7 @@ const handleSubmit = async () => {
     booking_date:  state.selectedDate,
     slot_time:     slotTime,
     status:        'active',
-    user_id:       session?.user?.id || null, // ✅ أضف السطر ده
+    user_id:       session?.user?.id || null,
   })
 
     if (error) {
@@ -92,21 +94,11 @@ const handleSubmit = async () => {
   const endTime = calcEndTime(state?.selectedSlot)
 
   return (
-    <div className="page">
-      <Navbar
-        back={-1}
-        subtitle="Patient Information"
-        breadcrumbs={[
-          { label: 'Departments', path: '/'  },
-          { label: 'Type',        path: -3   },
-          { label: 'Doctor',      path: -2   },
-          { label: 'Slot',        path: -1   },
-          { label: 'Confirm'                 },
-        ]}
-      />
+    <div className="page pt-[72px]">
+      <PublicNavbar back="/" />
 
       <div className="hero-gradient">
-        <div className="absolute -top-10 -right-10 w-50 h-50 rounded-full bg-white/5 pointer-events-none" />
+        <div className="absolute -top-10 -right-10 w-50 h-50 rounded-full bg-surface/5 pointer-events-none" />
         <div className="hero-inner text-center relative">
           <span className="hero-chip">Almost Done!</span>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Patient Information</h1>
@@ -119,91 +111,96 @@ const handleSubmit = async () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <motion.div
-            className="card animate-fadeIn p-6"
+            className="animate-fadeIn"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 className="font-bold text-gray-900 text-base mb-5 flex items-center gap-2"><User size={18} /> Your Details</h2>
+            <Card className="p-6">
+              <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><User size={18} /> Your Details</h2>
 
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="input-label">Full Name *</label>
-                <input name="patient_name" value={form.patient_name} onChange={handleChange}
-                  onKeyDown={e => handleKeyDown(e, phoneRef)} autoFocus className="input"
-                  placeholder="Ahmed Mohamed"
-                  style={{ borderColor: errors.patient_name ? 'var(--danger)' : undefined }} />
-                {errors.patient_name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.patient_name}</p>}
-              </div>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <label className="input-label">Full Name *</label>
+                  <Input name="patient_name" value={form.patient_name} onChange={handleChange}
+                    onKeyDown={e => handleKeyDown(e, phoneRef)} autoFocus
+                    placeholder="Ahmed Mohamed"
+                    className={errors.patient_name ? 'border-red-500' : ''} />
+                  {errors.patient_name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.patient_name}</p>}
+                </div>
 
-              <div>
-                <label className="input-label">Phone Number *</label>
-                <input ref={phoneRef} name="phone" value={form.phone} onChange={handleChange}
-                  onKeyDown={e => handleKeyDown(e, ageRef)} className="input"
-                  placeholder="01012345678"
-                  style={{ borderColor: errors.phone ? 'var(--danger)' : undefined }} />
-                {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.phone}</p>}
-              </div>
+                <div>
+                  <label className="input-label">Phone Number *</label>
+                  <Input ref={phoneRef} name="phone" value={form.phone} onChange={handleChange}
+                    onKeyDown={e => handleKeyDown(e, ageRef)}
+                    placeholder="01012345678"
+                    className={errors.phone ? 'border-red-500' : ''} />
+                  {errors.phone && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.phone}</p>}
+                </div>
 
-              <div>
-                <label className="input-label">Age <span className="text-gray-400 font-normal">(optional)</span></label>
-                <input ref={ageRef} name="age" type="number" value={form.age} onChange={handleChange}
-                  onKeyDown={e => handleKeyDown(e, submitRef)} className="input"
-                  placeholder="30" min="1" max="120"
-                  style={{ borderColor: errors.age ? 'var(--danger)' : undefined }} />
-                {errors.age && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.age}</p>}
+                <div>
+                  <label className="input-label">Age <span className="text-txt-muted font-normal">(optional)</span></label>
+                  <Input ref={ageRef} name="age" type="number" value={form.age} onChange={handleChange}
+                    onKeyDown={e => handleKeyDown(e, submitRef)}
+                    placeholder="30" min="1" max="120"
+                    className={errors.age ? 'border-red-500' : ''} />
+                  {errors.age && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.age}</p>}
+                </div>
               </div>
-            </div>
+            </Card>
           </motion.div>
 
           <div className="flex flex-col gap-4">
             <motion.div
-              className="card animate-fadeIn p-6"
+              className="animate-fadeIn"
               style={{ animationDelay: '60ms' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.06 }}
             >
-              <h2 className="font-bold text-gray-900 text-base mb-5 flex items-center gap-2"><CheckCircle size={18} /> Booking Summary</h2>
+              <Card className="p-6">
+                <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><CheckCircle size={18} /> Booking Summary</h2>
 
-              <div className="flex flex-col gap-3">
-                {[
-                  { icon: <Stethoscope size={14} />, label: 'Doctor',   value: state?.doctor?.name },
-                  { icon: <Building2 size={14} />, label: 'Type',     value: state?.bookingType, capitalize: true },
-                  { icon: <CalendarDays size={14} />, label: 'Date',     value: state?.selectedDate },
-                  { icon: <Clock size={14} />, label: 'Time',     value: state?.selectedSlot ? `${state.selectedSlot} → ${endTime}` : '' },
-                  { icon: <Clock size={14} />, label: 'Duration', value: '15 minutes' },
-                ].map(({ icon, label, value, capitalize }) => (
-                  <div key={label} className="flex justify-between items-center pb-3 border-b border-gray-100">
-                    <span className="text-xs text-gray-400 flex items-center gap-1.5">{icon} {label}</span>
-                    <span className={`text-xs font-semibold text-gray-800 ${capitalize ? 'capitalize' : ''}`}>{value || '—'}</span>
-                  </div>
-                ))}
-              </div>
+                <div className="flex flex-col gap-3">
+                  {[
+                    { icon: <Stethoscope size={14} />, label: 'Doctor',   value: state?.doctor?.name },
+                    { icon: <Building2 size={14} />, label: 'Type',     value: state?.bookingType, capitalize: true },
+                    { icon: <CalendarDays size={14} />, label: 'Date',     value: state?.selectedDate },
+                    { icon: <Clock size={14} />, label: 'Time',     value: state?.selectedSlot ? `${state.selectedSlot} → ${endTime}` : '' },
+                    { icon: <Clock size={14} />, label: 'Duration', value: '15 minutes' },
+                  ].map(({ icon, label, value, capitalize }) => (
+                    <div key={label} className="flex justify-between items-center pb-3 border-b border-border">
+                      <span className="text-xs text-txt-muted flex items-center gap-1.5">{icon} {label}</span>
+                      <span className={`text-xs font-semibold text-txt-primary ${capitalize ? 'capitalize' : ''}`}>{value || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </motion.div>
 
             <motion.div
-              className="card animate-fadeIn p-4 bg-blue-50 border-blue-200"
+              className="animate-fadeIn"
               style={{ animationDelay: '120ms' }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.12 }}
             >
-              <p className="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-1.5"><AlertCircle size={16} /> Tips</p>
-              <ul className="text-xs text-gray-500 pl-4 leading-relaxed">
-                <li>Save your booking reference after confirming</li>
-                <li>Arrive 10 minutes before your slot</li>
-                <li>You can cancel using your reference number</li>
-              </ul>
+              <Card className="p-4 bg-blue-50 border-blue-200">
+                <p className="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-1.5"><AlertCircle size={16} /> Tips</p>
+                <ul className="text-xs text-txt-muted pl-4 leading-relaxed">
+                  <li>Save your booking reference after confirming</li>
+                  <li>Arrive 10 minutes before your slot</li>
+                  <li>You can cancel using your reference number</li>
+                </ul>
+              </Card>
             </motion.div>
           </div>
         </div>
 
         <div className="mt-5">
-          <button ref={submitRef} onClick={handleSubmit} disabled={loading}
-            className="btn btn-primary btn-lg btn-full">
-            {loading ? '⏳ Creating booking...' : '✓ Confirm Booking'}
-          </button>
+          <Button ref={submitRef} onClick={handleSubmit} disabled={loading} size="lg" className="w-full">
+            {loading ? 'Creating booking...' : 'Confirm Booking'}
+          </Button>
         </div>
       </div>
     </div>

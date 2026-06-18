@@ -1,13 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Search, Building2, CalendarDays, Clock } from 'lucide-react'
+import { Search, Building2, ChevronDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import PatientNavbar from '../../components/home/PatientNavbar'
+import { useLanguage } from '../../contexts/LanguageContext'
+import { useAuth } from '../../hooks/useAuth'
+import PublicNavbar from '../../components/layout/PublicNavbar'
 import HeroSection from '../../components/home/HeroSection'
 import NextAppointmentCard from '../../components/home/NextAppointmentCard'
 import DepartmentCard from '../../components/home/DepartmentCard'
 import CancelBanner from '../../components/home/CancelBanner'
+import HomeSections from '../../components/home/HomeSections'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Badge } from '../../components/ui/badge'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,6 +33,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
+  const { lang } = useLanguage()
+  const isRTL = lang === 'ar'
 
   const [searchTerm, setSearchTerm] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
@@ -45,130 +53,188 @@ export default function Home() {
       if (!ignore) setUser(session.user)
 
       const today = new Date().toISOString().split('T')[0]
-      const { data: depts, error } = await supabase.from('departments').select('*')
-      if (error || !depts || ignore) { setLoading(false); return }
 
-      const { data: bookingsData } = await supabase
-        .from('bookings').select('department_id').eq('status', 'active').eq('booking_date', today)
+      const [deptRes, bookingRes, nextRes] = await Promise.all([
+        supabase.from('departments').select('*'),
+        supabase.from('bookings').select('department_id').eq('status', 'active').eq('booking_date', today),
+        supabase.from('bookings').select('*, doctors(name), departments(name_en, name_ar)')
+          .eq('status', 'active').order('booking_date', { ascending: true }).limit(1),
+      ])
+
+      if (ignore) return
+
+      const depts = deptRes.data
+      if (!depts) { setLoading(false); return }
 
       const countMap = {}
-      bookingsData?.forEach(b => { countMap[b.department_id] = (countMap[b.department_id] || 0) + 1 })
+      bookingRes.data?.forEach(b => { countMap[b.department_id] = (countMap[b.department_id] || 0) + 1 })
 
-      if (!ignore) {
-        setDepartments(depts.map(d => ({ ...d, bookedCount: countMap[d.id] || 0 })))
-        setLoading(false)
+      setDepartments(depts.map(d => ({ ...d, bookedCount: countMap[d.id] || 0 })))
+      setLoading(false)
+
+      const next = nextRes.data?.[0]
+      if (next) {
+        setNextBooking({
+          ...next,
+          deptName: next.departments?.name_en || '',
+          deptNameAr: next.departments?.name_ar || '',
+        })
       }
+      setApptLoading(false)
     }
     load()
     return () => { ignore = true }
   }, [navigate])
 
-  useEffect(() => {
-    if (!user) return
-    let ignore = false
-    const fetchNext = async () => {
+  const filteredDepts = useMemo(() => {
+    return departments.filter(dept => {
+      const remaining = dept.max_daily - (dept.bookedCount || 0)
+      const matchSearch = !searchTerm ||
+        dept.name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dept.name_ar?.includes(searchTerm)
+      const matchFilter = activeFilter === 'all' ||
+        (activeFilter === 'open' && remaining > 0) ||
+        (activeFilter === 'full' && remaining <= 0)
+      return matchSearch && matchFilter
+    })
+  }, [departments, searchTerm, activeFilter])
 
-      const { data: bookings } = await supabase
-        .from('bookings').select('*, doctors(name)')
-        .eq('status', 'active').order('booking_date', { ascending: true }).limit(1)
-
-      if (!bookings || bookings.length === 0 || ignore) { setApptLoading(false); return }
-
-      const booking = bookings[0]
-      const { data: dept } = await supabase
-        .from('departments').select('name_en, name_ar').eq('id', booking.department_id).single()
-
-      if (!ignore) {
-        setNextBooking({ ...booking, deptName: dept?.name_en || '', deptNameAr: dept?.name_ar || '' })
-        setApptLoading(false)
-      }
-    }
-    fetchNext()
-    return () => { ignore = true }
-  }, [user])
-
-  const filteredDepts = departments.filter(dept => {
-    const remaining = dept.max_daily - (dept.bookedCount || 0)
-    const matchSearch = !searchTerm ||
-      dept.name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dept.name_ar?.includes(searchTerm)
-    const matchFilter = activeFilter === 'all' ||
-      (activeFilter === 'open' && remaining > 0) ||
-      (activeFilter === 'full' && remaining <= 0)
-    return matchSearch && matchFilter
-  })
+  const openCount = useMemo(() => {
+    return departments.filter(d => (d.max_daily - d.bookedCount) > 0).length
+  }, [departments])
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-slate-50">
-      <div className="text-center">
-        <Building2 size={48} className="text-blue-300 animate-pulse mx-auto mb-4" />
-        <p className="text-slate-400 font-medium">Loading departments...</p>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <PublicNavbar />
+      <div className="flex items-center justify-center pt-32">
+        <div className="text-center">
+          <div className="spinner spinner-lg mx-auto mb-4" />
+          <p className="text-txt-muted font-medium">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
+        </div>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <PatientNavbar user={user} nextBooking={nextBooking} />
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <PublicNavbar />
 
+      {/* New Hero Section */}
       <HeroSection
         departmentCount={departments.length}
-        openCount={departments.filter(d => (d.max_daily - d.bookedCount) > 0).length}
+        openCount={openCount}
         onScrollToDepts={scrollToDepartments}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-10" ref={departmentsSectionRef}>
-        {!apptLoading && nextBooking && <NextAppointmentCard booking={nextBooking} />}
+      {/* Statistics + Marketing Sections (without footer, without why choose us) */}
+      <HomeSections hideFooter hideWhyChooseUs />
 
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-xl font-bold text-slate-800">Select Department</h2>
-            <p className="text-slate-400 text-sm mt-0.5">Choose a department to book your appointment</p>
-          </div>
-          <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full font-medium">
-            {departments.filter(d => (d.max_daily - d.bookedCount) > 0).length} open today
-          </span>
-        </div>
+      {/* Departments Section with Real Data */}
+      <section ref={departmentsSectionRef} className="py-16 lg:py-20 bg-surface">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6" dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-10"
+          >
+            <Badge variant="primary" className="mb-3">
+              {isRTL ? 'احجز موعدك' : 'Book Your Appointment'}
+            </Badge>
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-txt-primary mb-2">
+              {isRTL ? 'اختر القسم الطبي' : 'Select a Department'}
+            </h2>
+            <p className="text-txt-muted">
+              {isRTL ? 'اختر التخصص المناسب لحجز موعد مع طبيب' : 'Choose the right specialty to book with a doctor'}
+            </p>
+          </motion.div>
 
-        <div className="flex flex-wrap gap-2.5 items-center mb-5">
-          <div className="relative flex-1 min-w-[220px]">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Search size={16} /></span>
-            <input value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-              placeholder="Search departments..."
-              className="w-full py-2 pl-9 pr-3.5 border border-gray-200 rounded-xl text-[13px] text-gray-700 bg-white outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 transition-all" />
+          {!apptLoading && nextBooking && <NextAppointmentCard booking={nextBooking} />}
+
+          {/* Search & Filter */}
+          <div className="flex flex-wrap items-center gap-3 mb-8 p-4 rounded-2xl bg-surface-hover border border-border">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} />
+              <Input
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder={isRTL ? 'بحث عن قسم...' : 'Search departments...'}
+                className="h-9 text-sm ps-9"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {['all', 'open', 'full'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setActiveFilter(f)}
+                  className={`h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                    activeFilter === f
+                      ? 'bg-primary text-white shadow-md shadow-primary/20'
+                      : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
+                  }`}
+                >
+                  {f === 'all' ? (isRTL ? 'الكل' : 'All') : f === 'open' ? (isRTL ? 'متاح' : 'Open') : (isRTL ? 'ممتلئ' : 'Full')}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-txt-muted whitespace-nowrap">
+              {isRTL ? `عرض ${filteredDepts.length} من ${departments.length} قسم` : `Showing ${filteredDepts.length} of ${departments.length} departments`}
+            </span>
           </div>
-          <div className="flex gap-1.5">
-            {['all', 'open', 'full'].map(f => (
-              <button key={f} onClick={() => setActiveFilter(f)}
-                className={`px-4 py-2 rounded-[10px] text-[13px] font-semibold cursor-pointer transition-all ${
-                  activeFilter === f
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                    : 'bg-white text-gray-500 border border-gray-200'
-                }`}>
-                {f === 'all' ? 'All' : f === 'open' ? 'Open' : 'Full'}
-              </button>
+
+          {/* Department Grid */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredDepts.map(dept => (
+              <motion.div key={dept.id} variants={cardVariants}>
+                <DepartmentCard dept={dept} />
+              </motion.div>
             ))}
-          </div>
-          <span className="text-xs text-gray-400 whitespace-nowrap">
-            Showing {filteredDepts.length} of {departments.length} departments
-          </span>
+          </motion.div>
+
+          <CancelBanner />
         </div>
+      </section>
 
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {filteredDepts.map(dept => (
-            <motion.div key={dept.id} variants={cardVariants}>
-              <DepartmentCard dept={dept} />
-            </motion.div>
-          ))}
-        </motion.div>
-
-        <CancelBanner />
+      {/* CTA Section from HomeSections is already there - skip duplicate */}
+      <div className="bg-[#F8FAFC]">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative rounded-3xl bg-gradient-to-br from-primary to-primary-dark p-8 lg:p-16 text-center overflow-hidden"
+          >
+            <div className="absolute -top-20 -end-20 w-60 h-60 rounded-full bg-surface/5 pointer-events-none" />
+            <div className="absolute -bottom-20 -start-20 w-60 h-60 rounded-full bg-surface/5 pointer-events-none" />
+            <div className="relative z-10">
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4">
+                {isRTL ? 'احجز موعدك الآن' : 'Book Your Appointment Now'}
+              </h2>
+              <p className="text-lg text-white/80 mb-8 max-w-lg mx-auto">
+                {isRTL
+                  ? 'اختر الطبيب المناسب واحجز موعدك في دقائق'
+                  : 'Choose the right doctor and book your appointment in minutes'}
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button size="lg" className="bg-surface text-primary hover:bg-surface/90 shadow-xl" onClick={() => navigate('/register')}>
+                  {isRTL ? 'حجز موعد' : 'Book Now'}
+                </Button>
+                <Button variant="outline" size="lg" className="border-white/30 text-white bg-transparent hover:bg-surface/10">
+                  {isRTL ? 'اتصل بنا' : 'Call Us'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <HomeSections hideFooter={false} hideStats />
     </div>
   )
 }

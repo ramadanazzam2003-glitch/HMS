@@ -119,6 +119,7 @@ export const translations = {
     reschedule: 'إعادة جدولة',
     showing: 'عرض',
     of: 'من',
+    loadMore: 'تحميل المزيد',
 
     // Settings
     settingsPage: 'الإعدادات',
@@ -326,6 +327,7 @@ export const translations = {
     reschedule: 'Reschedule',
     showing: 'Showing',
     of: 'of',
+    loadMore: 'Load More',
 
     // Settings
     settingsPage: 'Settings',

@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FileText, Search } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import MedicalRecordCard from '../../components/medical/MedicalRecordCard'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function MedicalRecords() {
   const { t } = useLanguage()
@@ -36,47 +39,54 @@ export default function MedicalRecords() {
   })
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.medicalRecordsPage} />
-
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-              <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
-                <Search size={16} />
-              </span>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input" style={{ paddingInlineStart: 36 }}
-                placeholder={t.searchPatientPhoneDiag} />
-            </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">{t.medicalRecordsPage}</h1>
+            <p className="text-txt-muted text-sm mt-1">{t.searchPatientPhoneDiag}</p>
           </div>
+        </div>
 
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
-              <div className="spinner spinner-lg mx-auto mb-4" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon"><FileText size={48} style={{ color: 'var(--text-disabled)' }} /></div>
-              <p className="empty-state-title">{t.noRecordsFound}</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="relative max-w-md">
+          <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none left-3" />
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="h-9 text-sm ps-9"
+            placeholder={t.searchPatientPhoneDiag}
+          />
+        </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1,2,3,4].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <FileText size={48} className="text-txt-disabled mb-4" />
+              <p className="text-txt-primary font-semibold">{t.noRecordsFound}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="space-y-3">
               {filtered.map((record, i) => (
-                <motion.div key={record.id}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.04 }}>
+                <motion.div
+                  key={record.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i * 0.04 }}
+                >
                   <MedicalRecordCard record={record} onClick={() => {}} />
                 </motion.div>
               ))}
             </div>
-          )}
-
-          <div style={{ padding: '8px 14px', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
-            {t.showing} {filtered.length} {t.of} {records.length}
-          </div>
-        </motion.div>
+            <p className="text-sm text-txt-muted">{t.showing} {filtered.length} {t.of} {records.length}</p>
+          </>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 import { useUI } from '../../hooks/useUI'
 import { motion } from 'framer-motion'
 import { Search, CheckCircle, XCircle } from 'lucide-react'
@@ -61,56 +66,57 @@ export default function CheckInOut() {
   )
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle="Check-In / Check-Out" />
-      <div className="page-content-lg">
+    <DashboardLayout>
+      <div className="space-y-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="card p-4 mb-5">
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"><Search size={16} /></span>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input pl-9" placeholder="Search by name or phone..." />
-            </div>
-          </div>
+          <Card>
+            <CardContent className="p-4">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none"><Search size={16} /></span>
+                <Input value={search} onChange={e => setSearch(e.target.value)}
+                  className="pl-9" placeholder="Search by name or phone..." />
+              </div>
+            </CardContent>
+          </Card>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="spinner spinner-lg mx-auto mb-4" />
+            <div className="flex flex-col items-center justify-center py-12">
+              <Skeleton className="h-8 w-8 rounded-full mb-4" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon"><CheckCircle size={48} className="text-gray-300" /></div>
-              <p className="empty-state-title">No Patients</p>
-              <p className="empty-state-desc">No patients in queue today.</p>
-            </div>
+            <Card>
+              <CardContent className="py-12 text-center">
+                <div className="mb-4"><CheckCircle size={48} className="text-txt-muted mx-auto" /></div>
+                <p className="font-semibold text-txt-primary">No Patients</p>
+                <p className="text-txt-muted text-sm mt-1">No patients in queue today.</p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="flex flex-col gap-2.5">
               {filtered.map((b, i) => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  className="card p-4 flex items-center justify-between gap-3">
+                  className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 shadow-card">
                   <div className="flex items-center gap-4">
                     <div className="text-center min-w-[55px]">
-                      <p className="text-sm font-bold text-blue-600">{b.slot_time}</p>
+                      <p className="text-sm font-bold text-primary">{b.slot_time}</p>
                     </div>
-                    <div className="border-l border-gray-200 pl-3">
-                      <p className="font-semibold text-gray-900 text-sm">{b.patient_name}</p>
-                      <p className="text-xs text-gray-400">{b.phone} · {b.doctors?.name}</p>
-                      <p className="text-xs text-gray-400">{b.departments?.name_en}</p>
+                    <div className="border-s border-border ps-3">
+                      <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
+                      <p className="text-xs text-txt-muted">{b.phone} · {b.doctors?.name}</p>
+                      <p className="text-xs text-txt-muted">{b.departments?.name_en}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="badge badge-success">Active</span>
-                    <motion.button onClick={() => handleMarkCompleted(b.id)}
-                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      className="btn btn-primary btn-sm text-xs flex items-center gap-1">
+                    <Badge variant="success">Active</Badge>
+                    <Button size="sm" onClick={() => handleMarkCompleted(b.id)}
+                      className="text-xs flex items-center gap-1">
                       <CheckCircle size={12} /> Complete
-                    </motion.button>
-                    <motion.button onClick={() => handleMarkNoShow(b.id)}
-                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      className="btn btn-ghost btn-sm text-red-500 text-xs flex items-center gap-1">
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleMarkNoShow(b.id)}
+                      className="text-xs flex items-center gap-1 text-danger">
                       <XCircle size={12} /> No Show
-                    </motion.button>
+                    </Button>
                   </div>
                 </motion.div>
               ))}
@@ -118,6 +124,6 @@ export default function CheckInOut() {
           )}
         </motion.div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

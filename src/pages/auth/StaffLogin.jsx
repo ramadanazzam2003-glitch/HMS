@@ -5,6 +5,8 @@ import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
 import { motion } from 'framer-motion'
 import { Building2, Mail, Lock } from 'lucide-react'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 
 function withTimeout(promise, ms = 10000) {
   const timeout = new Promise((_, reject) =>
@@ -134,84 +136,82 @@ export default function StaffLogin() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mb-3 flex justify-center"><Building2 size={40} className="text-blue-600" /></div>
-          <h1 className="text-3xl font-bold text-gray-800">Welcome Back</h1>
-          <p className="text-gray-500 mt-2">Sign in to your MediBook account</p>
+          <h1 className="text-3xl font-bold text-txt-primary">Welcome Back</h1>
+          <p className="text-txt-muted mt-2">Sign in to your MediBook account</p>
         </div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+          className="bg-surface rounded-2xl shadow-sm border border-border p-8 space-y-4">
 
           {state?.verified && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl">
               Email verified! You can now login.
             </div>
           )}
 
           {state?.registered && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-xl">
               Account created! Please check your email to verify, then login.
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
               {error}
             </div>
           )}
 
           <form onSubmit={handleLogin}>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><Mail size={14} /> Email *</label>
-              <input
+              <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><Mail size={14} /> Email *</label>
+              <Input
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={handleChange}
                 autoFocus
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
                 placeholder="ahmed@example.com"
               />
             </div>
 
             <div className="mt-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><Lock size={14} /> Password *</label>
-              <input
+              <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><Lock size={14} /> Password *</label>
+              <Input
                 name="password"
                 type="password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
                 placeholder="Your password"
               />
             </div>
 
-            <motion.button
+            <Button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 mt-6"
+              size="lg"
+              className="w-full mt-6"
             >
               {loading ? 'Signing in...' : 'Sign In'}
-            </motion.button>
+            </Button>
           </form>
 
           <div className="text-center">
-            <Link to="/forgot-password" className="text-sm text-blue-600 font-semibold hover:underline">
+            <Link to="/forgot-password" className="text-sm text-primary font-semibold hover:underline">
               Forgot Password?
             </Link>
           </div>
 
-          <div className="border-t border-gray-100 pt-4">
-            <p className="text-center text-sm text-gray-500">
+          <div className="border-t border-border pt-4">
+            <p className="text-center text-sm text-txt-muted">
               Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/register" className="text-primary font-semibold hover:underline">
                 Register
               </Link>
             </p>
 
-            <p className="text-center text-sm text-gray-500 mt-2">
+            <p className="text-center text-sm text-txt-muted mt-2">
               Didn't receive verification email?{' '}
-              <Link to="/verify-email" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/verify-email" className="text-primary font-semibold hover:underline">
                 Verify here
               </Link>
             </p>

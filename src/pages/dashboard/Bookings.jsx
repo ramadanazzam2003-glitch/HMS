@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Search, CalendarDays } from 'lucide-react'
+import { Search, CalendarDays, ChevronDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function Bookings() {
   const navigate = useNavigate()
@@ -18,6 +23,8 @@ export default function Bookings() {
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState('all')
   const [search, setSearch]     = useState('')
+  const [page, setPage]         = useState(1)
+  const PAGE_SIZE = 25
 
   const fetchBookings = async () => {
     const { data } = await supabase
@@ -56,97 +63,133 @@ export default function Bookings() {
     return matchStatus && matchSearch
   })
 
+  const paginated = filtered.slice(0, page * PAGE_SIZE)
+  const hasMore = paginated.length < filtered.length
+
+  const handleLoadMore = () => setPage(prev => prev + 1)
+
   const filterLabels = { all: t.all, active: t.statusActive, cancelled: t.statusCancelled }
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.allBookings} />
-
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-              <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}>
-                <Search size={16} />
-              </span>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                className="input" style={{ paddingInlineStart: 36 }}
-                placeholder={t.searchRefPatientDoctor} />
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {['all', 'active', 'cancelled'].map(f => (
-                <button key={f} onClick={() => setFilter(f)}
-                  className="btn btn-md"
-                  style={{
-                    background: filter === f ? 'var(--primary)' : 'var(--surface)',
-                    color: filter === f ? '#fff' : 'var(--text-secondary)',
-                    border: `1.5px solid ${filter === f ? 'var(--primary)' : 'var(--border)'}`,
-                  }}>
-                  {filterLabels[f]}
-                </button>
-              ))}
-            </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">
+              {isRTL ? 'الحجوزات' : 'Bookings'}
+            </h1>
+            <p className="text-txt-muted text-sm mt-1">
+              {isRTL ? 'إدارة ومتابعة جميع الحجوزات' : 'Manage and track all bookings'}
+            </p>
           </div>
+          <Badge variant="primary" className="text-xs">
+            {filtered.length} {isRTL ? 'حجز' : 'bookings'}
+          </Badge>
+        </div>
 
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
-              <div className="spinner spinner-lg mx-auto mb-4" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon"><CalendarDays size={48} style={{ color: 'var(--text-disabled)' }} /></div>
-              <p className="empty-state-title">{t.noData}</p>
-              <p className="empty-state-desc">{t.searchRefPatientDoctor}</p>
-            </div>
-          ) : (
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table className="table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {[t.ref, t.patient, t.phone, t.doctor, t.department, t.queue, t.status, t.actions].map(col => (
-                        <th key={col} style={{ padding: '10px 14px', textAlign: 'start', fontWeight: 600, color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>{col}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map((b, i) => (
-                      <motion.tr key={b.id}
-                        style={{ borderBottom: '1px solid var(--border)' }}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.25, delay: i * 0.03 }}>
-                        <td style={{ padding: '10px 14px', fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 600 }}>{b.booking_ref}</td>
-                        <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{b.patient_name}</td>
-                        <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>{b.phone}</td>
-                        <td style={{ padding: '10px 14px', color: 'var(--text-secondary)' }}>{b.doctors?.name}</td>
-                        <td style={{ padding: '10px 14px', color: 'var(--text-muted)' }}>{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</td>
-                        <td style={{ padding: '10px 14px' }}><span className="badge badge-primary">#{b.queue_number}</span></td>
-                        <td style={{ padding: '10px 14px' }}>
-                          <span className={`badge ${b.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
-                            {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
-                          </span>
-                        </td>
-                        <td style={{ padding: '10px 14px' }}>
-                          {b.status === 'active' && hasPermission('bookings:update') && (
-                            <div style={{ display: 'flex', gap: 4 }}>
-                              <button onClick={() => navigate(`/reschedule/${b.id}`)} className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)', fontSize: 12 }}>{t.reschedule}</button>
-                              <button onClick={() => handleCancel(b.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: 12 }}>{t.cancel}</button>
-                            </div>
-                          )}
-                        </td>
-                      </motion.tr>
+        {/* Search & Filter */}
+        <div className="flex flex-wrap items-center gap-3 p-4 rounded-2xl bg-surface border border-border">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} />
+            <Input
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1) }}
+              className="h-9 text-sm ps-9"
+              placeholder={t.searchRefPatientDoctor}
+            />
+          </div>
+          <div className="flex gap-1.5">
+            {['all', 'active', 'cancelled'].map(f => (
+              <button
+                key={f}
+                onClick={() => { setFilter(f); setPage(1) }}
+                className={`h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                  filter === f
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
+                }`}
+              >
+                {filterLabels[f]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Table */}
+        {loading ? (
+          <div className="space-y-3">
+            {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-14 rounded-xl" />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <CalendarDays size={48} className="text-txt-disabled mb-4" />
+              <p className="text-txt-primary font-semibold mb-1">{t.noData}</p>
+              <p className="text-txt-muted text-sm">{t.searchRefPatientDoctor}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="p-0 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-surface-hover/50">
+                    {[t.ref, t.patient, t.phone, t.doctor, t.department, t.queue, t.status, t.actions].map(col => (
+                      <th key={col} className="px-4 py-3 text-start font-semibold text-txt-muted text-xs whitespace-nowrap">{col}</th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-              <div style={{ padding: '8px 14px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
-                {t.showing} {filtered.length} {t.of} {bookings.length}
-              </div>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.map((b, i) => (
+                    <motion.tr
+                      key={b.id}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: i * 0.02 }}
+                      className="border-b border-border last:border-0 hover:bg-surface-hover/50 transition-colors"
+                    >
+                      <td className="px-4 py-3 font-mono font-semibold text-primary text-xs">{b.booking_ref}</td>
+                      <td className="px-4 py-3 font-medium text-txt-primary">{b.patient_name}</td>
+                      <td className="px-4 py-3 text-txt-muted">{b.phone}</td>
+                      <td className="px-4 py-3 text-txt-secondary">{b.doctors?.name}</td>
+                      <td className="px-4 py-3 text-txt-muted">{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</td>
+                      <td className="px-4 py-3"><Badge variant="primary" className="text-[10px]">#{b.queue_number}</Badge></td>
+                      <td className="px-4 py-3">
+                        <Badge variant={b.status === 'active' ? 'success' : 'danger'} className="text-[10px]">
+                          {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        {b.status === 'active' && hasPermission('bookings:update') && (
+                          <div className="flex gap-1.5">
+                            <Button variant="ghost" size="xs" onClick={() => navigate(`/reschedule/${b.id}`)}>
+                              {t.reschedule}
+                            </Button>
+                            <Button variant="ghost" size="xs" className="text-danger hover:bg-danger-light" onClick={() => handleCancel(b.id)}>
+                              {t.cancel}
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </motion.div>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+              <span className="text-sm text-txt-muted">
+                {t.showing} {paginated.length} {t.of} {filtered.length}
+              </span>
+              {hasMore && (
+                <Button variant="outline" size="sm" onClick={handleLoadMore}>
+                  {t.loadMore} <ChevronDown size={14} />
+                </Button>
+              )}
+            </div>
+          </Card>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

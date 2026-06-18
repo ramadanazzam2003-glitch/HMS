@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { calcEndTime } from '../../utils/booking'
 import { motion } from 'framer-motion'
 import { CalendarDays, Clock, CheckCircle, Stethoscope } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function DoctorDashboard() {
   const navigate = useNavigate()
@@ -61,91 +64,96 @@ export default function DoctorDashboard() {
   }
 
   if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" subtitle={t.doctorDashboard} />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="text-center">
-          <div className="spinner spinner-lg mx-auto mb-4" />
-          <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.loading}</p>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="rounded-2xl bg-surface border border-border p-6">
+              <Skeleton className="h-4 w-24 mb-3" />
+              <Skeleton className="h-8 w-16" />
+            </div>
+          ))}
+        </div>
+        <div className="rounded-2xl bg-surface border border-border p-6">
+          <Skeleton className="h-5 w-40 mb-5" />
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 w-full" />)}
+          </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 
   return (
-    <div className="page">
-      <Navbar
-        variant="dashboard"
-        subtitle={`Dr. ${doctor?.name || profile?.full_name || ''}`}
-        right={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-ghost btn-sm">{t.back}</button>
+    <DashboardLayout>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="rounded-2xl bg-surface border border-border p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <CalendarDays size={18} className="text-txt-muted" />
+              <p className="text-xs font-medium text-txt-muted">{t.todaysAppointments}</p>
+            </div>
+            <p className="font-display text-3xl font-extrabold text-txt-primary">{stats.today}</p>
           </div>
-        }
-      />
+          <div className="rounded-2xl bg-green-50 border border-green-200 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <Stethoscope size={18} className="text-success" />
+              <p className="text-xs font-medium text-success">{t.active}</p>
+            </div>
+            <p className="font-display text-3xl font-extrabold text-success">{stats.active}</p>
+          </div>
+          <div className="rounded-2xl bg-blue-50 border border-blue-200 p-5">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle size={18} className="text-primary" />
+              <p className="text-xs font-medium text-primary">{t.completed}</p>
+            </div>
+            <p className="font-display text-3xl font-extrabold text-primary">{stats.completed}</p>
+          </div>
+        </div>
+      </motion.div>
 
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            {[
-              { label: t.todaysAppointments, value: stats.today, icon: <CalendarDays size={18} style={{ color: 'var(--text-muted)' }} />, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
-              { label: t.active, value: stats.active, icon: <Stethoscope size={18} style={{ color: 'var(--success)' }} />, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
-              { label: t.completed, value: stats.completed, icon: <CheckCircle size={18} style={{ color: 'var(--primary)' }} />, color: 'var(--primary-light)', borderColor: 'var(--primary-border)', textColor: 'var(--primary)', labelColor: 'var(--primary)' },
-            ].map((s) => (
-              <div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  {s.icon}
-                  <p style={{ fontSize: 12, color: s.labelColor, fontWeight: 500 }}>{s.label}</p>
+      <div className="rounded-2xl bg-surface border border-border p-6 mb-6">
+        <h2 className="font-display text-base font-bold text-txt-primary mb-5">{t.todaySchedule}</h2>
+
+        {todayBookings.length === 0 ? (
+          <p className="text-txt-muted text-center py-8">{t.noAppointments}</p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {todayBookings.map(b => (
+              <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-surface-hover border border-border">
+                <div className="flex items-center gap-4">
+                  <div className="text-center min-w-[56px]">
+                    <p className="text-sm font-bold text-primary">{b.slot_time}</p>
+                    <p className="text-xs text-txt-muted">{calcEndTime(b.slot_time)}</p>
+                  </div>
+                  <div className="border-s border-border ps-4">
+                    <p className="font-bold text-txt-primary text-sm">{b.patient_name}</p>
+                    <p className="text-xs text-txt-muted">{b.phone} · #{b.queue_number}</p>
+                    <p className="text-xs text-txt-muted">{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</p>
+                  </div>
                 </div>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: s.textColor }}>{s.value}</p>
-              </div>
+
+                <div className="flex items-center gap-2">
+                  <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                    {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
+                  </Badge>
+                  {b.status === 'active' && (
+                    <Button variant="primary" size="sm" onClick={() => navigate(`/doctor/consultation/${b.id}`)}>
+                      {t.consult}
+                    </Button>
+                  )}
+                  {b.status === 'active' && (
+                    <Button variant="ghost" size="sm" className="text-success text-xs" onClick={() => handleComplete(b.id)}>
+                      {t.done}
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
             ))}
           </div>
-        </motion.div>
-
-        <div className="card" style={{ padding: 24, marginBottom: 24 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 20 }}>{t.todaySchedule}</h2>
-
-          {todayBookings.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '32px 0' }}>{t.noAppointments}</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {todayBookings.map(b => (
-                <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 16, background: 'var(--surface-hover)', borderRadius: 12, border: '1px solid var(--border)', cursor: 'default' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ textAlign: 'center', minWidth: 56 }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--primary)' }}>{b.slot_time}</p>
-                      <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>{calcEndTime(b.slot_time)}</p>
-                    </div>
-                    <div style={{ borderInlineStart: '1px solid var(--border)', paddingInlineStart: 16 }}>
-                      <p style={{ fontWeight: 700, color: 'var(--text-primary)', fontSize: 13 }}>{b.patient_name}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{b.phone} · #{b.queue_number}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</p>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                      {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
-                    </span>
-                    {b.status === 'active' && (
-                      <button onClick={() => navigate(`/doctor/consultation/${b.id}`)} className="btn btn-primary btn-sm" style={{ fontSize: 12 }}>
-                        {t.consult}
-                      </button>
-                    )}
-                    {b.status === 'active' && (
-                      <button onClick={() => handleComplete(b.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--success)', fontSize: 12 }}>
-                        {t.done}
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

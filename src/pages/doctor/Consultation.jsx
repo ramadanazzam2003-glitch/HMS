@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
 import PrescriptionBuilder from '../../components/medical/PrescriptionBuilder'
 import { motion } from 'framer-motion'
 import { User, Phone, CalendarDays, Clock, Building2, Heart, Thermometer, Weight, Activity } from 'lucide-react'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function Consultation() {
   const navigate = useNavigate()
@@ -102,78 +105,75 @@ export default function Consultation() {
   }
 
   if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/doctor" subtitle="Consultation" />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="text-center">
-          <div className="spinner spinner-lg mx-auto mb-4" />
-          <p className="text-gray-400 font-medium">Loading...</p>
+    <DashboardLayout>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
         </div>
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
-    </div>
+    </DashboardLayout>
   )
 
   if (!booking) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/doctor" subtitle="Consultation" />
-      <div className="page-content-lg">
-        <div className="card empty-state">
-          <p className="empty-state-title">Booking not found</p>
-          <button onClick={() => navigate('/doctor')} className="btn btn-primary btn-md mt-4">Back to Dashboard</button>
-        </div>
+    <DashboardLayout>
+      <div className="rounded-2xl bg-surface border border-border p-10 text-center">
+        <p className="text-txt-primary font-semibold mb-4">Booking not found</p>
+        <Button variant="primary" onClick={() => navigate('/doctor')}>Back to Dashboard</Button>
       </div>
-    </div>
+    </DashboardLayout>
   )
 
   return (
-    <div className="page">
-      <Navbar
-        variant="dashboard" back="/doctor" subtitle="Patient Consultation"
-        right={
-          <button onClick={handleSave} disabled={saving}
-            className="btn btn-primary btn-sm">
+    <DashboardLayout>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-lg font-bold text-txt-primary">Patient Consultation</h1>
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Record'}
-          </button>
-        }
-      />
+          </Button>
+        </div>
 
-      <div className="page-content-lg">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <motion.div className="card p-5" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-              <h3 className="font-bold text-gray-900 text-sm mb-3">Patient Info</h3>
+            <motion.div className="rounded-2xl bg-surface border border-border p-5" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+              <h3 className="font-bold text-txt-primary text-sm mb-3">Patient Info</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400 flex items-center gap-1.5"><User size={14} /> Name</span>
-                  <span className="font-semibold text-gray-800">{booking.patient_name}</span>
+                  <span className="text-txt-muted flex items-center gap-1.5"><User size={14} /> Name</span>
+                  <span className="font-semibold text-txt-primary">{booking.patient_name}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400 flex items-center gap-1.5"><Phone size={14} /> Phone</span>
-                  <span className="font-semibold text-gray-800">{booking.phone}</span>
+                  <span className="text-txt-muted flex items-center gap-1.5"><Phone size={14} /> Phone</span>
+                  <span className="font-semibold text-txt-primary">{booking.phone}</span>
                 </div>
                 {booking.age && (
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-400 flex items-center gap-1.5"><User size={14} /> Age</span>
-                    <span className="font-semibold text-gray-800">{booking.age}</span>
+                    <span className="text-txt-muted flex items-center gap-1.5"><User size={14} /> Age</span>
+                    <span className="font-semibold text-txt-primary">{booking.age}</span>
                   </div>
                 )}
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400 flex items-center gap-1.5"><Building2 size={14} /> Department</span>
-                  <span className="font-semibold text-gray-800">{booking.departments?.name_en}</span>
+                  <span className="text-txt-muted flex items-center gap-1.5"><Building2 size={14} /> Department</span>
+                  <span className="font-semibold text-txt-primary">{booking.departments?.name_en}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400 flex items-center gap-1.5"><CalendarDays size={14} /> Date</span>
-                  <span className="font-semibold text-gray-800">{booking.booking_date}</span>
+                  <span className="text-txt-muted flex items-center gap-1.5"><CalendarDays size={14} /> Date</span>
+                  <span className="font-semibold text-txt-primary">{booking.booking_date}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400 flex items-center gap-1.5"><Clock size={14} /> Time</span>
-                  <span className="font-semibold text-gray-800">{booking.slot_time}</span>
+                  <span className="text-txt-muted flex items-center gap-1.5"><Clock size={14} /> Time</span>
+                  <span className="font-semibold text-txt-primary">{booking.slot_time}</span>
                 </div>
               </div>
             </motion.div>
 
-            <motion.div className="card p-5" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-              <h3 className="font-bold text-gray-900 text-sm mb-3">Vitals</h3>
+            <motion.div className="rounded-2xl bg-surface border border-border p-5" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+              <h3 className="font-bold text-txt-primary text-sm mb-3">Vitals</h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { key: 'bp', label: 'Blood Pressure', placeholder: '120/80', icon: <Activity size={14} /> },
@@ -182,11 +182,10 @@ export default function Consultation() {
                   { key: 'heartRate', label: 'Heart Rate', placeholder: '72 bpm', icon: <Heart size={14} /> },
                 ].map(({ key, label, placeholder, icon }) => (
                   <div key={key}>
-                    <label className="text-xs text-gray-400 mb-1 block flex items-center gap-1">{icon} {label}</label>
-                    <input
+                    <label className="text-xs text-txt-muted mb-1 block flex items-center gap-1">{icon} {label}</label>
+                    <Input
                       value={vitals[key]}
                       onChange={(e) => setVitals({ ...vitals, [key]: e.target.value })}
-                      className="input text-sm"
                       placeholder={placeholder}
                     />
                   </div>
@@ -195,27 +194,27 @@ export default function Consultation() {
             </motion.div>
           </div>
 
-          <motion.div className="card p-5 mb-4" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-            <h3 className="font-bold text-gray-900 text-sm mb-3">Diagnosis *</h3>
+          <motion.div className="rounded-2xl bg-surface border border-border p-5 mb-4" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <h3 className="font-bold text-txt-primary text-sm mb-3">Diagnosis *</h3>
             <textarea
               value={diagnosis}
               onChange={(e) => setDiagnosis(e.target.value)}
-              className="input text-sm min-h-[100px] resize-y"
+              className="flex h-auto w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm text-txt-primary placeholder:text-txt-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[100px] resize-y"
               placeholder="Enter diagnosis here..."
             />
           </motion.div>
 
-          <motion.div className="card p-5 mb-4" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-            <h3 className="font-bold text-gray-900 text-sm mb-3">Notes</h3>
+          <motion.div className="rounded-2xl bg-surface border border-border p-5 mb-4" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+            <h3 className="font-bold text-txt-primary text-sm mb-3">Notes</h3>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="input text-sm min-h-[80px] resize-y"
+              className="flex h-auto w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm text-txt-primary placeholder:text-txt-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[80px] resize-y"
               placeholder="Additional clinical notes (optional)..."
             />
           </motion.div>
 
-          <div className="card p-5 mb-4">
+          <div className="rounded-2xl bg-surface border border-border p-5 mb-4">
             <PrescriptionBuilder
               prescriptions={prescriptions}
               onChange={setPrescriptions}
@@ -223,17 +222,15 @@ export default function Consultation() {
           </div>
 
           <div className="flex gap-3">
-            <button onClick={handleSave} disabled={saving}
-              className="btn btn-primary btn-md flex-1">
+            <Button variant="primary" size="md" className="flex-1" onClick={handleSave} disabled={saving}>
               {saving ? 'Saving...' : 'Save & Complete'}
-            </button>
-            <button onClick={() => navigate('/doctor')}
-              className="btn btn-secondary btn-md">
+            </Button>
+            <Button variant="outline" size="md" onClick={() => navigate('/doctor')}>
               Cancel
-            </button>
+            </Button>
           </div>
         </motion.div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { FileText, CalendarDays, CreditCard } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function AuditLog() {
   const { t, isRTL } = useLanguage()
@@ -59,68 +62,80 @@ export default function AuditLog() {
   }, [isRTL])
 
   const filtered = logs.filter(l => filter === 'all' || l.type === filter)
-
   const filterLabels = { all: t.allTypes, booking: t.bookingsType, invoice: t.invoicesType }
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.auditLogPage} />
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            {['all', 'booking', 'invoice'].map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className="btn btn-md"
-                style={{
-                  background: filter === f ? 'var(--primary)' : 'var(--surface)',
-                  color: filter === f ? '#fff' : 'var(--text-secondary)',
-                  border: `1.5px solid ${filter === f ? 'var(--primary)' : 'var(--border)'}`,
-                }}>
-                {filterLabels[f]}
-              </button>
-            ))}
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">{t.auditLogPage}</h1>
+            <p className="text-txt-muted text-sm mt-1">{isRTL ? 'سجل النشاطات والتغييرات' : 'Activity and change log'}</p>
           </div>
+        </div>
 
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 0' }}>
-              <div className="spinner spinner-lg mx-auto mb-4" />
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon"><FileText size={48} style={{ color: 'var(--text-disabled)' }} /></div>
-              <p className="empty-state-title">{t.noActivityYet}</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="flex gap-2">
+          {['all', 'booking', 'invoice'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                filter === f
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
+              }`}
+            >
+              {filterLabels[f]}
+            </button>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="space-y-2">
+            {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+          </div>
+        ) : filtered.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <FileText size={48} className="text-txt-disabled mb-4" />
+              <p className="text-txt-primary font-semibold">{t.noActivityYet}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="space-y-2">
               {filtered.map((log, i) => (
-                <motion.div key={i} className="card" style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12 }}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.03 }}>
-                  <div style={{ width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, flexShrink: 0, background: log.type === 'booking' ? 'var(--primary-light)' : 'var(--success-light)', color: log.type === 'booking' ? 'var(--primary)' : 'var(--success)' }}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: i * 0.02 }}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-surface border border-border hover:shadow-sm transition-shadow"
+                >
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                    log.type === 'booking' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'
+                  }`}>
                     {log.type === 'booking' ? <CalendarDays size={14} /> : <CreditCard size={14} />}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, color: 'var(--text-primary)' }}>
-                      <span style={{ fontWeight: 600 }}>{log.subject}</span>
-                      <span style={{ color: 'var(--text-muted)', margin: '0 4px' }}>·</span>
-                      <span className={`badge text-[10px] ${
-                        log.action === 'active' || log.action === 'paid' ? 'badge-success'
-                        : log.action === 'cancelled' || log.action === 'unpaid' ? 'badge-danger'
-                        : 'badge-primary'
-                      }`}>{log.action}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-txt-primary">
+                      <span className="font-semibold">{log.subject}</span>
+                      <span className="text-txt-muted mx-1.5">&middot;</span>
+                      <Badge variant={
+                        log.action === 'active' || log.action === 'paid' ? 'success' :
+                        log.action === 'cancelled' || log.action === 'unpaid' ? 'danger' : 'primary'
+                      } className="text-[10px]">{log.action}</Badge>
                     </p>
-                    <p style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.detail}</p>
+                    <p className="text-xs text-txt-muted truncate mt-0.5">{log.detail}</p>
                   </div>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)', flexShrink: 0 }}>{log.timestamp?.slice(0, 16).replace('T', ' ')}</span>
+                  <span className="text-[10px] text-txt-muted shrink-0">{log.timestamp?.slice(0, 16).replace('T', ' ')}</span>
                 </motion.div>
               ))}
             </div>
-          )}
-
-          <div style={{ padding: '8px 14px', fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
-            {t.showing} {filtered.length} {t.of} {logs.length}
-          </div>
-        </motion.div>
+            <p className="text-sm text-txt-muted">{t.showing} {filtered.length} {t.of} {logs.length}</p>
+          </>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

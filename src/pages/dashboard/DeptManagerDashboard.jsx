@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function DeptManagerDashboard() {
   const navigate = useNavigate()
@@ -49,95 +54,98 @@ export default function DeptManagerDashboard() {
     return () => { ignore = true }
   }, [])
 
-  if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" subtitle={t.deptManagerDashboard} />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="spinner spinner-lg mx-auto mb-4" />
-      </div>
-    </div>
-  )
-
   return (
-    <div className="page">
-      <Navbar
-        variant="dashboard"
-        subtitle={isRTL ? (department?.name_ar || department?.name_en || t.deptManagerDashboard) : (department?.name_en || t.deptManagerDashboard)}
-        right={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => navigate('/dashboard/bookings')} className="btn btn-ghost btn-sm">{t.allBookings}</button>
-            <button onClick={() => navigate('/dashboard/medical-records')} className="btn btn-ghost btn-sm">{t.records}</button>
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">
+              {isRTL ? (department?.name_ar || department?.name_en || t.deptManagerDashboard) : (department?.name_en || t.deptManagerDashboard)}
+            </h1>
+            <p className="text-txt-muted text-sm mt-1">{t.deptManagerDashboard}</p>
           </div>
-        }
-      />
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/bookings')}>{t.allBookings}</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/medical-records')}>{t.records}</Button>
+          </div>
+        </div>
 
-      <div className="page-content-lg">
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {[
-            { label: t.todaysBookings, value: stats.today, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
-            { label: t.active, value: stats.active, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
-            { label: t.completed, value: stats.completed, color: 'var(--primary-light)', borderColor: 'var(--primary-border)', textColor: 'var(--primary)', labelColor: 'var(--primary)' },
-          ].map((s) => (
-            <div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}>
-              <p style={{ fontSize: 12, color: s.labelColor, marginBottom: 4, fontWeight: 500 }}>{s.label}</p>
-              <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: s.textColor }}>{s.value}</p>
+        {loading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {[1,2,3].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: t.todaysBookings, value: stats.today, color: 'bg-surface', textColor: 'text-txt-primary', labelColor: 'text-txt-muted' },
+                { label: t.active, value: stats.active, color: 'bg-green-50', textColor: 'text-green-600', labelColor: 'text-green-600' },
+                { label: t.completed, value: stats.completed, color: 'bg-blue-50', textColor: 'text-blue-600', labelColor: 'text-blue-600' },
+              ].map((s) => (
+                <div key={s.label} className={`${s.color} rounded-2xl p-5 border border-border/50`}>
+                  <p className={`text-xs font-semibold ${s.labelColor}`}>{s.label}</p>
+                  <p className={`text-3xl font-extrabold mt-1 ${s.textColor}`}>{s.value}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-          <div className="card" style={{ padding: 24 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>
-              {t.departmentStaff} ({doctors.length})
-            </h2>
-            {doctors.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0', fontSize: 13 }}>{t.noDoctorsAssigned}</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {doctors.map(doc => (
-                  <div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: 'var(--surface-hover)', borderRadius: 12 }}>
-                    <div>
-                      <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{doc.name}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{doc.type} · {doc.working_days?.length || 0} {t.daysPerWeek}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-base font-bold text-txt-primary mb-4">{t.departmentStaff} ({doctors.length})</h2>
+                  {doctors.length === 0 ? (
+                    <p className="text-txt-muted text-center py-6 text-sm">{t.noDoctorsAssigned}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {doctors.map(doc => (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-surface-hover rounded-xl">
+                          <div>
+                            <p className="font-semibold text-txt-primary text-sm">{doc.name}</p>
+                            <p className="text-xs text-txt-muted capitalize">{doc.type} &middot; {doc.working_days?.length || 0} {t.daysPerWeek}</p>
+                          </div>
+                          <Badge variant={doc.is_active ? 'success' : 'danger'}>
+                            {doc.is_active ? t.active : t.inactive}
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
-                    <span className={`badge ${doc.is_active ? 'badge-success' : 'badge-danger'}`}>
-                      {doc.is_active ? t.active : t.inactive}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  )}
+                </CardContent>
+              </Card>
 
-          <div className="card" style={{ padding: 24 }}>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16 }}>{t.todaySchedule}</h2>
-            {todayBookings.length === 0 ? (
-              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0', fontSize: 13 }}>{t.noBookingsToday}</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {todayBookings.map(b => (
-                  <div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: 'var(--surface-hover)', borderRadius: 12 }}>
-                    <div>
-                      <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{b.patient_name}</p>
-                      <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{b.slot_time} · {b.doctors?.name}</p>
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-base font-bold text-txt-primary mb-4">{t.todaySchedule}</h2>
+                  {todayBookings.length === 0 ? (
+                    <p className="text-txt-muted text-center py-6 text-sm">{t.noBookingsToday}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {todayBookings.map(b => (
+                        <div key={b.id} className="flex items-center justify-between p-3 bg-surface-hover rounded-xl">
+                          <div>
+                            <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
+                            <p className="text-xs text-txt-muted">{b.slot_time} &middot; {b.doctors?.name}</p>
+                          </div>
+                          <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                            {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
+                          </Badge>
+                        </div>
+                      ))}
                     </div>
-                    <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                      {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <button onClick={() => navigate('/dashboard/bookings')} className="btn btn-primary btn-md">{t.allBookingsAction}</button>
-          <button onClick={() => navigate('/dashboard/medical-records')} className="btn btn-secondary btn-md">{t.medicalRecords}</button>
-          <button onClick={() => navigate('/dashboard/analytics')} className="btn btn-secondary btn-md">{t.analytics}</button>
-          <button onClick={() => navigate('/dashboard/billing')} className="btn btn-secondary btn-md">{t.billing}</button>
-        </div>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => navigate('/dashboard/bookings')}>{t.allBookingsAction}</Button>
+              <Button variant="outline" onClick={() => navigate('/dashboard/medical-records')}>{t.medicalRecords}</Button>
+              <Button variant="outline" onClick={() => navigate('/dashboard/analytics')}>{t.analytics}</Button>
+              <Button variant="outline" onClick={() => navigate('/dashboard/billing')}>{t.billing}</Button>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

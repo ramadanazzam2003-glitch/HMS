@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { motion } from 'framer-motion'
 import { Building2, User, Mail, Lock } from 'lucide-react'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -61,80 +63,76 @@ export default function Register() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mb-3 flex justify-center"><Building2 size={40} className="text-blue-600" /></div>
-          <h1 className="text-3xl font-bold text-gray-800">Create Account</h1>
-          <p className="text-gray-500 mt-2">Register to manage your bookings</p>
+          <h1 className="text-3xl font-bold text-txt-primary">Create Account</h1>
+          <p className="text-txt-muted mt-2">Register to manage your bookings</p>
         </div>
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+          className="bg-surface rounded-2xl shadow-sm border border-border p-8 space-y-4">
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><User size={14} /> Full Name *</label>
-            <input
+            <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><User size={14} /> Full Name *</label>
+            <Input
               name="full_name"
               value={form.full_name}
               onChange={handleChange}
               autoFocus
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
               placeholder="Ahmed Mohamed"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><Mail size={14} /> Email *</label>
-            <input
+            <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><Mail size={14} /> Email *</label>
+            <Input
               name="email"
               type="email"
               value={form.email}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
               placeholder="ahmed@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><Lock size={14} /> Password *</label>
-            <input
+            <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><Lock size={14} /> Password *</label>
+            <Input
               name="password"
               type="password"
               value={form.password}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
               placeholder="Min 6 characters"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><Lock size={14} /> Confirm Password *</label>
-            <input
+            <label className="block text-sm font-semibold text-txt-secondary mb-1 flex items-center gap-1.5"><Lock size={14} /> Confirm Password *</label>
+            <Input
               name="confirm_password"
               type="password"
               value={form.confirm_password}
               onChange={handleChange}
               onKeyDown={(e) => e.key === 'Enter' && handleRegister()}
-              className="w-full border border-gray-200 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-400"
               placeholder="Repeat password"
             />
           </div>
 
-          <motion.button
+          <Button
             onClick={handleRegister}
             disabled={loading}
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 mt-2"
+            size="lg"
+            className="w-full mt-2"
           >
             {loading ? 'Creating account...' : 'Create Account'}
-          </motion.button>
+          </Button>
 
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-txt-muted">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+            <Link to="/login" className="text-primary font-semibold hover:underline">
               Login
             </Link>
           </p>

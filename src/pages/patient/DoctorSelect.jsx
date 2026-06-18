@@ -3,7 +3,12 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, CalendarDays, Stethoscope, UserRound } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
+import { Input } from '../../components/ui/input'
 import DoctorCard from '../../components/DoctorCard'
 import StepIndicator from '../../components/StepIndicator'
 
@@ -22,18 +27,17 @@ const cardVariants = {
 
 function DoctorSkeleton() {
   return (
-    <div className="card p-5 flex items-center gap-4">
-      <div className="skeleton skeleton-circle w-15 h-15 shrink-0" />
+    <Card className="p-5 flex items-center gap-4">
+      <Skeleton className="w-15 h-15 rounded-full shrink-0" />
       <div className="flex-1 flex flex-col gap-2">
-        <div className="skeleton skeleton-text w-[55%]" />
-        <div className="skeleton skeleton-text w-[35%]" />
-        <div className="skeleton skeleton-text w-[70%]" />
+        <Skeleton className="h-4 w-[55%]" />
+        <Skeleton className="h-3 w-[35%]" />
+        <Skeleton className="h-3 w-[70%]" />
       </div>
-      <div className="skeleton w-[90px] h-6 rounded-full shrink-0" />
-    </div>
+      <Skeleton className="w-[90px] h-6 rounded-full shrink-0" />
+    </Card>
   )
 }
-
 
 export default function DoctorSelect() {
   const { departmentId }  = useParams()
@@ -92,16 +96,8 @@ export default function DoctorSelect() {
   const todayCount = doctors.filter(d => isAvailableToday(d)).length
 
   return (
-    <div className="page">
-      <Navbar
-        back={`/booking-type/${departmentId}`}
-        subtitle={department?.name_en}
-        breadcrumbs={[
-          { label: 'Departments', path: '/' },
-          { label: 'Type', path: `/booking-type/${departmentId}` },
-          { label: bookingType === 'consultant' ? 'Consultant' : 'Doctor' },
-        ]}
-      />
+    <div className="page pt-[72px]">
+      <PublicNavbar back={`/booking-type/${departmentId}`} />
 
       <div className="hero-gradient">
         <div className="hero-inner text-center">
@@ -126,24 +122,25 @@ export default function DoctorSelect() {
         {!loading && doctors.length > 0 && (
           <div className="flex gap-2.5 mb-4 flex-wrap">
             <div className="flex-1 min-w-[180px] relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"><Search size={16} /></span>
-              <input
-                className="input pl-9"
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-txt-muted"><Search size={16} /></span>
+              <Input
+                className="pl-9"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder={`Search ${bookingType === 'consultant' ? 'consultants' : 'doctors'}...`}
               />
             </div>
 
-            <button
+            <Button
+              variant="outline"
               onClick={() => setFilterToday(f => !f)}
-              className={`btn btn-md gap-1.5 ${filterToday ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white text-gray-500 border-gray-200'}`}
+              className={`gap-1.5 ${filterToday ? 'bg-green-50 text-green-600 border-green-200' : ''}`}
             >
               <CalendarDays size={14} /> Available Today
               {filterToday && todayCount > 0 && (
-                <span className="badge badge-success py-0.5 px-1.5 text-[10px]">{todayCount}</span>
+                <Badge variant="success" className="py-0.5 px-1.5 text-[10px]">{todayCount}</Badge>
               )}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -152,14 +149,14 @@ export default function DoctorSelect() {
             {Array(4).fill(0).map((_, i) => <DoctorSkeleton key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="card empty-state">
-            <div className="empty-state-icon">
-              {search || filterToday ? <Search size={48} className="text-gray-300" /> : <Stethoscope size={48} className="text-gray-300" />}
+          <Card className="text-center p-8">
+            <div className="mb-4">
+              {search || filterToday ? <Search size={48} className="text-txt-muted mx-auto" /> : <Stethoscope size={48} className="text-txt-muted mx-auto" />}
             </div>
-            <p className="empty-state-title">
+            <h3 className="text-lg font-bold text-txt-primary mb-2">
               {search || filterToday ? 'No Results Found' : `No ${bookingType === 'consultant' ? 'Consultants' : 'Doctors'} Available`}
-            </p>
-            <p className="empty-state-desc">
+            </h3>
+            <p className="text-sm text-txt-muted mb-6">
               {search
                 ? `No results for "${search}". Try a different name.`
                 : filterToday
@@ -167,9 +164,9 @@ export default function DoctorSelect() {
                   : `No ${bookingType === 'consultant' ? 'consultants' : 'doctors'} are currently available in this department.`}
             </p>
             {(search || filterToday) && (
-              <button onClick={() => { setSearch(''); setFilterToday(false) }} className="btn btn-secondary btn-md">Clear Filters</button>
+              <Button variant="outline" onClick={() => { setSearch(''); setFilterToday(false) }}>Clear Filters</Button>
             )}
-          </div>
+          </Card>
         ) : (
           <motion.div
             className="flex flex-col gap-3"

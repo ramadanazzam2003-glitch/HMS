@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Card, CardContent } from '../../components/ui/card'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function PatientProfile() {
   const navigate = useNavigate()
@@ -76,23 +80,25 @@ export default function PatientProfile() {
   }
 
   if (loading) return (
-    <div className="page">
-      <Navbar back="/" subtitle="My Profile" />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="spinner spinner-lg mx-auto mb-4" />
-        <p className="text-gray-400 font-medium">Loading...</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <PublicNavbar />
+      <main className="pt-20 flex items-center justify-center p-10">
+        <div className="text-center">
+          <Skeleton className="h-8 w-48 mx-auto mb-4 rounded-xl" />
+          <Skeleton className="h-4 w-32 mx-auto rounded-xl" />
+        </div>
+      </main>
     </div>
   )
 
   return (
-    <div className="page">
-      <Navbar back="/" subtitle="Account Settings" />
-      <div className="page-content">
+    <div className="min-h-screen bg-gray-50">
+      <PublicNavbar />
+      <main className="pt-20 px-4 max-w-2xl mx-auto pb-8">
         <div className="flex gap-2 mb-5">
           {['profile', 'security'].map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={`btn btn-md capitalize ${tab === t ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
+              className={`h-10 px-5 rounded-xl text-sm font-semibold border transition-all capitalize ${tab === t ? 'bg-primary text-white border-primary' : 'bg-surface text-txt-secondary border-border'}`}>
               {t === 'profile' ? '👤 Profile' : '🔒 Security'}
             </button>
           ))}
@@ -100,68 +106,69 @@ export default function PatientProfile() {
 
         {tab === 'profile' && (
           <>
-            <div className="card p-6 mb-4">
-              <h3 className="font-bold text-gray-900 text-sm mb-4">Personal Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="input-label">Full Name *</label>
-                  <input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })}
-                    className="input" placeholder="Your full name" />
+            <Card className="mb-4">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-txt-primary text-sm mb-4">Personal Information</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-txt-secondary mb-1">Full Name *</label>
+                    <Input value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} placeholder="Your full name" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-txt-secondary mb-1">Phone</label>
+                    <Input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="01xxxxxxxxx" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-txt-secondary mb-1">Email</label>
+                    <Input value={form.email} disabled className="bg-gray-50" />
+                    <p className="text-xs text-txt-muted mt-1">Email cannot be changed</p>
+                  </div>
                 </div>
-                <div>
-                  <label className="input-label">Phone</label>
-                  <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="input" placeholder="01xxxxxxxxx" />
-                </div>
-                <div>
-                  <label className="input-label">Email</label>
-                  <input value={form.email} disabled className="input bg-gray-50" />
-                  <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             <div className="flex gap-3">
-              <button onClick={handleSave} disabled={saving} className="btn btn-primary btn-md flex-1">
+              <Button onClick={handleSave} disabled={saving} className="flex-1">
                 {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-              <button onClick={() => navigate('/')} className="btn btn-secondary btn-md">Cancel</button>
+              </Button>
+              <Button onClick={() => navigate('/')} variant="outline">Cancel</Button>
             </div>
           </>
         )}
 
         {tab === 'security' && (
           <>
-            <div className="card p-6 mb-4">
-              <h3 className="font-bold text-gray-900 text-sm mb-4">Change Password</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="input-label">New Password</label>
-                  <input type="password" value={passwordForm.newPassword}
-                    onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="input" placeholder="Min 6 characters" />
+            <Card className="mb-4">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-txt-primary text-sm mb-4">Change Password</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-txt-secondary mb-1">New Password</label>
+                    <Input type="password" value={passwordForm.newPassword}
+                      onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })} placeholder="Min 6 characters" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-txt-secondary mb-1">Confirm Password</label>
+                    <Input type="password" value={passwordForm.confirmPassword}
+                      onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })} placeholder="Repeat password" />
+                  </div>
+                  <Button onClick={handleChangePassword} disabled={changingPassword} className="w-full">
+                    {changingPassword ? 'Changing...' : 'Change Password'}
+                  </Button>
                 </div>
-                <div>
-                  <label className="input-label">Confirm Password</label>
-                  <input type="password" value={passwordForm.confirmPassword}
-                    onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="input" placeholder="Repeat password" />
-                </div>
-                <button onClick={handleChangePassword} disabled={changingPassword}
-                  className="btn btn-primary btn-md w-full">
-                  {changingPassword ? 'Changing...' : 'Change Password'}
-                </button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="card p-6 border-red-200">
-              <h3 className="font-bold text-red-600 text-sm mb-2">Danger Zone</h3>
-              <p className="text-xs text-gray-500 mb-4">Permanently delete your account and all associated data.</p>
-              <button onClick={handleDeleteAccount} className="btn btn-danger btn-md">Delete Account</button>
-            </div>
+            <Card className="border-red-200">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-red-600 text-sm mb-2">Danger Zone</h3>
+                <p className="text-xs text-txt-muted mb-4">Permanently delete your account and all associated data.</p>
+                <Button onClick={handleDeleteAccount} variant="danger">Delete Account</Button>
+              </CardContent>
+            </Card>
           </>
         )}
-      </div>
+      </main>
     </div>
   )
 }

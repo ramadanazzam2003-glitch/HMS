@@ -3,7 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CalendarDays, Clock, Stethoscope } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Skeleton } from '../../components/ui/skeleton'
 import { useUI } from '../../hooks/useUI'
 import { calcEndTime } from '../../utils/booking'
 
@@ -119,66 +122,58 @@ export default function Reschedule() {
   }
 
   if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/my-bookings" subtitle="Reschedule" />
+    <div className="page pt-[72px]">
+      <PublicNavbar back="/my-bookings" />
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="text-center">
-          <div className="spinner spinner-lg mx-auto mb-4" />
-          <p className="text-gray-400 font-medium">Loading...</p>
+          <Skeleton className="w-12 h-12 rounded-full mx-auto mb-4" />
+          <p className="text-txt-muted font-medium">Loading...</p>
         </div>
       </div>
     </div>
   )
 
   if (!booking) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/my-bookings" subtitle="Reschedule" />
-      <div className="page-content-lg">
-        <div className="card empty-state">
-          <p className="empty-state-title">Booking not found</p>
-          <button onClick={() => navigate('/my-bookings')} className="btn btn-primary btn-md mt-4">Back to Bookings</button>
-        </div>
+    <div className="page pt-[72px]">
+      <PublicNavbar back="/my-bookings" />
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <Card className="text-center p-8">
+          <h3 className="text-lg font-bold text-txt-primary mb-2">Booking not found</h3>
+          <Button className="mt-4" onClick={() => navigate('/my-bookings')}>Back to Bookings</Button>
+        </Card>
       </div>
     </div>
   )
 
   return (
-    <div className="page">
-      <Navbar
-        variant="dashboard" back="/my-bookings" subtitle="Reschedule Appointment"
-        right={
-          <button onClick={handleReschedule} disabled={saving}
-            className="btn btn-primary btn-sm">
-            {saving ? 'Saving...' : 'Confirm Reschedule'}
-          </button>
-        }
-      />
+    <div className="page pt-[72px]">
+      <PublicNavbar back="/my-bookings" />
 
-      <div className="page-content-lg">
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2"><Stethoscope size={16} /> Current Booking</h3>
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <Card className="p-5 mb-4">
+          <h3 className="font-bold text-txt-primary text-sm mb-3 flex items-center gap-2"><Stethoscope size={16} /> Current Booking</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <p className="text-xs text-gray-400">Doctor</p>
-              <p className="font-semibold text-gray-800">{booking.doctors?.name}</p>
+              <p className="text-xs text-txt-muted">Doctor</p>
+              <p className="font-semibold text-txt-primary">{booking.doctors?.name}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Department</p>
-              <p className="font-semibold text-gray-800">{booking.departments?.name_en}</p>
+              <p className="text-xs text-txt-muted">Department</p>
+              <p className="font-semibold text-txt-primary">{booking.departments?.name_en}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Current Date</p>
-              <p className="font-semibold text-gray-800">{booking.booking_date}</p>
+              <p className="text-xs text-txt-muted">Current Date</p>
+              <p className="font-semibold text-txt-primary">{booking.booking_date}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Current Time</p>
-              <p className="font-semibold text-gray-800">{booking.slot_time}</p>
+              <p className="text-xs text-txt-muted">Current Time</p>
+              <p className="font-semibold text-txt-primary">{booking.slot_time}</p>
             </div>
           </div>
-        </div>
+        </Card>
 
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2"><CalendarDays size={16} /> Select New Date</h3>
+        <Card className="p-5 mb-4">
+          <h3 className="font-bold text-txt-primary text-sm mb-3 flex items-center gap-2"><CalendarDays size={16} /> Select New Date</h3>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {generateDates().map(({ dateStr, dayName, isWorking, isToday }) => (
               <motion.button
@@ -191,26 +186,26 @@ export default function Reschedule() {
                   selectedDate === dateStr
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : isWorking
-                      ? 'border-gray-200 hover:border-blue-300 cursor-pointer'
-                      : 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed'
+                      ? 'border-border hover:border-blue-300 cursor-pointer'
+                      : 'border-border bg-gray-50 text-txt-muted cursor-not-allowed'
                 }`}
               >
-                <p className="text-xs text-gray-400">{dayName.slice(0, 3)}</p>
+                <p className="text-xs text-txt-muted">{dayName.slice(0, 3)}</p>
                 <p className="font-bold text-sm">{dateStr.slice(8, 10)}</p>
-                <p className="text-xs text-gray-400">{dateStr.slice(5, 7)}</p>
+                <p className="text-xs text-txt-muted">{dateStr.slice(5, 7)}</p>
                 {isToday && <span className="text-[10px] text-blue-500 font-bold">Today</span>}
               </motion.button>
             ))}
           </div>
-        </div>
+        </Card>
 
         {selectedDate && (
-          <div className="card p-5 mb-4">
-            <h3 className="font-bold text-gray-900 text-sm mb-3 flex items-center gap-2">
+          <Card className="p-5 mb-4">
+            <h3 className="font-bold text-txt-primary text-sm mb-3 flex items-center gap-2">
               <Clock size={16} /> Available Slots — {getDayName(selectedDate)}, {selectedDate}
             </h3>
             {availableSlots.length === 0 ? (
-              <p className="text-gray-400 text-center py-4">No available slots for this date</p>
+              <p className="text-txt-muted text-center py-4">No available slots for this date</p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 {availableSlots.map(slot => (
@@ -222,7 +217,7 @@ export default function Reschedule() {
                     className={`p-3 rounded-xl border text-center transition-all ${
                       selectedSlot === slot
                         ? 'border-blue-500 bg-blue-600 text-white'
-                        : 'border-gray-200 hover:border-blue-300'
+                        : 'border-border hover:border-blue-300'
                     }`}
                   >
                     <p className="text-sm font-bold">{slot}</p>
@@ -231,11 +226,11 @@ export default function Reschedule() {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         )}
 
         {selectedDate && selectedSlot && (
-          <div className="card p-5 bg-green-50 border-green-200">
+          <Card className="p-5 bg-green-50 border-green-200 mb-4">
             <h3 className="font-bold text-green-800 text-sm mb-2 flex items-center gap-2"><CalendarDays size={16} /> New Appointment Details</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -247,15 +242,12 @@ export default function Reschedule() {
                 <p className="font-semibold text-green-800">{selectedSlot} — {calcEndTime(selectedSlot)}</p>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
-        <div className="mt-5">
-          <button onClick={handleReschedule} disabled={saving || !selectedDate || !selectedSlot}
-            className="btn btn-primary btn-lg btn-full">
-            {saving ? 'Rescheduling...' : 'Confirm Reschedule'}
-          </button>
-        </div>
+        <Button onClick={handleReschedule} disabled={saving || !selectedDate || !selectedSlot} size="lg" className="w-full">
+          {saving ? 'Rescheduling...' : 'Confirm Reschedule'}
+        </Button>
       </div>
     </div>
   )

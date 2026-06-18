@@ -32,7 +32,7 @@ export default function Triage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-surface">
       <TriageHeader />
 
       <div className="flex-1 overflow-y-auto px-4 pt-4">
@@ -56,7 +56,7 @@ export default function Triage() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-gray-100 px-4 py-3 bg-white">
+      <div className="border-t border-gray-100 px-4 py-3 bg-surface">
         <div className="flex items-end gap-2">
           <textarea
             value={input}

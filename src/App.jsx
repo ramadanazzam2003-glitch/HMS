@@ -1,77 +1,90 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { UIProvider } from './contexts/UIProvider'
-
-import NotFound from './pages/NotFound'
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 // Patient Pages
-import Home from './pages/patient/Home'
-import BookingType from './pages/patient/BookingType'
-import DoctorSelect from './pages/patient/DoctorSelect'
-import SlotSelect from './pages/patient/SlotSelect'
-import PatientForm from './pages/patient/PatientForm'
-import Confirmation from './pages/patient/Confirmation'
-import Cancel from './pages/patient/Cancel'
-import Triage from './pages/Triage'
-import Reschedule from './pages/patient/Reschedule'
-import PatientProfile from './pages/patient/Profile'
-import PatientMedicalHistory from './pages/patient/MedicalHistory'
-import PatientPayments from './pages/patient/Payments'
+const Home = lazy(() => import('./pages/patient/Home'))
+const BookingType = lazy(() => import('./pages/patient/BookingType'))
+const DoctorSelect = lazy(() => import('./pages/patient/DoctorSelect'))
+const SlotSelect = lazy(() => import('./pages/patient/SlotSelect'))
+const PatientForm = lazy(() => import('./pages/patient/PatientForm'))
+const Confirmation = lazy(() => import('./pages/patient/Confirmation'))
+const Cancel = lazy(() => import('./pages/patient/Cancel'))
+const Triage = lazy(() => import('./pages/Triage'))
+const Reschedule = lazy(() => import('./pages/patient/Reschedule'))
+const PatientProfile = lazy(() => import('./pages/patient/Profile'))
+const PatientMedicalHistory = lazy(() => import('./pages/patient/MedicalHistory'))
+const PatientPayments = lazy(() => import('./pages/patient/Payments'))
 
 // Auth Pages
-import Register from './pages/auth/Register'
-import StaffLogin from './pages/auth/StaffLogin'
-import MyBookings from './pages/auth/MyBookings'
-import VerifyEmail from './pages/auth/VerifyEmail'
-import ForgotPassword from './pages/auth/ForgotPassword'
-import ResetPassword from './pages/auth/ResetPassword'
+const Register = lazy(() => import('./pages/auth/Register'))
+const StaffLogin = lazy(() => import('./pages/auth/StaffLogin'))
+const MyBookings = lazy(() => import('./pages/auth/MyBookings'))
+const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
 
 // Staff Dashboard Pages
-import Overview from './pages/dashboard/Overview'
-import Bookings from './pages/dashboard/Bookings'
-import Settings from './pages/dashboard/Settings'
-import AdminPanel from './pages/dashboard/AdminPanel'
-import MedicalRecords from './pages/dashboard/MedicalRecords'
-import Analytics from './pages/dashboard/Analytics'
-import AuditLog from './pages/dashboard/AuditLog'
-import DepartmentDashboard from './pages/dashboard/DepartmentDashboard'
-import DirectorDashboard from './pages/dashboard/DirectorDashboard'
-import DeptManagerDashboard from './pages/dashboard/DeptManagerDashboard'
-import ReceptionistDashboard from './pages/dashboard/ReceptionistDashboard'
+const Overview = lazy(() => import('./pages/dashboard/Overview'))
+const Bookings = lazy(() => import('./pages/dashboard/Bookings'))
+const Settings = lazy(() => import('./pages/dashboard/Settings'))
+const AdminPanel = lazy(() => import('./pages/dashboard/AdminPanel'))
+const MedicalRecords = lazy(() => import('./pages/dashboard/MedicalRecords'))
+const Analytics = lazy(() => import('./pages/dashboard/Analytics'))
+const AuditLog = lazy(() => import('./pages/dashboard/AuditLog'))
+const DepartmentDashboard = lazy(() => import('./pages/dashboard/DepartmentDashboard'))
+const DirectorDashboard = lazy(() => import('./pages/dashboard/DirectorDashboard'))
+const DeptManagerDashboard = lazy(() => import('./pages/dashboard/DeptManagerDashboard'))
+const ReceptionistDashboard = lazy(() => import('./pages/dashboard/ReceptionistDashboard'))
+const Patients = lazy(() => import('./pages/dashboard/Patients'))
 
 // Doctor Pages
-import DoctorDashboard from './pages/doctor/Dashboard'
-import Consultation from './pages/doctor/Consultation'
-import PatientRecord from './pages/doctor/PatientRecord'
-import DoctorSchedule from './pages/doctor/Schedule'
-import PatientSearch from './pages/doctor/PatientSearch'
-import LabOrders from './pages/doctor/LabOrders'
-import FollowUp from './pages/doctor/FollowUp'
-import EditRecord from './pages/doctor/EditRecord'
+const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'))
+const Consultation = lazy(() => import('./pages/doctor/Consultation'))
+const PatientRecord = lazy(() => import('./pages/doctor/PatientRecord'))
+const DoctorSchedule = lazy(() => import('./pages/doctor/Schedule'))
+const PatientSearch = lazy(() => import('./pages/doctor/PatientSearch'))
+const LabOrders = lazy(() => import('./pages/doctor/LabOrders'))
+const FollowUp = lazy(() => import('./pages/doctor/FollowUp'))
+const EditRecord = lazy(() => import('./pages/doctor/EditRecord'))
 
 // Nurse Pages
-import NurseTriage from './pages/nurse/Triage'
-import PatientQueue from './pages/nurse/PatientQueue'
-import MedicationTracking from './pages/nurse/MedicationTracking'
+const NurseTriage = lazy(() => import('./pages/nurse/Triage'))
+const PatientQueue = lazy(() => import('./pages/nurse/PatientQueue'))
+const MedicationTracking = lazy(() => import('./pages/nurse/MedicationTracking'))
 
 // Receptionist Pages
-import WalkInBooking from './pages/receptionist/WalkInBooking'
-import PatientDirectory from './pages/receptionist/PatientDirectory'
-import CheckInOut from './pages/receptionist/CheckInOut'
+const WalkInBooking = lazy(() => import('./pages/receptionist/WalkInBooking'))
+const PatientDirectory = lazy(() => import('./pages/receptionist/PatientDirectory'))
+const CheckInOut = lazy(() => import('./pages/receptionist/CheckInOut'))
 
 // Billing Pages
-import InvoiceList from './pages/billing/InvoiceList'
-import InvoiceDetail from './pages/billing/InvoiceDetail'
-import CreateInvoice from './pages/billing/CreateInvoice'
+const InvoiceList = lazy(() => import('./pages/billing/InvoiceList'))
+const InvoiceDetail = lazy(() => import('./pages/billing/InvoiceDetail'))
+const CreateInvoice = lazy(() => import('./pages/billing/CreateInvoice'))
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute'
 import PatientRoute from './components/PatientRoute'
 import DoctorRoute from './components/DoctorRoute'
 
+function AppFallback() {
+  return (
+    <div className="flex items-center justify-center h-screen bg-slate-50">
+      <div className="text-center">
+        <div className="spinner spinner-lg mx-auto mb-4" />
+        <p className="text-slate-400 font-medium">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
       <UIProvider>
+      <Suspense fallback={<AppFallback />}>
       <Routes>
         {/* Patient Routes */}
         <Route path="/" element={<PatientRoute><Home /></PatientRoute>} />
@@ -80,7 +93,7 @@ function App() {
         <Route path="/slot-select/:doctorId" element={<PatientRoute><SlotSelect /></PatientRoute>} />
         <Route path="/patient-form" element={<PatientRoute><PatientForm /></PatientRoute>} />
         <Route path="/confirmation" element={<PatientRoute><Confirmation /></PatientRoute>} />
-        <Route path="/cancel" element={<Cancel />} />
+        <Route path="/cancel" element={<PatientRoute><Cancel /></PatientRoute>} />
         <Route path="/triage" element={<PatientRoute><Triage /></PatientRoute>} />
         <Route path="/reschedule/:bookingId" element={<PatientRoute><Reschedule /></PatientRoute>} />
         <Route path="/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
@@ -98,6 +111,7 @@ function App() {
         {/* Dashboard Routes */}
         <Route path="/dashboard" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
         <Route path="/dashboard/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+        <Route path="/dashboard/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
         <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/dashboard/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
         <Route path="/dashboard/medical-records" element={<ProtectedRoute><MedicalRecords /></ProtectedRoute>} />
@@ -138,6 +152,7 @@ function App() {
         {/* 404 Catch-All */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
       </UIProvider>
     </BrowserRouter>
   )

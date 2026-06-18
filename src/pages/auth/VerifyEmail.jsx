@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { Button } from '../../components/ui/button'
 
 export default function VerifyEmail() {
   const { state } = useLocation()
@@ -111,16 +112,16 @@ export default function VerifyEmail() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 text-center">
+        <div className="bg-surface rounded-2xl shadow-sm border border-border p-10 text-center">
 
           {/* Icon */}
           <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-5">
             <span className="text-3xl">📧</span>
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Check your email</h1>
-          <p className="text-gray-500 text-sm mb-1">We sent a 6-digit code to</p>
-          <p className="text-blue-600 font-semibold mb-8">{state?.email}</p>
+          <h1 className="text-2xl font-bold text-txt-primary mb-2">Check your email</h1>
+          <p className="text-txt-muted text-sm mb-1">We sent a 6-digit code to</p>
+          <p className="text-primary font-semibold mb-8">{state?.email}</p>
 
           {/* OTP Inputs */}
           <div className="flex gap-2 justify-center mb-6" onPaste={handlePaste}>
@@ -137,7 +138,7 @@ export default function VerifyEmail() {
                 className={`w-11 h-14 text-center text-xl font-bold rounded-xl border-2 transition-all outline-none
                   ${digit
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 text-gray-800'
+                    : 'border-border text-txt-primary'
                   }
                   focus:border-blue-500 focus:bg-blue-50`}
               />
@@ -146,30 +147,31 @@ export default function VerifyEmail() {
 
           {/* Error */}
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">
               ❌ {error}
             </div>
           )}
 
           {/* Verify Button */}
-          <button
+          <Button
             onClick={() => handleVerify()}
             disabled={loading || digits.join('').length !== 6}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-40 mb-4"
+            size="lg"
+            className="w-full mb-4"
           >
             {loading ? 'Verifying...' : 'Verify Code →'}
-          </button>
+          </Button>
 
           {/* Resend */}
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-txt-muted">
             Didn't receive it?{' '}
             {resendTimer > 0 ? (
-              <span className="text-gray-400">Resend in {resendTimer}s</span>
+              <span className="text-txt-muted">Resend in {resendTimer}s</span>
             ) : (
               <button
                 onClick={handleResend}
                 disabled={resending}
-                className="text-blue-600 font-semibold hover:underline disabled:opacity-50"
+                className="text-primary font-semibold hover:underline disabled:opacity-50"
               >
                 {resending ? 'Sending...' : 'Resend code'}
               </button>
@@ -178,9 +180,9 @@ export default function VerifyEmail() {
         </div>
 
         {/* Back to login */}
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-txt-muted mt-6">
           Wrong email?{' '}
-          <button onClick={() => navigate('/register')} className="text-blue-600 hover:underline font-medium">
+          <button onClick={() => navigate('/register')} className="text-primary hover:underline font-medium">
             Go back
           </button>
         </p>

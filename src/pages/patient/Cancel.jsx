@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, AlertTriangle, CheckCircle, User, Stethoscope, Building2, CalendarDays, Clock, Hash, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
 
 export default function Cancel() {
   const navigate = useNavigate()
@@ -60,30 +63,14 @@ export default function Cancel() {
   }
 
   return (
-    <div className="page">
-
-      <Navbar
-        back="/"
-        subtitle="Cancel Booking"
-        right={
-          <div className="flex items-center gap-1.5 text-xs">
-            {['Search', 'Confirm', 'Done'].map((s, i) => (
-              <div key={s} className="flex items-center gap-1.5">
-                <span className={i === currentStep ? 'font-bold text-red-500' : i < currentStep ? 'text-green-500' : 'text-gray-400'}>
-                  {i < currentStep ? '✓ ' : ''}{s}
-                </span>
-                {i < 2 && <span className="text-gray-400">›</span>}
-              </div>
-            ))}
-          </div>
-        }
-      />
+    <div className="page pt-[72px]">
+      <PublicNavbar back="/my-bookings" />
 
       {/* Hero */}
       <div className="bg-gradient-to-br from-red-800 via-red-600 to-red-400 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-white/5" />
+        <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full bg-surface/5" />
         <div className="max-w-6xl mx-auto px-4 py-10 text-center relative">
-          <span className="inline-block bg-white/15 backdrop-blur-sm text-white/90 text-xs font-semibold tracking-widest uppercase px-3.5 py-1 rounded-full mb-2.5 border border-white/20">
+          <span className="inline-block bg-surface/15 backdrop-blur-sm text-white/90 text-xs font-semibold tracking-widest uppercase px-3.5 py-1 rounded-full mb-2.5 border border-white/20">
             Cancel Booking
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-white leading-tight mb-2">Find Your Booking</h1>
@@ -98,53 +85,54 @@ export default function Cancel() {
           {step === 'search' && (
             <motion.div
               key="search"
-              className="card animate-fadeIn p-7"
+              className="animate-fadeIn"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
             >
-              <h2 className="font-bold text-gray-900 text-base mb-5 flex items-center gap-2"><Search size={18} /> Search Booking</h2>
+              <Card className="p-7">
+                <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><Search size={18} /> Search Booking</h2>
 
-              <div className="flex flex-col gap-4">
-                <div>
-                  <label className="input-label">Booking Reference *</label>
-                  <input
-                    value={bookingRef}
-                    onChange={e => setBookingRef(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && document.getElementById('phone-input').focus()}
-                    className="input uppercase tracking-wide"
-                    placeholder="BK-123456"
-                  />
-                </div>
-
-                <div>
-                  <label className="input-label">Phone Number *</label>
-                  <input
-                    id="phone-input"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                    className="input"
-                    placeholder="01012345678"
-                  />
-                </div>
-
-                {error && (
-                  <div className="alert-error animate-fadeIn">
-                    <X size={16} />
-                    <span>{error}</span>
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="input-label">Booking Reference *</label>
+                    <Input
+                      value={bookingRef}
+                      onChange={e => setBookingRef(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && document.getElementById('phone-input').focus()}
+                      className="uppercase tracking-wide"
+                      placeholder="BK-123456"
+                    />
                   </div>
-                )}
 
-                <button onClick={handleSearch} disabled={loading} className="btn-danger btn-full mt-1">
-                  {loading ? 'Searching...' : 'Find My Booking'}
-                </button>
+                  <div>
+                    <label className="input-label">Phone Number *</label>
+                    <Input
+                      id="phone-input"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                      placeholder="01012345678"
+                    />
+                  </div>
 
-                <button onClick={() => navigate('/')} className="btn btn-ghost btn-full">
-                  ← Back to Home
-                </button>
-              </div>
+                  {error && (
+                    <div className="alert-error animate-fadeIn">
+                      <X size={16} />
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  <Button variant="danger" className="w-full mt-1" onClick={handleSearch} disabled={loading}>
+                    {loading ? 'Searching...' : 'Find My Booking'}
+                  </Button>
+
+                  <Button variant="ghost" className="w-full" onClick={() => navigate('/')}>
+                    ← Back to Home
+                  </Button>
+                </div>
+              </Card>
             </motion.div>
           )}
 
@@ -158,9 +146,9 @@ export default function Cancel() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="card p-6">
+              <Card className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="font-bold text-gray-900 text-sm">Booking Found</h2>
+                  <h2 className="font-bold text-txt-primary text-sm">Booking Found</h2>
                   <span className="font-mono text-sm font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
                     {booking.booking_ref}
                   </span>
@@ -175,13 +163,13 @@ export default function Cancel() {
                     { icon: <Clock size={14} />, label: 'Time', value: booking.slot_time },
                     { icon: <Hash size={14} />, label: 'Queue', value: `#${booking.queue_number}` },
                   ].map(({ icon, label, value }, i) => (
-                    <div key={label} className={`flex justify-between items-center py-2.5 ${i < 5 ? 'border-b border-gray-100' : ''}`}>
-                      <span className="text-sm text-gray-400 flex items-center gap-1.5">{icon} {label}</span>
-                      <span className="text-sm font-semibold text-gray-900">{value || '—'}</span>
+                    <div key={label} className={`flex justify-between items-center py-2.5 ${i < 5 ? 'border-b border-border' : ''}`}>
+                      <span className="text-sm text-txt-muted flex items-center gap-1.5">{icon} {label}</span>
+                      <span className="text-sm font-semibold text-txt-primary">{value || '—'}</span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               <div className="alert-error animate-fadeIn" style={{ animationDelay: '60ms' }}>
                 <AlertTriangle size={20} />
@@ -198,13 +186,13 @@ export default function Cancel() {
                 </div>
               )}
 
-              <button onClick={handleCancel} disabled={loading} className="btn-danger btn-full btn-lg">
+              <Button variant="danger" size="lg" className="w-full" onClick={handleCancel} disabled={loading}>
                 {loading ? 'Cancelling...' : 'Yes, Cancel My Booking'}
-              </button>
+              </Button>
 
-              <button onClick={() => { setStep('search'); setBooking(null) }} className="btn-secondary btn-full">
+              <Button variant="outline" className="w-full" onClick={() => { setStep('search'); setBooking(null) }}>
                 ← No, Keep My Booking
-              </button>
+              </Button>
             </motion.div>
           )}
 
@@ -212,26 +200,27 @@ export default function Cancel() {
           {step === 'done' && (
             <motion.div
               key="done"
-              className="card p-10 text-center"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4 }}
             >
-              <div className="w-18 h-18 rounded-full bg-green-50 border-2 border-green-500 flex items-center justify-center mx-auto mb-5">
-                <CheckCircle size={36} className="text-green-500" />
-              </div>
-              <h2 className="text-xl font-extrabold text-gray-900 mb-2">Booking Cancelled</h2>
-              <p className="text-gray-500 text-sm mb-1">
-                Your booking <strong className="text-red-500">{booking?.booking_ref}</strong> has been successfully cancelled.
-              </p>
-              <p className="text-gray-400 text-sm mb-7">
-                You can make a new booking anytime from the home page.
-              </p>
+              <Card className="p-10 text-center">
+                <div className="w-18 h-18 rounded-full bg-green-50 border-2 border-green-500 flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle size={36} className="text-green-500" />
+                </div>
+                <h2 className="text-xl font-extrabold text-txt-primary mb-2">Booking Cancelled</h2>
+                <p className="text-txt-muted text-sm mb-1">
+                  Your booking <strong className="text-red-500">{booking?.booking_ref}</strong> has been successfully cancelled.
+                </p>
+                <p className="text-txt-muted text-sm mb-7">
+                  You can make a new booking anytime from the home page.
+                </p>
 
-              <div className="flex flex-col gap-2.5">
-                <button onClick={() => navigate('/')} className="btn-primary btn-full btn-lg">Back to Home</button>
-                <button onClick={() => navigate('/my-bookings')} className="btn-secondary btn-full">View My Bookings</button>
-              </div>
+                <div className="flex flex-col gap-2.5">
+                  <Button size="lg" className="w-full" onClick={() => navigate('/')}>Back to Home</Button>
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/my-bookings')}>View My Bookings</Button>
+                </div>
+              </Card>
             </motion.div>
           )}
         </AnimatePresence>

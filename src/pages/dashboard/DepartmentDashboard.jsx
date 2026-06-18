@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Building2, Stethoscope, Users, CalendarDays } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function DepartmentDashboard() {
   const navigate = useNavigate()
@@ -52,87 +55,110 @@ export default function DepartmentDashboard() {
     activeDoctors: doctors.filter(d => d.is_active).length,
   }
 
-  if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.departmentDashboard} />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="spinner spinner-lg mx-auto mb-4" />
-      </div>
-    </div>
-  )
-
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={isRTL ? (department?.name_ar || department?.name_en || t.departmentDashboard) : (department?.name_en || t.departmentDashboard)} />
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-            {[
-              { label: t.todaysBookings, value: stats.todayBookings, icon: <CalendarDays size={16} style={{ color: 'var(--text-muted)', marginBottom: 4 }} />, color: 'var(--surface)', borderColor: 'var(--border)', textColor: 'var(--text-primary)', labelColor: 'var(--text-muted)' },
-              { label: t.active, value: stats.active, icon: <Stethoscope size={16} style={{ color: 'var(--success)', marginBottom: 4 }} />, color: 'var(--success-light)', borderColor: 'var(--success-border)', textColor: 'var(--success)', labelColor: 'var(--success)' },
-              { label: t.completed, value: stats.completed, icon: <Building2 size={16} style={{ color: 'var(--primary)', marginBottom: 4 }} />, color: 'var(--primary-light)', borderColor: 'var(--primary-border)', textColor: 'var(--primary)', labelColor: 'var(--primary)' },
-              { label: t.doctors, value: `${stats.activeDoctors}/${stats.doctors}`, icon: <Users size={16} style={{ color: 'var(--secondary)', marginBottom: 4 }} />, color: 'var(--secondary-light)', borderColor: 'var(--secondary-border)', textColor: 'var(--secondary)', labelColor: 'var(--secondary)' },
-            ].map((s, i) => (
-              <motion.div key={s.label} className="stat-card" style={{ background: s.color, borderColor: s.borderColor }}
-                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: i * 0.1 }}>
-                {s.icon}
-                <p style={{ fontSize: 12, color: s.labelColor, marginBottom: 4, fontWeight: 500 }}>{s.label}</p>
-                <p style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: s.textColor }}>{s.value}</p>
-              </motion.div>
-            ))}
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">
+              {isRTL ? (department?.name_ar || department?.name_en || t.departmentDashboard) : (department?.name_en || t.departmentDashboard)}
+            </h1>
+            <p className="text-txt-muted text-sm mt-1">{t.departmentDashboard}</p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="card" style={{ padding: 24 }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Users size={16} /> {t.departmentStaff}
-              </h2>
-              {doctors.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0', fontSize: 13 }}>{t.noDoctorsAssigned}</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {doctors.map((doc, i) => (
-                    <motion.div key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: 'var(--surface-hover)', borderRadius: 12 }}
-                      initial={{ opacity: 0, x: isRTL ? 8 : -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}>
-                      <div>
-                        <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{doc.name}</p>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{doc.type} · {doc.working_days?.length || 0} {t.daysPerWeek}</p>
-                      </div>
-                      <span className={`badge ${doc.is_active ? 'badge-success' : 'badge-danger'}`}>
-                        {doc.is_active ? t.active : t.inactive}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[1,2,3,4].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: t.todaysBookings, value: stats.todayBookings, color: 'bg-surface', textColor: 'text-txt-primary', labelColor: 'text-txt-muted' },
+                { label: t.active, value: stats.active, color: 'bg-green-50', textColor: 'text-green-600', labelColor: 'text-green-600' },
+                { label: t.completed, value: stats.completed, color: 'bg-blue-50', textColor: 'text-blue-600', labelColor: 'text-blue-600' },
+                { label: t.doctors, value: `${stats.activeDoctors}/${stats.doctors}`, color: 'bg-purple-50', textColor: 'text-purple-600', labelColor: 'text-purple-600' },
+              ].map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.08 }}
+                  className={`${s.color} rounded-2xl p-5 border border-border/50`}
+                >
+                  <p className={`text-xs font-semibold ${s.labelColor}`}>{s.label}</p>
+                  <p className={`text-3xl font-extrabold mt-1 ${s.textColor}`}>{s.value}</p>
+                </motion.div>
+              ))}
             </div>
 
-            <div className="card" style={{ padding: 24 }}>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <CalendarDays size={16} /> {t.todaySchedule}
-              </h2>
-              {bookings.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '24px 0', fontSize: 13 }}>{t.noBookingsToday}</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {bookings.map((b, i) => (
-                    <motion.div key={b.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: 'var(--surface-hover)', borderRadius: 12 }}
-                      initial={{ opacity: 0, x: isRTL ? 8 : -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}>
-                      <div>
-                        <p style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{b.patient_name}</p>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{b.slot_time} · {b.doctors?.name}</p>
-                      </div>
-                      <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
-                        {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-base font-bold text-txt-primary mb-4 flex items-center gap-2">
+                    <Users size={16} /> {t.departmentStaff}
+                  </h2>
+                  {doctors.length === 0 ? (
+                    <p className="text-txt-muted text-center py-6 text-sm">{t.noDoctorsAssigned}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {doctors.map((doc, i) => (
+                        <motion.div
+                          key={doc.id}
+                          initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: i * 0.05 }}
+                          className="flex items-center justify-between p-3 bg-surface-hover rounded-xl"
+                        >
+                          <div>
+                            <p className="font-semibold text-txt-primary text-sm">{doc.name}</p>
+                            <p className="text-xs text-txt-muted capitalize">{doc.type} &middot; {doc.working_days?.length || 0} {t.daysPerWeek}</p>
+                          </div>
+                          <Badge variant={doc.is_active ? 'success' : 'danger'}>
+                            {doc.is_active ? t.active : t.inactive}
+                          </Badge>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-base font-bold text-txt-primary mb-4 flex items-center gap-2">
+                    <CalendarDays size={16} /> {t.todaySchedule}
+                  </h2>
+                  {bookings.length === 0 ? (
+                    <p className="text-txt-muted text-center py-6 text-sm">{t.noBookingsToday}</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {bookings.map((b, i) => (
+                        <motion.div
+                          key={b.id}
+                          initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2, delay: i * 0.05 }}
+                          className="flex items-center justify-between p-3 bg-surface-hover rounded-xl"
+                        >
+                          <div>
+                            <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
+                            <p className="text-xs text-txt-muted">{b.slot_time} &middot; {b.doctors?.name}</p>
+                          </div>
+                          <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                            {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
+                          </Badge>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </motion.div>
+          </>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -4,10 +4,14 @@ import { motion } from 'framer-motion'
 import { CalendarDays, Clock, Stethoscope, UserRound, AlertTriangle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useUI } from '../../hooks/useUI'
-import Navbar from '../../components/Navbar'
+import PublicNavbar from '../../components/layout/PublicNavbar'
+import { Button } from '../../components/ui/button'
+import { Card } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 import SlotPicker from '../../components/SlotPicker'
 import StepIndicator from '../../components/StepIndicator'
-import { calcEndTime } from '../../utils/booking'  
+import { calcEndTime } from '../../utils/booking'
 
 const isDateAllowed = (dateStr, workingDays) => {
   if (!workingDays || workingDays.length === 0) return true
@@ -21,7 +25,7 @@ export default function SlotSelect() {
   const { state } = useLocation()
   const navigate = useNavigate()
 
-  const doctor      = state?.doctor
+  const [doctor, setDoctor]           = useState(state?.doctor || null)
   const bookingType = state?.bookingType
   const deptId      = state?.deptId
 
@@ -30,7 +34,18 @@ export default function SlotSelect() {
   const [bookedSlots, setBookedSlots]   = useState([])
   const [selectedSlot, setSelectedSlot] = useState('')
   const [loading, setLoading]           = useState(false)
+  const [fetchingDoctor, setFetchingDoctor] = useState(!state?.doctor)
   const { toast } = useUI()
+
+  useEffect(() => {
+    if (state?.doctor) return
+    const fetchDoctor = async () => {
+      const { data } = await supabase.from('doctors').select('*').eq('id', doctorId).single()
+      if (data) setDoctor(data)
+      setFetchingDoctor(false)
+    }
+    fetchDoctor()
+  }, [doctorId, state?.doctor])
 
   useEffect(() => {
     if (!currentDate) return
@@ -62,16 +77,25 @@ export default function SlotSelect() {
     navigate('/patient-form', { state: { doctor, bookingType, deptId, selectedDate: currentDate, selectedSlot } })
   }
 
+  if (fetchingDoctor) return (
+    <div className="page pt-[72px]">
+      <PublicNavbar back={`/doctor-select/${doctorId}`} />
+      <div className="flex-1 flex items-center justify-center p-10">
+        <Skeleton className="w-12 h-12 rounded-full mx-auto" />
+      </div>
+    </div>
+  )
+
   if (!doctor) return (
-    <div className="page">
-      <Navbar back="/" subtitle="Slot Selection" />
+    <div className="page pt-[72px]">
+      <PublicNavbar back={`/doctor-select/${doctorId}`} />
       <div className="page-content">
-        <div className="card empty-state">
-          <div className="empty-state-icon"><AlertTriangle size={48} className="text-gray-300" /></div>
-          <p className="empty-state-title">No Doctor Selected</p>
-          <p className="empty-state-desc">Please go back and select a doctor first.</p>
-          <button onClick={() => navigate('/')} className="btn btn-primary btn-md">Go Home</button>
-        </div>
+        <Card className="text-center p-8">
+          <div className="mb-4"><AlertTriangle size={48} className="text-txt-muted mx-auto" /></div>
+          <h3 className="text-lg font-bold text-txt-primary mb-2">No Doctor Selected</h3>
+          <p className="text-sm text-txt-muted mb-6">Please go back and select a doctor first.</p>
+          <Button onClick={() => navigate('/')}>Go Home</Button>
+        </Card>
       </div>
     </div>
   )
@@ -80,22 +104,13 @@ export default function SlotSelect() {
   const dateAllowed    = isDateAllowed(currentDate, doctor?.working_days)
 
   return (
-    <div className="page">
-      <Navbar
-        back={-1}
-        subtitle={doctor.name}
-        breadcrumbs={[
-          { label: 'Departments', path: '/' },
-          { label: 'Type',       path: -2 },
-          { label: 'Doctor',     path: -1 },
-          { label: 'Slot' },
-        ]}
-      />
+    <div className="page pt-[72px]">
+      <PublicNavbar back={`/doctor-select/${doctorId}`} />
 
       <div className="hero-gradient">
         <div className="hero-inner">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl shrink-0 bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/20">
+            <div className="w-16 h-16 rounded-2xl shrink-0 bg-surface/15 backdrop-blur-md flex items-center justify-center border border-white/20">
               {bookingType === 'consultant' ? <Stethoscope size={28} className="text-white" /> : <UserRound size={28} className="text-white" />}
             </div>
             <div>
@@ -113,24 +128,24 @@ export default function SlotSelect() {
         <StepIndicator currentStep={3} />
 
         <motion.div
-          className="card p-5 mb-4"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <label className="input-label flex items-center gap-1.5"><CalendarDays size={14} /> Select Date</label>
-          <input type="date" value={currentDate} min={today}
-            onChange={e => { setCurrentDate(e.target.value); setSelectedSlot('') }}
-            className="input" />
-          {!dateAllowed && (
-            <div className="alert-warning mt-3">
-              <AlertTriangle size={16} />
-              <div>
-                <p className="font-semibold mb-0.5">Not available on this day</p>
-                <p className="text-xs">Available: {doctor.working_days?.map(d => d.slice(0, 3)).join(', ')}</p>
+          <Card className="p-5 mb-4">
+            <label className="input-label flex items-center gap-1.5"><CalendarDays size={14} /> Select Date</label>
+            <Input type="date" value={currentDate} min={today}
+              onChange={e => { setCurrentDate(e.target.value); setSelectedSlot('') }} />
+            {!dateAllowed && (
+              <div className="alert-warning mt-3">
+                <AlertTriangle size={16} />
+                <div>
+                  <p className="font-semibold mb-0.5">Not available on this day</p>
+                  <p className="text-xs">Available: {doctor.working_days?.map(d => d.slice(0, 3)).join(', ')}</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </Card>
         </motion.div>
 
         <SlotPicker
@@ -145,30 +160,28 @@ export default function SlotSelect() {
 
         {selectedSlot && (
           <motion.div
-            className="card p-4 mb-4 bg-blue-50 border-blue-200"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs text-blue-600 font-semibold mb-0.5">Selected Slot</p>
-                <p className="text-lg font-extrabold text-blue-600">{selectedSlot} → {calcEndTime(selectedSlot)}</p>
-                <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1"><CalendarDays size={12} /> {currentDate} · <Clock size={12} /> 15 min session</p>
+            <Card className="p-4 mb-4 bg-blue-50 border-blue-200">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-blue-600 font-semibold mb-0.5">Selected Slot</p>
+                  <p className="text-lg font-extrabold text-blue-600">{selectedSlot} → {calcEndTime(selectedSlot)}</p>
+                  <p className="text-xs text-txt-muted mt-0.5 flex items-center gap-1"><CalendarDays size={12} /> {currentDate} · <Clock size={12} /> 15 min session</p>
+                </div>
+                <Button variant="ghost" size="icon-sm" onClick={() => setSelectedSlot('')} className="rounded-full bg-blue-200 text-blue-600 font-bold text-sm">
+                  ×
+                </Button>
               </div>
-              <button onClick={() => setSelectedSlot('')}
-                className="w-7 h-7 rounded-full bg-blue-200 border-none cursor-pointer text-sm text-blue-600 font-bold">
-                ×
-              </button>
-            </div>
+            </Card>
           </motion.div>
         )}
 
-        <button onClick={handleContinue} disabled={!selectedSlot}
-          className="btn btn-primary btn-lg btn-full"
-          style={{ opacity: selectedSlot ? 1 : 0.4 }}>
+        <Button onClick={handleContinue} disabled={!selectedSlot} size="lg" className="w-full" style={{ opacity: selectedSlot ? 1 : 0.4 }}>
           Continue → {selectedSlot || 'Select a slot first'}
-        </button>
+        </Button>
       </div>
     </div>
   )

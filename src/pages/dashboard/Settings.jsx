@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Building2, Stethoscope, Pencil, Trash2, Plus, Lock, CalendarDays } from 'lucide-react'
+import { Building2, Stethoscope, Pencil, Trash2, Plus, Lock, CalendarDays, Mail, Key } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 const DAYS_KEYS = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri']
 
-function DocForm({ type, showDocForm, docForm, setDocForm, slotsInput, setSlotsInput, editingDoc, saveDoc, setShowDocForm, setEditingDoc, departments, t }) {
+function DocForm({ type, showDocForm, docForm, setDocForm, slotsInput, setSlotsInput, editingDoc, saveDoc, setShowDocForm, setEditingDoc, departments, t, saving }) {
   const toggleDay = (day) => {
     const days = docForm.working_days || []
     setDocForm({ ...docForm, working_days: days.includes(day) ? days.filter(d => d !== day) : [...days, day] })
@@ -19,51 +24,58 @@ function DocForm({ type, showDocForm, docForm, setDocForm, slotsInput, setSlotsI
   if (!showDocForm || docForm.type !== type) return null
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }} className="card" style={{ padding: 24, marginBottom: 16 }}>
-      <h3 style={{ fontWeight: 700, color: 'var(--primary)', fontSize: 13, marginBottom: 16 }}>
-        {editingDoc ? t.editDoctor : t.addDoctor}
-      </h3>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}
+      className="rounded-2xl p-6 bg-surface border border-border mb-4 shadow-sm">
+      <h3 className="font-bold text-primary text-sm mb-4">{editingDoc ? t.editDoctor : t.addDoctor}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <div>
-          <label className="input-label">{t.doctorName} *</label>
-          <input value={docForm.name} onChange={e => setDocForm({ ...docForm, name: e.target.value })}
-            className="input" placeholder="Dr. Ahmed Mohamed" />
+          <label className="text-xs font-semibold text-txt-muted block mb-1.5">{t.doctorName} *</label>
+          <Input value={docForm.name} onChange={e => setDocForm({ ...docForm, name: e.target.value })} placeholder="Dr. Ahmed Mohamed" />
         </div>
         <div>
-          <label className="input-label">{t.department} *</label>
-          <select value={docForm.department_id} onChange={e => setDocForm({ ...docForm, department_id: e.target.value })} className="input">
+          <label className="text-xs font-semibold text-txt-muted block mb-1.5">{t.department} *</label>
+          <select value={docForm.department_id} onChange={e => setDocForm({ ...docForm, department_id: e.target.value })}
+            className="h-9 px-3 rounded-xl border border-border bg-surface text-sm w-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
             <option value="">{t.department}</option>
             {departments.map(d => <option key={d.id} value={d.id}>{d.name_en}</option>)}
           </select>
         </div>
         <div>
-          <label className="input-label">{t.workingDays}</label>
-          <input value={slotsInput} onChange={e => setSlotsInput(e.target.value)}
-            className="input" placeholder="09:00, 09:30, 10:00" />
+          <label className="text-xs font-semibold text-txt-muted block mb-1.5">{t.workingDays}</label>
+          <Input value={slotsInput} onChange={e => setSlotsInput(e.target.value)} placeholder="09:00, 09:30, 10:00" />
         </div>
       </div>
+      {!editingDoc && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div>
+            <label className="text-xs font-semibold text-txt-muted block mb-1.5 flex items-center gap-1"><Mail size={12} /> {t.email} *</label>
+            <Input type="email" value={docForm.email || ''} onChange={e => setDocForm({ ...docForm, email: e.target.value })} placeholder="doctor@hospital.com" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-txt-muted block mb-1.5 flex items-center gap-1"><Key size={12} /> {t.password} *</label>
+            <Input type="password" value={docForm.password || ''} onChange={e => setDocForm({ ...docForm, password: e.target.value })} placeholder="********" />
+          </div>
+        </div>
+      )}
       <div className="mb-4">
-        <label className="input-label">{t.workingDays}</label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+        <label className="text-xs font-semibold text-txt-muted block mb-1.5">{t.workingDays}</label>
+        <div className="flex flex-wrap gap-2">
           {DAYS_KEYS.map(dayKey => {
             const active = (docForm.working_days || []).includes(dayKey)
             return (
               <button key={dayKey} onClick={() => toggleDay(dayKey)}
-                className="btn btn-sm"
-                style={{
-                  background: active ? 'var(--primary)' : 'var(--surface)',
-                  color: active ? '#fff' : 'var(--text-secondary)',
-                  border: `1.5px solid ${active ? 'var(--primary)' : 'var(--border)'}`,
-                }}>
+                className={`h-8 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  active ? 'bg-primary text-white' : 'bg-surface text-txt-secondary border border-border'
+                }`}>
                 {t[dayKey]}
               </button>
             )
           })}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={saveDoc} className="btn btn-primary btn-md">{editingDoc ? t.save : t.save}</button>
-        <button onClick={() => { setShowDocForm(false); setEditingDoc(null) }} className="btn btn-secondary btn-md">{t.cancel}</button>
+      <div className="flex gap-2.5">
+        <Button size="sm" onClick={saveDoc} disabled={saving}>{saving ? '...' : (editingDoc ? t.save : t.save)}</Button>
+        <Button variant="outline" size="sm" onClick={() => { setShowDocForm(false); setEditingDoc(null) }}>{t.cancel}</Button>
       </div>
     </motion.div>
   )
@@ -72,31 +84,32 @@ function DocForm({ type, showDocForm, docForm, setDocForm, slotsInput, setSlotsI
 function DocList({ type, doctors, toggleDocActive, startEditDoc, deleteDoc, t }) {
   const list = doctors.filter(d => d.type === type)
   if (list.length === 0) return (
-    <div className="card" style={{ padding: 32, textAlign: 'center', border: '2px dashed var(--border)' }}>
-      <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>{t.noDoctorsAssigned}</p>
+    <div className="rounded-2xl p-8 text-center border-2 border-dashed border-border">
+      <p className="text-txt-muted text-sm">{t.noDoctorsAssigned}</p>
     </div>
   )
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="space-y-2.5">
       {list.map((doc, i) => (
-        <motion.div key={doc.id} className="card p-3.5 flex items-center justify-between gap-3"
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.04 }}
-          whileHover={{ scale: 1.01 }}>
+        <motion.div key={doc.id} className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-surface border border-border"
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.04 }}>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-800 text-sm mb-0.5">{doc.name}</p>
-            <p className="text-xs text-gray-400">{doc.departments?.name_en} · {(doc.slots || []).length} slots</p>
+            <p className="font-semibold text-txt-primary text-sm mb-0.5">{doc.name}</p>
+            <p className="text-xs text-txt-muted">{doc.departments?.name_en} &middot; {(doc.slots || []).length} slots</p>
             {doc.working_days?.length > 0 && (
-              <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1"><CalendarDays size={12} /> {doc.working_days.map(d => d.slice(0, 3)).join(', ')}</p>
+              <p className="text-[11px] text-txt-muted mt-0.5 flex items-center gap-1"><CalendarDays size={12} /> {doc.working_days.map(d => d.slice(0, 3)).join(', ')}</p>
             )}
           </div>
           <div className="flex items-center gap-2.5 shrink-0">
             <button onClick={() => toggleDocActive(doc)}
-              className={`btn btn-sm ${doc.is_active ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'}`}>
+              className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-all ${
+                doc.is_active ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'
+              }`}>
               {doc.is_active ? 'Active' : 'Inactive'}
             </button>
-            <button onClick={() => startEditDoc(doc)} className="btn btn-ghost btn-sm text-blue-600"><Pencil size={14} /></button>
-            <button onClick={() => deleteDoc(doc.id)} className="btn btn-ghost btn-sm text-red-500"><Trash2 size={14} /></button>
+            <button onClick={() => startEditDoc(doc)} className="h-8 w-8 flex items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50"><Pencil size={14} /></button>
+            <button onClick={() => deleteDoc(doc.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
           </div>
         </motion.div>
       ))}
@@ -119,10 +132,11 @@ export default function Settings() {
   const [editingDept, setEditingDept] = useState(null)
   const [showDeptForm, setShowDeptForm] = useState(false)
 
-  const [docForm, setDocForm]       = useState({ name: '', type: 'doctor', department_id: '', working_days: [], slots: [], is_active: true })
+  const [docForm, setDocForm]       = useState({ name: '', type: 'doctor', department_id: '', working_days: [], slots: [], is_active: true, email: '', password: '' })
   const [editingDoc, setEditingDoc] = useState(null)
   const [showDocForm, setShowDocForm] = useState(false)
   const [slotsInput, setSlotsInput] = useState('')
+  const [saving, setSaving] = useState(false)
 
   const fetchAll = async () => {
     setLoading(true)
@@ -147,17 +161,16 @@ export default function Settings() {
 
   if (!hasPermission('settings:manage')) {
     return (
-      <div className="page">
-        <Navbar variant="dashboard" back="/dashboard" subtitle="Settings" />
-        <div className="flex-1 flex items-center justify-center p-10">
-          <div className="card p-12 text-center">
-            <div className="mb-4 flex justify-center"><Lock size={48} className="text-gray-300" /></div>
-            <h2 className="font-bold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-400 mb-6">Only administrators can access settings.</p>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-md">Back to Dashboard</button>
-          </div>
-        </div>
-      </div>
+      <DashboardLayout>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Lock size={48} className="text-txt-disabled mb-4" />
+            <h2 className="font-bold text-txt-primary mb-2">{isRTL ? 'وصول مرفوض' : 'Access Denied'}</h2>
+            <p className="text-txt-muted mb-6">{isRTL ? 'فقط المسؤولون يمكنهم الوصول إلى الإعدادات' : 'Only administrators can access settings.'}</p>
+            <Button onClick={() => navigate('/dashboard')}>{isRTL ? 'العودة للوحة التحكم' : 'Back to Dashboard'}</Button>
+          </CardContent>
+        </Card>
+      </DashboardLayout>
     )
   }
 
@@ -188,12 +201,41 @@ export default function Settings() {
 
   const saveDoc = async () => {
     if (!docForm.name || !docForm.department_id) return toast('Name and department are required', { type: 'error' })
+    if (!editingDoc && (!docForm.email || !docForm.password)) return toast('Email and password are required for new doctor', { type: 'error' })
+    setSaving(true)
     const slots = slotsInput.split(',').map(s => s.trim()).filter(s => /^\d{2}:\d{2}$/.test(s))
-    const payload = { ...docForm, slots }
-    if (editingDoc) await supabase.from('doctors').update(payload).eq('id', editingDoc)
-    else await supabase.from('doctors').insert(payload)
+
+    if (editingDoc) {
+      const { email, password, ...payload } = docForm
+      payload.slots = slots
+      await supabase.from('doctors').update(payload).eq('id', editingDoc)
+    } else {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const adminSession = sessionData?.session
+
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: docForm.email,
+        password: docForm.password,
+      })
+      if (authError) { setSaving(false); return toast(authError.message, { type: 'error' }) }
+
+      const payload = { name: docForm.name, type: docForm.type, department_id: docForm.department_id, working_days: docForm.working_days, slots, is_active: true }
+      if (authData?.user?.id) payload.user_id = authData.user.id
+      await supabase.from('doctors').insert(payload)
+
+      if (adminSession) {
+        await supabase.auth.setSession({
+          access_token: adminSession.access_token,
+          refresh_token: adminSession.refresh_token,
+        })
+      }
+
+      toast(`Doctor account created! Email: ${docForm.email}`, { type: 'success' })
+    }
+
+    setSaving(false)
     setShowDocForm(false); setEditingDoc(null)
-    setDocForm({ name: '', type: 'doctor', department_id: '', working_days: [], slots: [], is_active: true })
+    setDocForm({ name: '', type: 'doctor', department_id: '', working_days: [], slots: [], is_active: true, email: '', password: '' })
     setSlotsInput(''); fetchAll()
   }
 
@@ -209,151 +251,149 @@ export default function Settings() {
   }
 
   const startEditDoc = (doc) => {
-    setDocForm({ name: doc.name, type: doc.type || 'doctor', department_id: doc.department_id, working_days: doc.working_days || [], is_active: doc.is_active })
+    setDocForm({ name: doc.name, type: doc.type || 'doctor', department_id: doc.department_id, working_days: doc.working_days || [], is_active: doc.is_active, email: '', password: '' })
     setSlotsInput((doc.slots || []).join(', '))
     setEditingDoc(doc.id); setShowDocForm(true)
   }
 
   const openAddForm = (type) => {
     setShowDocForm(true); setEditingDoc(null)
-    setDocForm({ name: '', type, department_id: '', working_days: [], slots: [], is_active: true })
+    setDocForm({ name: '', type, department_id: '', working_days: [], slots: [], is_active: true, email: '', password: '' })
     setSlotsInput('')
   }
 
-  const docFormProps = { showDocForm, docForm, setDocForm, slotsInput, setSlotsInput, editingDoc, saveDoc, setShowDocForm, setEditingDoc, departments, t }
+  const docFormProps = { showDocForm, docForm, setDocForm, slotsInput, setSlotsInput, editingDoc, saveDoc, setShowDocForm, setEditingDoc, departments, t, saving }
   const docListProps = { doctors, toggleDocActive, startEditDoc, deleteDoc, t }
 
-  if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.settingsPage} />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="text-center">
-          <div className="spinner spinner-lg mx-auto mb-4" />
-          <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t.loading}</p>
-        </div>
-      </div>
-    </div>
-  )
-
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.settingsPage} />
-
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
-            {[
-              { id: 'departments', label: t.departments, icon: <Building2 size={16} /> },
-              { id: 'doctors', label: t.doctorsTab, icon: <Stethoscope size={16} /> },
-            ].map(tabItem => (
-              <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
-                className="btn btn-md"
-                style={{
-                  background: tab === tabItem.id ? 'var(--primary)' : 'var(--surface)',
-                  color: tab === tabItem.id ? '#fff' : 'var(--text-secondary)',
-                  border: `1.5px solid ${tab === tabItem.id ? 'var(--primary)' : 'var(--border)'}`,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                {tabItem.icon}{tabItem.label}
-              </button>
-            ))}
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">{t.settingsPage}</h1>
+            <p className="text-txt-muted text-sm mt-1">{isRTL ? 'إدارة الأقسام والأطباء' : 'Manage departments and doctors'}</p>
           </div>
+        </div>
 
-          {tab === 'departments' && (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>{t.departments} ({departments.length})</h2>
-                <button onClick={() => { setShowDeptForm(true); setEditingDept(null); setDeptForm({ name_en: '', name_ar: '', max_daily: 50, is_open: true }) }}
-                  className="btn btn-primary btn-sm"><Plus size={14} /> {t.addDepartment}</button>
-              </div>
+        {loading ? (
+          <div className="space-y-3">
+            {[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+          </div>
+        ) : (
+          <>
+            <div className="flex gap-2">
+              {[
+                { id: 'departments', label: t.departments, icon: <Building2 size={16} /> },
+                { id: 'doctors', label: t.doctorsTab, icon: <Stethoscope size={16} /> },
+              ].map(tabItem => (
+                <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
+                  className={`h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                    tab === tabItem.id
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
+                  }`}>
+                  {tabItem.icon}{tabItem.label}
+                </button>
+              ))}
+            </div>
 
-              {showDeptForm && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="card p-6 mb-4">
-                  <h3 className="font-bold text-blue-600 text-sm mb-4">{editingDept ? 'Edit Department' : 'New Department'}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
-                    <div>
-                      <label className="input-label">Name (English) *</label>
-                      <input value={deptForm.name_en} onChange={e => setDeptForm({ ...deptForm, name_en: e.target.value })}
-                        className="input" placeholder="e.g. Cardiology" />
-                    </div>
-                    <div>
-                      <label className="input-label">Name (Arabic)</label>
-                      <input value={deptForm.name_ar} onChange={e => setDeptForm({ ...deptForm, name_ar: e.target.value })}
-                        className="input" placeholder="e.g. القلب" dir="rtl" />
-                    </div>
-                    <div>
-                      <label className="input-label">Max Daily Bookings</label>
-                      <input type="number" value={deptForm.max_daily} onChange={e => setDeptForm({ ...deptForm, max_daily: parseInt(e.target.value) })} className="input" />
-                    </div>
-                    <div className="flex items-center gap-2.5">
-                      <label className="text-xs text-gray-500">Open for bookings</label>
-                      <button onClick={() => setDeptForm({ ...deptForm, is_open: !deptForm.is_open })}
-                        className="relative w-11 h-6 rounded-full cursor-pointer transition-colors border-none"
-                        style={{ background: deptForm.is_open ? 'var(--success)' : 'var(--border)' }}>
-                        <div className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all"
-                          style={{ left: deptForm.is_open ? 22 : 2 }} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex gap-2.5">
-                    <button onClick={saveDept} className="btn btn-primary btn-md">{editingDept ? 'Update' : 'Save'}</button>
-                    <button onClick={() => { setShowDeptForm(false); setEditingDept(null) }} className="btn btn-secondary btn-md">Cancel</button>
-                  </div>
-                </motion.div>
-              )}
+            {tab === 'departments' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-bold text-txt-primary">{t.departments} ({departments.length})</h2>
+                  <Button size="sm" onClick={() => { setShowDeptForm(true); setEditingDept(null); setDeptForm({ name_en: '', name_ar: '', max_daily: 50, is_open: true }) }}>
+                    <Plus size={14} /> {t.addDepartment}
+                  </Button>
+                </div>
 
-              <div className="flex flex-col gap-2.5">
-                {departments.map((dept, i) => (
-                  <motion.div key={dept.id} className="card p-3.5 flex items-center justify-between gap-3"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.04 }}
-                    whileHover={{ scale: 1.01 }}>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 text-sm mb-0.5">{dept.name_en}</p>
-                      <p className="text-xs text-gray-400">{dept.name_ar} · Max {dept.max_daily}/day</p>
+                {showDeptForm && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+                    className="rounded-2xl p-6 bg-surface border border-border mb-4 shadow-sm">
+                    <h3 className="font-bold text-primary text-sm mb-4">{editingDept ? 'Edit Department' : 'New Department'}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-4">
+                      <div>
+                        <label className="text-xs font-semibold text-txt-muted block mb-1.5">Name (English) *</label>
+                        <Input value={deptForm.name_en} onChange={e => setDeptForm({ ...deptForm, name_en: e.target.value })} placeholder="e.g. Cardiology" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-txt-muted block mb-1.5">Name (Arabic)</label>
+                        <Input value={deptForm.name_ar} onChange={e => setDeptForm({ ...deptForm, name_ar: e.target.value })} placeholder="e.g. القلب" dir="rtl" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-txt-muted block mb-1.5">Max Daily Bookings</label>
+                        <Input type="number" value={deptForm.max_daily} onChange={e => setDeptForm({ ...deptForm, max_daily: parseInt(e.target.value) })} />
+                      </div>
+                      <div className="flex items-center gap-2.5 pt-6">
+                        <label className="text-xs text-txt-muted">Open for bookings</label>
+                        <button onClick={() => setDeptForm({ ...deptForm, is_open: !deptForm.is_open })}
+                          className="relative w-11 h-6 rounded-full cursor-pointer transition-colors border-none"
+                          style={{ background: deptForm.is_open ? 'var(--color-primary)' : 'var(--color-border)' }}>
+                          <div className="absolute top-0.5 w-5 h-5 rounded-full bg-surface transition-all"
+                            style={{ left: deptForm.is_open ? 22 : 2 }} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <button onClick={() => toggleDeptOpen(dept)}
-                        className={`btn btn-sm ${dept.is_open ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'}`}>
-                        {dept.is_open ? 'Open' : 'Closed'}
-                      </button>
-                      <button onClick={() => startEditDept(dept)} className="btn btn-ghost btn-sm text-blue-600"><Pencil size={14} /></button>
-                      <button onClick={() => deleteDept(dept.id)} className="btn btn-ghost btn-sm text-red-500"><Trash2 size={14} /></button>
+                    <div className="flex gap-2.5">
+                      <Button size="sm" onClick={saveDept}>{editingDept ? 'Update' : 'Save'}</Button>
+                      <Button variant="outline" size="sm" onClick={() => { setShowDeptForm(false); setEditingDept(null) }}>Cancel</Button>
                     </div>
                   </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
+                )}
 
-          {tab === 'doctors' && (
-            <div className="flex flex-col gap-8">
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Stethoscope size={16} /> {t.consultants} ({doctors.filter(d => d.type === 'consultant').length})
-                  </h2>
-                  <button onClick={() => openAddForm('consultant')} className="btn btn-primary btn-sm"><Plus size={14} /> {t.addDoctor}</button>
+                <div className="space-y-2.5">
+                  {departments.map((dept, i) => (
+                    <motion.div key={dept.id} className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-surface border border-border"
+                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.04 }}>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-txt-primary text-sm mb-0.5">{dept.name_en}</p>
+                        <p className="text-xs text-txt-muted">{dept.name_ar} &middot; Max {dept.max_daily}/day</p>
+                      </div>
+                      <div className="flex items-center gap-2.5 shrink-0">
+                        <button onClick={() => toggleDeptOpen(dept)}
+                          className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-all ${
+                            dept.is_open ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'
+                          }`}>
+                          {dept.is_open ? 'Open' : 'Closed'}
+                        </button>
+                        <button onClick={() => startEditDept(dept)} className="h-8 w-8 flex items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50"><Pencil size={14} /></button>
+                        <button onClick={() => deleteDept(dept.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
-                <DocForm type="consultant" {...docFormProps} />
-                <DocList type="consultant" {...docListProps} />
               </div>
+            )}
 
-              <div style={{ borderTop: '1px solid var(--border)' }} />
-
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Stethoscope size={16} /> {t.doctorsTab} ({doctors.filter(d => d.type === 'doctor').length})
-                  </h2>
-                  <button onClick={() => openAddForm('doctor')} className="btn btn-primary btn-sm"><Plus size={14} /> {t.addDoctor}</button>
+            {tab === 'doctors' && (
+              <div className="space-y-8">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-bold text-txt-primary flex items-center gap-1.5">
+                      <Stethoscope size={16} /> {t.consultants} ({doctors.filter(d => d.type === 'consultant').length})
+                    </h2>
+                    <Button size="sm" onClick={() => openAddForm('consultant')}><Plus size={14} /> {t.addDoctor}</Button>
+                  </div>
+                  <DocForm type="consultant" {...docFormProps} />
+                  <DocList type="consultant" {...docListProps} />
                 </div>
-                <DocForm type="doctor" {...docFormProps} />
-                <DocList type="doctor" {...docListProps} />
+
+                <div className="border-t border-border" />
+
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-base font-bold text-txt-primary flex items-center gap-1.5">
+                      <Stethoscope size={16} /> {t.doctorsTab} ({doctors.filter(d => d.type === 'doctor').length})
+                    </h2>
+                    <Button size="sm" onClick={() => openAddForm('doctor')}><Plus size={14} /> {t.addDoctor}</Button>
+                  </div>
+                  <DocForm type="doctor" {...docFormProps} />
+                  <DocList type="doctor" {...docListProps} />
+                </div>
               </div>
-            </div>
-          )}
-        </motion.div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

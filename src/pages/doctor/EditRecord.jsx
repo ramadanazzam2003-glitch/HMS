@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useUI } from '../../hooks/useUI'
 import PrescriptionBuilder from '../../components/medical/PrescriptionBuilder'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function EditRecord() {
   const navigate = useNavigate()
@@ -90,59 +93,59 @@ export default function EditRecord() {
   }
 
   if (loading) return (
-    <div className="page">
-      <Navbar variant="dashboard" back={-1} subtitle="Edit Record" />
-      <div className="flex-1 flex items-center justify-center p-10">
-        <div className="spinner spinner-lg mx-auto mb-4" />
+    <DashboardLayout>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
-    </div>
+    </DashboardLayout>
   )
 
   if (!record) return (
-    <div className="page">
-      <Navbar variant="dashboard" back={-1} subtitle="Edit Record" />
-      <div className="page-content-lg">
-        <div className="card empty-state">
-          <p className="empty-state-title">Record not found</p>
-          <button onClick={() => navigate(-1)} className="btn btn-primary btn-md mt-4">Go Back</button>
-        </div>
+    <DashboardLayout>
+      <div className="rounded-2xl bg-surface border border-border p-10 text-center">
+        <p className="text-txt-primary font-semibold mb-4">Record not found</p>
+        <Button variant="primary" onClick={() => navigate(-1)}>Go Back</Button>
       </div>
-    </div>
+    </DashboardLayout>
   )
 
   return (
-    <div className="page">
-      <Navbar
-        variant="dashboard" back={-1} subtitle="Edit Medical Record"
-        right={
-          <button onClick={handleSave} disabled={saving} className="btn btn-primary btn-sm">
+    <DashboardLayout>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-lg font-bold text-txt-primary">Edit Medical Record</h1>
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-        }
-      />
-      <div className="page-content-lg">
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Patient Info</h3>
+          </Button>
+        </div>
+
+        <div className="rounded-2xl bg-surface border border-border p-5">
+          <h3 className="font-bold text-txt-primary text-sm mb-3">Patient Info</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Name</span>
-              <span className="font-semibold text-gray-800">{record.patient_name}</span>
+              <span className="text-txt-muted">Name</span>
+              <span className="font-semibold text-txt-primary">{record.patient_name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Phone</span>
-              <span className="font-semibold text-gray-800">{record.patient_phone}</span>
+              <span className="text-txt-muted">Phone</span>
+              <span className="font-semibold text-txt-primary">{record.patient_phone}</span>
             </div>
             {record.patient_age && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Age</span>
-                <span className="font-semibold text-gray-800">{record.patient_age}</span>
+                <span className="text-txt-muted">Age</span>
+                <span className="font-semibold text-txt-primary">{record.patient_age}</span>
               </div>
             )}
           </div>
         </div>
 
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Vitals</h3>
+        <div className="rounded-2xl bg-surface border border-border p-5">
+          <h3 className="font-bold text-txt-primary text-sm mb-3">Vitals</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
               { key: 'bp', label: 'Blood Pressure', placeholder: '120/80' },
@@ -151,37 +154,37 @@ export default function EditRecord() {
               { key: 'heartRate', label: 'Heart Rate', placeholder: '72 bpm' },
             ].map(({ key, label, placeholder }) => (
               <div key={key}>
-                <label className="text-xs text-gray-400 mb-1 block">{label}</label>
-                <input value={vitals[key]} onChange={e => setVitals({ ...vitals, [key]: e.target.value })}
-                  className="input text-sm" placeholder={placeholder} />
+                <label className="text-xs text-txt-muted mb-1 block">{label}</label>
+                <Input value={vitals[key]} onChange={e => setVitals({ ...vitals, [key]: e.target.value })}
+                  placeholder={placeholder} />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Diagnosis *</h3>
+        <div className="rounded-2xl bg-surface border border-border p-5">
+          <h3 className="font-bold text-txt-primary text-sm mb-3">Diagnosis *</h3>
           <textarea value={diagnosis} onChange={e => setDiagnosis(e.target.value)}
-            className="input text-sm min-h-[100px] resize-y" placeholder="Enter diagnosis..." />
+            className="flex h-auto w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm text-txt-primary placeholder:text-txt-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[100px] resize-y" placeholder="Enter diagnosis..." />
         </div>
 
-        <div className="card p-5 mb-4">
-          <h3 className="font-bold text-gray-900 text-sm mb-3">Notes</h3>
+        <div className="rounded-2xl bg-surface border border-border p-5">
+          <h3 className="font-bold text-txt-primary text-sm mb-3">Notes</h3>
           <textarea value={notes} onChange={e => setNotes(e.target.value)}
-            className="input text-sm min-h-[80px] resize-y" placeholder="Additional notes..." />
+            className="flex h-auto w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm text-txt-primary placeholder:text-txt-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[80px] resize-y" placeholder="Additional notes..." />
         </div>
 
-        <div className="card p-5 mb-4">
+        <div className="rounded-2xl bg-surface border border-border p-5">
           <PrescriptionBuilder prescriptions={prescriptions} onChange={setPrescriptions} />
         </div>
 
         <div className="flex gap-3">
-          <button onClick={handleSave} disabled={saving} className="btn btn-primary btn-md flex-1">
+          <Button variant="primary" size="md" className="flex-1" onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
-          </button>
-          <button onClick={() => navigate(-1)} className="btn btn-secondary btn-md">Cancel</button>
+          </Button>
+          <Button variant="outline" size="md" onClick={() => navigate(-1)}>Cancel</Button>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

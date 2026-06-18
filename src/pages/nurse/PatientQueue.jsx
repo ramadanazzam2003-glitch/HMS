@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 import { motion } from 'framer-motion'
 import { Users, Hash } from 'lucide-react'
 
@@ -36,70 +41,70 @@ export default function PatientQueue() {
   }
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle="Patient Queue" />
-      <div className="page-content-lg">
+    <DashboardLayout>
+      <div className="space-y-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="grid grid-cols-3 gap-3 mb-5">
-            <motion.div className="card p-4 text-center bg-green-50 border-green-200" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <p className="font-display text-3xl font-extrabold text-green-600">{stats.active}</p>
-              <p className="text-xs text-green-600">Waiting</p>
+          <div className="grid grid-cols-3 gap-4 mb-5">
+            <motion.div className="rounded-2xl p-5 bg-green-50 border border-green-200 text-center" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <p className="text-3xl font-extrabold text-green-600">{stats.active}</p>
+              <p className="text-xs text-green-600 font-semibold mt-1">Waiting</p>
             </motion.div>
-            <motion.div className="card p-4 text-center bg-blue-50 border-blue-200" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <p className="font-display text-3xl font-extrabold text-blue-600">{stats.completed}</p>
-              <p className="text-xs text-blue-600">Completed</p>
+            <motion.div className="rounded-2xl p-5 bg-blue-50 border border-blue-200 text-center" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <p className="text-3xl font-extrabold text-blue-600">{stats.completed}</p>
+              <p className="text-xs text-blue-600 font-semibold mt-1">Completed</p>
             </motion.div>
-            <motion.div className="card p-4 text-center bg-red-50 border-red-200" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <p className="font-display text-3xl font-extrabold text-red-500">{stats.cancelled}</p>
-              <p className="text-xs text-red-500">Cancelled</p>
+            <motion.div className="rounded-2xl p-5 bg-red-50 border border-red-200 text-center" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <p className="text-3xl font-extrabold text-red-500">{stats.cancelled}</p>
+              <p className="text-xs text-red-500 font-semibold mt-1">Cancelled</p>
             </motion.div>
           </div>
 
           <div className="flex gap-2 mb-5">
             {['active', 'completed', 'cancelled', 'all'].map(f => (
-              <motion.button key={f} onClick={() => setFilter(f)}
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                className={`btn btn-md capitalize ${filter === f ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-500 border-gray-200'}`}>
+              <Button key={f} variant={filter === f ? 'primary' : 'outline'} size="sm"
+                onClick={() => setFilter(f)} className="capitalize">
                 {f}
-              </motion.button>
+              </Button>
             ))}
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="spinner spinner-lg mx-auto mb-4" />
-              <p className="text-gray-400 font-medium">Loading...</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <Skeleton className="h-8 w-8 rounded-full mb-4" />
+              <p className="text-txt-muted font-medium">Loading...</p>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon"><Users size={48} className="text-gray-300" /></div>
-              <p className="empty-state-title">No Patients</p>
-              <p className="empty-state-desc">No patients match this filter.</p>
-            </div>
+            <Card>
+              <CardContent className="py-12 text-center">
+                <div className="mb-4"><Users size={48} className="text-txt-muted mx-auto" /></div>
+                <p className="font-semibold text-txt-primary">No Patients</p>
+                <p className="text-txt-muted text-sm mt-1">No patients match this filter.</p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="flex flex-col gap-2.5">
               {filtered.map((b, i) => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  className="card p-4 flex items-center justify-between gap-3">
+                  className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 shadow-card">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-sm font-bold text-blue-600 shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-sm font-bold text-primary shrink-0">
                       <Hash size={14} /> {b.queue_number || i + 1}
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{b.patient_name}</p>
-                      <p className="text-xs text-gray-400">{b.slot_time} · {b.doctors?.name} · {b.departments?.name_en}</p>
+                      <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
+                      <p className="text-xs text-txt-muted">{b.slot_time} · {b.doctors?.name} · {b.departments?.name_en}</p>
                     </div>
                   </div>
-                  <span className={`badge ${b.status === 'active' ? 'badge-success' : b.status === 'completed' ? 'badge-primary' : 'badge-danger'}`}>
+                  <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
                     {b.status}
-                  </span>
+                  </Badge>
                 </motion.div>
               ))}
             </div>
           )}
         </motion.div>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

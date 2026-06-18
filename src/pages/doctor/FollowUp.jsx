@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Skeleton } from '../../components/ui/skeleton'
 
 const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 
@@ -105,62 +108,60 @@ export default function FollowUp() {
   }
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/doctor" subtitle="Schedule Follow-Up" />
-      <div className="page-content-lg">
+    <DashboardLayout>
+      <div className="space-y-4">
+        <h1 className="font-display text-lg font-bold text-txt-primary">Schedule Follow-Up</h1>
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="spinner spinner-lg mx-auto mb-4" />
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
           </div>
         ) : !selectedPatient ? (
           <div>
-            <h3 className="font-bold text-gray-900 text-sm mb-4">Recent Patients</h3>
+            <h3 className="font-bold text-txt-primary text-sm mb-4">Recent Patients</h3>
             {recentPatients.length === 0 ? (
-              <div className="card empty-state">
-                <div className="empty-state-icon">👥</div>
-                <p className="empty-state-title">No Patients</p>
-                <p className="empty-state-desc">No recent patients found.</p>
+              <div className="rounded-2xl bg-surface border border-border p-10 text-center">
+                <p className="text-txt-primary font-semibold">No Patients</p>
+                <p className="text-txt-muted text-sm mt-1">No recent patients found.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-2.5">
                 {recentPatients.map((p, i) => (
                   <button key={p.phone} onClick={() => setSelectedPatient(p)}
-                    className="card p-4 flex items-center justify-between gap-3 text-left animate-fadeIn hover:shadow-md transition-all"
+                    className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 text-left animate-fadeIn hover:shadow-md transition-all"
                     style={{ animationDelay: `${i * 30}ms` }}>
                     <div>
-                      <p className="font-semibold text-gray-900 text-sm">{p.name}</p>
-                      <p className="text-xs text-gray-400">{p.phone} · {p.department}</p>
-                      <p className="text-xs text-gray-400">Last visit: {p.lastVisit}</p>
-                      <p className="text-xs text-blue-600 mt-0.5">Diagnosis: {p.diagnosis}</p>
+                      <p className="font-semibold text-txt-primary text-sm">{p.name}</p>
+                      <p className="text-xs text-txt-muted">{p.phone} · {p.department}</p>
+                      <p className="text-xs text-txt-muted">Last visit: {p.lastVisit}</p>
+                      <p className="text-xs text-primary mt-0.5">Diagnosis: {p.diagnosis}</p>
                     </div>
-                    <span className="text-lg text-gray-400">→</span>
+                    <span className="text-lg text-txt-muted">→</span>
                   </button>
                 ))}
               </div>
             )}
           </div>
         ) : (
-          <div className="card p-6 animate-fadeIn">
+          <div className="rounded-2xl bg-surface border border-border p-6 animate-fadeIn">
             <div className="flex justify-between items-start mb-5">
               <div>
-                <h3 className="font-bold text-gray-900 text-base">{selectedPatient.name}</h3>
-                <p className="text-xs text-gray-400">{selectedPatient.phone} · {selectedPatient.department}</p>
+                <h3 className="font-bold text-txt-primary text-base">{selectedPatient.name}</h3>
+                <p className="text-xs text-txt-muted">{selectedPatient.phone} · {selectedPatient.department}</p>
               </div>
-              <button onClick={() => setSelectedPatient(null)} className="btn btn-ghost btn-sm text-gray-500">← Change</button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedPatient(null)}>← Change</Button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="input-label">Follow-Up Date *</label>
-                <input type="date" value={form.booking_date}
+                <label className="text-xs font-medium text-txt-secondary mb-1.5 block">Follow-Up Date *</label>
+                <Input type="date" value={form.booking_date}
                   min={new Date().toISOString().slice(0, 10)}
-                  onChange={e => setForm({ ...form, booking_date: e.target.value, slot_time: '' })}
-                  className="input" />
+                  onChange={e => setForm({ ...form, booking_date: e.target.value, slot_time: '' })} />
               </div>
 
               {form.booking_date && (
                 <div>
-                  <label className="input-label">Available Slots *</label>
+                  <label className="text-xs font-medium text-txt-secondary mb-1.5 block">Available Slots *</label>
                   <div className="grid grid-cols-4 gap-2">
                     {(doctor?.slots || []).map(slot => {
                       const isBooked = bookedSlots.includes(slot)
@@ -170,8 +171,8 @@ export default function FollowUp() {
                           onClick={() => setForm({ ...form, slot_time: slot })}
                           className={`rounded-xl p-2.5 text-sm font-semibold border-2 transition-all ${
                             isBooked ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed line-through'
-                            : isSelected ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white text-gray-800 border-gray-100 cursor-pointer hover:border-blue-300'
+                            : isSelected ? 'bg-primary text-white border-primary'
+                            : 'bg-surface text-txt-primary border-border cursor-pointer hover:border-primary/50'
                           }`}>
                           {slot}
                         </button>
@@ -182,23 +183,22 @@ export default function FollowUp() {
               )}
 
               <div>
-                <label className="input-label">Notes</label>
+                <label className="text-xs font-medium text-txt-secondary mb-1.5 block">Notes</label>
                 <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
-                  className="input text-sm min-h-[80px] resize-y"
+                  className="flex h-auto w-full rounded-xl border border-border bg-surface px-4 py-2 text-sm text-txt-primary placeholder:text-txt-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 min-h-[80px] resize-y"
                   placeholder="Follow-up reason or instructions..." />
               </div>
 
               <div className="flex gap-3">
-                <button onClick={handleSchedule} disabled={saving || !form.slot_time}
-                  className="btn btn-primary btn-md flex-1">
+                <Button variant="primary" size="md" className="flex-1" onClick={handleSchedule} disabled={saving || !form.slot_time}>
                   {saving ? 'Scheduling...' : 'Schedule Follow-Up'}
-                </button>
-                <button onClick={() => setSelectedPatient(null)} className="btn btn-secondary btn-md">Cancel</button>
+                </Button>
+                <Button variant="outline" size="md" onClick={() => setSelectedPatient(null)}>Cancel</Button>
               </div>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -3,10 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Users, Shield, Pencil, Trash2, Search, Lock } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
-import Navbar from '../../components/Navbar'
+import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { useUI } from '../../hooks/useUI'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Card, CardContent } from '../../components/ui/card'
+import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
+import { Badge } from '../../components/ui/badge'
+import { Skeleton } from '../../components/ui/skeleton'
 
 export default function AdminPanel() {
   const navigate = useNavigate()
@@ -124,202 +129,205 @@ export default function AdminPanel() {
 
   if (!hasPermission('users:manage')) {
     return (
-      <div className="page">
-        <Navbar variant="dashboard" back="/dashboard" subtitle={t.adminPanel} />
-        <div className="flex-1 flex items-center justify-center p-10">
-          <div className="card" style={{ padding: 48, textAlign: 'center' }}>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}><Lock size={48} style={{ color: 'var(--text-disabled)' }} /></div>
-            <h2 style={{ fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{t.back}</h2>
-            <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>{t.adminPanel}</p>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-primary btn-md">{t.back}</button>
-          </div>
-        </div>
-      </div>
+      <DashboardLayout>
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <Lock size={48} className="text-txt-disabled mb-4" />
+            <h2 className="font-bold text-txt-primary mb-2">{isRTL ? 'وصول مرفوض' : 'Access Denied'}</h2>
+            <p className="text-txt-muted mb-6">{t.adminPanel}</p>
+            <Button onClick={() => navigate('/dashboard')}>{t.back}</Button>
+          </CardContent>
+        </Card>
+      </DashboardLayout>
     )
   }
 
   return (
-    <div className="page">
-      <Navbar variant="dashboard" back="/dashboard" subtitle={t.adminPanel} />
-
-      <div className="page-content-lg">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-            {[
-              { id: 'users', label: t.users, icon: <Users size={16} /> },
-              { id: 'roles', label: t.rolesPermissions, icon: <Shield size={16} /> },
-            ].map(tabItem => (
-              <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
-                className="btn btn-md"
-                style={{
-                  background: tab === tabItem.id ? 'var(--primary)' : 'var(--surface)',
-                  color: tab === tabItem.id ? '#fff' : 'var(--text-secondary)',
-                  border: `1.5px solid ${tab === tabItem.id ? 'var(--primary)' : 'var(--border)'}`,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                {tabItem.icon}{tabItem.label}
-              </button>
-            ))}
+    <DashboardLayout>
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-txt-primary">{t.adminPanel}</h1>
+            <p className="text-txt-muted text-sm mt-1">{isRTL ? 'إدارة المستخدمين والأدوار والصلاحيات' : 'Manage users, roles and permissions'}</p>
           </div>
+        </div>
 
-          {tab === 'users' && (
-            <div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 mb-5">
+        <div className="flex gap-2">
+          {[
+            { id: 'users', label: t.users, icon: <Users size={16} /> },
+            { id: 'roles', label: t.rolesPermissions, icon: <Shield size={16} /> },
+          ].map(tabItem => (
+            <button key={tabItem.id} onClick={() => setTab(tabItem.id)}
+              className={`h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                tab === tabItem.id
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
+              }`}>
+              {tabItem.icon}{tabItem.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'users' && (
+          <div>
+            {/* Role Count Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5 mb-5">
+              {roles.map(r => (
+                <motion.div key={r.id} className="rounded-2xl p-3.5 text-center bg-surface border border-border cursor-pointer hover:border-primary-border transition-colors"
+                  onClick={() => setFilterRole(filterRole === r.name ? 'all' : r.name)}>
+                  <p className="text-2xl font-extrabold text-txt-primary">{users.filter(u => u.role_id === r.id).length}</p>
+                  <p className="text-[11px] text-txt-muted capitalize">{r.name.replace('_', ' ')}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Search & Filter */}
+            <div className="flex gap-3 mb-4 flex-wrap">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none left-3" />
+                <Input value={search} onChange={e => setSearch(e.target.value)} className="h-9 text-sm ps-9" placeholder={t.searchByNameEmail} />
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
+                <button onClick={() => setFilterRole('all')}
+                  className={`h-9 px-3 rounded-xl text-xs font-semibold transition-all ${
+                    filterRole === 'all' ? 'bg-primary text-white' : 'bg-surface text-txt-secondary border border-border'
+                  }`}>{t.all}</button>
                 {roles.map(r => (
-                  <motion.div key={r.id} className="card p-3.5 text-center cursor-pointer hover:border-blue-200 transition-colors"
-                    onClick={() => setFilterRole(filterRole === r.name ? 'all' : r.name)}
-                    whileHover={{ scale: 1.03 }}>
-                    <p className="text-2xl font-extrabold text-gray-800">{users.filter(u => u.role_id === r.id).length}</p>
-                    <p className="text-[11px] text-gray-400 capitalize">{r.name.replace('_', ' ')}</p>
-                  </motion.div>
+                  <button key={r.id} onClick={() => setFilterRole(r.name)}
+                    className={`h-9 px-3 rounded-xl text-xs font-semibold capitalize transition-all ${
+                      filterRole === r.name ? 'bg-primary text-white' : 'bg-surface text-txt-secondary border border-border'
+                    }`}>
+                    {r.name.replace('_', ' ')}
+                  </button>
                 ))}
               </div>
-
-              <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
-                <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
-                  <span style={{ position: 'absolute', insetInlineStart: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }}><Search size={16} /></span>
-                  <input value={search} onChange={e => setSearch(e.target.value)} className="input" style={{ paddingInlineStart: 36 }} placeholder={t.searchByNameEmail} />
-                </div>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  <button onClick={() => setFilterRole('all')}
-                    className="btn btn-sm"
-                    style={{
-                      background: filterRole === 'all' ? 'var(--primary)' : 'var(--surface)',
-                      color: filterRole === 'all' ? '#fff' : 'var(--text-secondary)',
-                      border: `1.5px solid ${filterRole === 'all' ? 'var(--primary)' : 'var(--border)'}`,
-                    }}>{t.all}</button>
-                  {roles.map(r => (
-                    <button key={r.id} onClick={() => setFilterRole(r.name)}
-                      className="btn btn-sm"
-                      style={{
-                        background: filterRole === r.name ? 'var(--primary)' : 'var(--surface)',
-                        color: filterRole === r.name ? '#fff' : 'var(--text-secondary)',
-                        border: `1.5px solid ${filterRole === r.name ? 'var(--primary)' : 'var(--border)'}`,
-                        textTransform: 'capitalize',
-                      }}>
-                      {r.name.replace('_', ' ')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {loading ? (
-                <div className="flex justify-center py-12"><div className="spinner spinner-lg" /></div>
-              ) : filtered.length === 0 ? (
-                <div className="card empty-state"><div className="empty-state-icon"><Users size={48} className="text-gray-300" /></div><p className="empty-state-title">No Users Found</p></div>
-              ) : (
-                <div className="card p-0 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-xs">
-                      <thead>
-                        <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                          {[t.patient, t.role, t.date, t.actions].map(col => (
-                            <th key={col} style={{ padding: '10px 14px', textAlign: 'start', fontWeight: 600, color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>{col}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filtered.map((u, i) => (
-                          <motion.tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}
-                            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}>
-                            <td style={{ padding: '10px 14px', fontWeight: 600, color: 'var(--text-primary)' }}>{u.full_name || '—'}</td>
-                            <td style={{ padding: '10px 14px' }}>
-                              {editingUser === u.id ? (
-                                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                                  <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                    className="input" style={{ padding: '4px 8px', fontSize: 12, width: 140 }}>
-                                    {roles.map(r => <option key={r.id} value={r.id}>{r.name.replace('_', ' ')}</option>)}
-                                  </select>
-                                  <button onClick={() => handleRoleChange(u.id, parseInt(newRole))} className="btn btn-primary btn-sm" style={{ fontSize: 11 }}>{t.save}</button>
-                                  <button onClick={() => setEditingUser(null)} className="btn btn-ghost btn-sm" style={{ fontSize: 11 }}>{t.cancel}</button>
-                                </div>
-                              ) : getRoleBadge(u.roles?.name)}
-                            </td>
-                            <td style={{ padding: '10px 14px', color: 'var(--text-muted)', fontSize: 12 }}>{new Date(u.created_at).toLocaleDateString()}</td>
-                            <td style={{ padding: '10px 14px' }}>
-                              {editingUser !== u.id && (
-                                <div style={{ display: 'flex', gap: 6 }}>
-                                  <button onClick={() => { setEditingUser(u.id); setNewRole(u.role_id) }} className="btn btn-ghost btn-sm" style={{ color: 'var(--primary)', fontSize: 12 }}><Pencil size={12} /> {t.edit}</button>
-                                  <button onClick={() => handleDeleteUser(u.id)} className="btn btn-ghost btn-sm" style={{ color: 'var(--danger)', fontSize: 12 }}><Trash2 size={12} /> {t.delete}</button>
-                                </div>
-                              )}
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div style={{ padding: '8px 14px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
-                    {t.showing} {filtered.length} {t.of} {users.length}
-                  </div>
-                </div>
-              )}
             </div>
-          )}
 
-          {tab === 'roles' && (
-            <div className="flex flex-col gap-5">
-              {roles.map(r => {
-                const rpList = getPermsForRole(r.id)
-                const isEditing = editingRolePerms === r.id
-                return (
-                  <motion.div key={r.id} className="card p-6"
-                    initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        {getRoleBadge(r.name)}
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{rpList.length} {t.permissions}</span>
+            {/* Users Table */}
+            {loading ? (
+              <div className="space-y-2">
+                {[1,2,3,4,5].map(i => <Skeleton key={i} className="h-12 rounded-xl" />)}
+              </div>
+            ) : filtered.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Users size={48} className="text-txt-disabled mb-4" />
+                  <p className="font-semibold text-txt-primary">{isRTL ? 'لا يوجد مستخدمين' : 'No Users Found'}</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="p-0 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-surface-hover/50">
+                        {[t.patient, t.role, t.date, t.actions].map(col => (
+                          <th key={col} className="px-4 py-3 text-start font-semibold text-txt-muted text-xs whitespace-nowrap">{col}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((u, i) => (
+                        <motion.tr key={u.id} className="border-b border-border last:border-0 hover:bg-surface-hover/50 transition-colors"
+                          initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.02 }}>
+                          <td className="px-4 py-3 font-medium text-txt-primary">{u.full_name || '—'}</td>
+                          <td className="px-4 py-3">
+                            {editingUser === u.id ? (
+                              <div className="flex gap-1.5 items-center">
+                                <select value={newRole} onChange={e => setNewRole(e.target.value)}
+                                  className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                  {roles.map(r => <option key={r.id} value={r.id}>{r.name.replace('_', ' ')}</option>)}
+                                </select>
+                                <Button size="xs" onClick={() => handleRoleChange(u.id, parseInt(newRole))}>{t.save}</Button>
+                                <Button variant="ghost" size="xs" onClick={() => setEditingUser(null)}>{t.cancel}</Button>
+                              </div>
+                            ) : getRoleBadge(u.roles?.name)}
+                          </td>
+                          <td className="px-4 py-3 text-txt-muted text-xs">{new Date(u.created_at).toLocaleDateString()}</td>
+                          <td className="px-4 py-3">
+                            {editingUser !== u.id && (
+                              <div className="flex gap-1.5">
+                                <Button variant="ghost" size="xs" className="text-primary"
+                                  onClick={() => { setEditingUser(u.id); setNewRole(u.role_id) }}>
+                                  <Pencil size={12} /> {t.edit}
+                                </Button>
+                                <Button variant="ghost" size="xs" className="text-danger"
+                                  onClick={() => handleDeleteUser(u.id)}>
+                                  <Trash2 size={12} /> {t.delete}
+                                </Button>
+                              </div>
+                            )}
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-4 py-3 border-t border-border text-sm text-txt-muted">
+                  {t.showing} {filtered.length} {t.of} {users.length}
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {tab === 'roles' && (
+          <div className="space-y-5">
+            {roles.map(r => {
+              const rpList = getPermsForRole(r.id)
+              const isEditing = editingRolePerms === r.id
+              return (
+                <motion.div key={r.id} className="rounded-2xl p-6 bg-surface border border-border"
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      {getRoleBadge(r.name)}
+                      <span className="text-xs text-txt-muted">{rpList.length} {t.permissions}</span>
+                    </div>
+                    {role === 'manager' && (
+                      <button onClick={() => isEditing ? setEditingRolePerms(null) : startEditRolePerms(r.id)}
+                        className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-all ${
+                          isEditing ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-200'
+                        }`}>
+                        {isEditing ? t.cancel : t.edit}
+                      </button>
+                    )}
+                  </div>
+
+                  {isEditing ? (
+                    <div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {permissions.map(p => (
+                          <button key={p.id} onClick={() => togglePerm(p.id)}
+                            className={`h-8 px-3 rounded-lg text-xs font-semibold transition-all ${
+                              selectedPerms.includes(p.id)
+                                ? 'bg-primary text-white'
+                                : 'bg-surface text-txt-secondary border border-border'
+                            }`}>
+                            {p.name}
+                          </button>
+                        ))}
                       </div>
-                      {role === 'manager' && (
-                        <button onClick={() => isEditing ? setEditingRolePerms(null) : startEditRolePerms(r.id)}
-                          className="btn btn-sm"
-                          style={{
-                            background: isEditing ? 'var(--danger-light)' : 'var(--primary-light)',
-                            color: isEditing ? 'var(--danger)' : 'var(--primary)',
-                            border: `1.5px solid ${isEditing ? 'var(--danger-border)' : 'var(--primary-border)'}`,
-                          }}>
-                          {isEditing ? t.cancel : t.edit}
-                        </button>
+                      <Button size="sm" onClick={() => handleUpdateRolePerms(r.id)}>{t.save}</Button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {rpList.length > 0 ? rpList.map(pId => {
+                        const perm = permissions.find(p => p.id === pId)
+                        return perm ? (
+                          <span key={pId} className="px-2.5 py-1 rounded-lg bg-surface-hover border border-border text-xs text-txt-secondary">{perm.name}</span>
+                        ) : null
+                      }) : (
+                        <span className="text-xs text-txt-muted italic">{t.noData}</span>
                       )}
                     </div>
-
-                    {isEditing ? (
-                      <div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-                          {permissions.map(p => (
-                            <button key={p.id} onClick={() => togglePerm(p.id)}
-                              className="btn btn-sm"
-                              style={{
-                                fontSize: 11,
-                                background: selectedPerms.includes(p.id) ? 'var(--primary)' : 'var(--surface)',
-                                color: selectedPerms.includes(p.id) ? '#fff' : 'var(--text-secondary)',
-                                border: `1.5px solid ${selectedPerms.includes(p.id) ? 'var(--primary)' : 'var(--border)'}`,
-                              }}>
-                              {p.name}
-                            </button>
-                          ))}
-                        </div>
-                        <button onClick={() => handleUpdateRolePerms(r.id)} className="btn btn-primary btn-md">{t.save}</button>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                        {rpList.length > 0 ? rpList.map(pId => {
-                          const perm = permissions.find(p => p.id === pId)
-                          return perm ? (
-                            <span key={pId} style={{ background: 'var(--surface-hover)', border: '1px solid var(--border)', padding: '2px 8px', borderRadius: 6, fontSize: 11, color: 'var(--text-secondary)' }}>{perm.name}</span>
-                          ) : null
-                        }) : (
-                          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t.noData}</span>
-                        )}
-                      </div>
-                    )}
-                  </motion.div>
-                )
-              })}
-            </div>
-          )}
-        </motion.div>
+                  )}
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
