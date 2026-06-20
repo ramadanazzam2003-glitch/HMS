@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Stethoscope, UserRound, Clock, CalendarDays, ArrowRight } from 'lucide-react'
-import { useLanguage } from '../../contexts/LanguageContext'
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function DoctorCard({ doc, bookingType, isAvailableToday, onSelect, animDelay }) {
   const { t } = useLanguage()

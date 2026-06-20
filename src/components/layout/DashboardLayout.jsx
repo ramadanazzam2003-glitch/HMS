@@ -150,8 +150,11 @@ export default function DashboardLayout({ children }) {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto scrollbar-hide p-3 space-y-1">
           {filteredItems.map((item) => {
-            const isActive = location.pathname === item.path ||
-              (item.path !== '/dashboard' && location.pathname.startsWith(item.path))
+       const isActive = location.pathname === item.path ||
+  (item.path !== '/dashboard' &&
+   item.path !== '/doctor' &&
+   item.path !== '/receptionist' &&
+   location.pathname.startsWith(item.path + '/'))
             const Icon = item.icon
             return (
               <button
