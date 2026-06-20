@@ -60,7 +60,24 @@ export default function DoctorDashboard() {
   }, [user?.id])
 
   const handleComplete = async (id) => {
-    await supabase.from('bookings').update({ status: 'completed' }).eq('id', id)
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ status: 'completed' })
+      .eq('id', id)
+      .select()
+
+    if (error) {
+      console.error('Failed to mark booking complete:', error)
+      alert('فشل تحديث الحجز، تأكد من صلاحيات RLS')
+      return
+    }
+
+    if (!data || data.length === 0) {
+      console.error('Update blocked silently — likely RLS policy issue (0 rows affected)')
+      alert('الـ update اتمنع — غالبًا مشكلة RLS policy')
+      return
+    }
+
     setTodayBookings(prev => prev.map(b => b.id === id ? { ...b, status: 'completed' } : b))
     setStats(prev => ({ ...prev, active: prev.active - 1, completed: prev.completed + 1 }))
   }

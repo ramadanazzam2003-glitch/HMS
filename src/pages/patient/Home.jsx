@@ -130,7 +130,7 @@ export default function Home() {
       <HomeSections hideFooter hideWhyChooseUs />
 
       {/* Departments Section with Real Data */}
-      <section ref={departmentsSectionRef} className="py-16 lg:py-20 bg-surface">
+      <section id="departments" ref={departmentsSectionRef} className="py-16 lg:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 lg:px-6" dir={isRTL ? 'rtl' : 'ltr'}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -222,7 +222,7 @@ export default function Home() {
                 <Button size="lg" className="bg-surface text-primary hover:bg-surface/90 shadow-xl" onClick={() => navigate('/register')}>
                   {t.bookNow}
                 </Button>
-                <Button variant="outline" size="lg" className="border-white/30 text-white bg-transparent hover:bg-surface/10">
+                <Button variant="outline" size="lg" className="border-white/30 text-white bg-transparent hover:bg-surface/10" onClick={() => window.location.href = 'tel:+20123456789'}>
                   {t.callUs}
                 </Button>
               </div>

@@ -175,7 +175,24 @@ export default function Settings() {
   }
 
   const saveDept = async () => {
-    if (!deptForm.name_en) return toast('Department name is required', { type: 'error' })
+    const nameEn = (deptForm.name_en || '').trim()
+    const nameAr = (deptForm.name_ar || '').trim()
+
+    if (!nameEn) return toast('Department name is required', { type: 'error' })
+
+    // فاليديشن: لازم 3 حروف على الأقل (سواء بالإنجليزي أو العربي لو موجود)
+    if (nameEn.length < 3) return toast('Department name must be at least 3 characters', { type: 'error' })
+    if (nameAr && nameAr.length < 3) return toast('Arabic department name must be at least 3 characters', { type: 'error' })
+
+    // فاليديشن: منع تكرار القسم (بالاسم الإنجليزي أو العربي) لو القسم ده مش هو نفسه اللي بيتعدل
+    const isDuplicate = departments.some(d => {
+      if (editingDept && d.id === editingDept) return false
+      const sameEn = d.name_en?.trim().toLowerCase() === nameEn.toLowerCase()
+      const sameAr = nameAr && d.name_ar?.trim() === nameAr
+      return sameEn || sameAr
+    })
+    if (isDuplicate) return toast('This department already exists', { type: 'error' })
+
     if (editingDept) await supabase.from('departments').update(deptForm).eq('id', editingDept)
     else await supabase.from('departments').insert(deptForm)
     setShowDeptForm(false); setEditingDept(null)
@@ -355,7 +372,7 @@ export default function Settings() {
                           className={`h-8 px-3 rounded-lg text-xs font-semibold border transition-all ${
                             dept.is_open ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-500 border-red-200'
                           }`}>
-                          {dept.is_open ? 'Open' : 'Closed'}
+                          {dept.is_open ? 'Active' : 'Inactive'}
                         </button>
                         <button onClick={() => startEditDept(dept)} className="h-8 w-8 flex items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50"><Pencil size={14} /></button>
                         <button onClick={() => deleteDept(dept.id)} className="h-8 w-8 flex items-center justify-center rounded-lg text-red-500 hover:bg-red-50"><Trash2 size={14} /></button>

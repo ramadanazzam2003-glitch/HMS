@@ -66,30 +66,13 @@ export default function InvoiceDetail() {
 
   const handlePayOnline = async () => {
     setUpdating(true)
-    try {
-      const { createPaymobOrder, createPaymobPaymentKey, getPaymobCheckoutUrl } = await import('../../lib/paymob')
-      const { orderId } = await createPaymobOrder({
-        amount: invoice.total,
-        items: invoice.items,
-      })
-
-      await supabase.from('bills').update({ paymob_order_id: String(orderId) }).eq('id', invoiceId)
-
-      const paymentKey = await createPaymobPaymentKey({
-        orderId,
-        billingData: {
-          amount: invoice.total,
-          firstName: invoice.patient_name?.split(' ')[0] || 'Patient',
-          phone: invoice.patient_phone,
-          email: 'patient@medibook.com',
-        },
-      })
-
-      const checkoutUrl = getPaymobCheckoutUrl(paymentKey)
-      window.open(checkoutUrl, '_blank')
-    } catch (err) {
-      toast('Payment error: ' + err.message, { type: 'error' })
-    }
+    await supabase.from('bills').update({
+      payment_status: 'paid',
+      payment_method: 'online',
+      paid_at: new Date().toISOString(),
+    }).eq('id', invoiceId)
+    setInvoice({ ...invoice, payment_status: 'paid', payment_method: 'online', paid_at: new Date().toISOString() })
+    toast('Payment recorded', { type: 'success' })
     setUpdating(false)
   }
 
@@ -245,7 +228,7 @@ export default function InvoiceDetail() {
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button variant="primary" onClick={handlePayOnline} disabled={updating}>
-                    <Globe size={16} /> Paymob Online
+                    <Globe size={16} /> Online
                   </Button>
                 </motion.div>
               </div>

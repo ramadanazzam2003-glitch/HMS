@@ -167,14 +167,14 @@ export default function DirectorDashboard() {
                 ) : (
                   <div className="space-y-2">
                     {recentBookings.map(b => (
-                      <div key={b.id} className="flex items-center justify-between p-3 bg-surface-hover rounded-xl">
-                        <div>
-                          <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
-                          <p className="text-xs text-txt-muted">
+                      <div key={b.id} className="flex items-center justify-between gap-2 p-3 bg-surface-hover rounded-xl">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-txt-primary text-sm truncate">{b.patient_name}</p>
+                          <p className="text-xs text-txt-muted truncate">
                             {isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en} &middot; {b.booking_date} &middot; {b.slot_time}
                           </p>
                         </div>
-                        <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                        <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'} className="shrink-0">
                           {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
                         </Badge>
                       </div>

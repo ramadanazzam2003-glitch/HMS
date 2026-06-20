@@ -251,7 +251,7 @@ export default function Doctors() {
         ) : (
           <div className="space-y-8">
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-base font-bold text-txt-primary flex items-center gap-1.5">
                   <Stethoscope size={16} /> {t.consultants} ({doctorsList.filter(d => d.type === 'consultant').length})
                 </h2>
@@ -264,7 +264,7 @@ export default function Doctors() {
             <div className="border-t border-border" />
 
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="text-base font-bold text-txt-primary flex items-center gap-1.5">
                   <Stethoscope size={16} /> {t.doctorsTab} ({doctorsList.filter(d => d.type === 'doctor').length})
                 </h2>

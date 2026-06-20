@@ -137,7 +137,7 @@ export default function Overview() {
         animate="visible"
       >
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
           <div>
             <h1 className="text-2xl font-extrabold text-txt-primary">
               {isRTL ? 'لوحة التحكم' : 'Dashboard'}
@@ -146,7 +146,7 @@ export default function Overview() {
               {isRTL ? `مرحباً بعودتك، ${profile?.full_name || 'User'}` : `Welcome back, ${profile?.full_name || 'User'}`}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <Badge variant="success" className="text-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-success mr-1.5 inline-block animate-pulse" />
               {isRTL ? 'النظام يعمل' : 'System Active'}

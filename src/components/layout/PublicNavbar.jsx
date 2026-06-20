@@ -82,7 +82,7 @@ export default function PublicNavbar({ back }) {
           {/* Actions */}
           <div className="flex items-center gap-2">
             {/* AI Triage Icon */}
-            <button
+            {/* <button
               onClick={() => navigate('/triage')}
               className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border text-sm font-medium text-txt-secondary hover:bg-primary-light hover:text-primary hover:border-primary/30 transition-all"
               title={isRTL ? 'المساعد الذكي' : 'AI Triage'}
@@ -95,7 +95,7 @@ export default function PublicNavbar({ back }) {
                 <path d="M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/>
               </svg>
               <span className="hidden xl:inline">{isRTL ? 'المساعد الذكي ' : 'AI Triage'}</span>
-            </button>
+            </button> */}
 
             <button
               onClick={toggleTheme}

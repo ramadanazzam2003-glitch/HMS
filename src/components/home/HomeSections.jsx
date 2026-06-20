@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { motion } from 'framer-motion'
 import { Stethoscope, Bone, Brain, Heart, Activity, Baby, Eye, Ear } from 'lucide-react'
@@ -16,8 +16,18 @@ const departments = [
 
 export default function HomeSections({ hideFooter, hideWhyChooseUs, hideStats }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { lang, t } = useLanguage()
   const isRTL = lang === 'ar'
+
+  const scrollToSection = (id) => {
+    if (location.pathname !== '/') { navigate('/'); setTimeout(() => scrollToId(id), 150); return }
+    scrollToId(id)
+  }
+  const scrollToId = (id) => {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <>
@@ -137,8 +147,13 @@ export default function HomeSections({ hideFooter, hideWhyChooseUs, hideStats })
             <div>
               <h4 className="font-bold text-txt-primary mb-4">{t.quickLinks}</h4>
               <ul className="space-y-2.5 text-sm text-txt-muted">
-                {['footerHome', 'footerDepartments', 'footerDoctors', 'footerServices'].map(link => (
-                  <li key={link}><button className="hover:text-primary transition-colors">{t[link]}</button></li>
+                {[
+                  { key: 'footerHome', action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+                  { key: 'footerDepartments', action: () => scrollToSection('departments') },
+                  { key: 'footerDoctors', action: () => navigate('/register') },
+                  { key: 'footerServices', action: () => navigate('/') },
+                ].map(link => (
+                  <li key={link.key}><button className="hover:text-primary transition-colors" onClick={link.action}>{t[link.key]}</button></li>
                 ))}
               </ul>
             </div>
@@ -146,7 +161,7 @@ export default function HomeSections({ hideFooter, hideWhyChooseUs, hideStats })
               <h4 className="font-bold text-txt-primary mb-4">{t.footerDepartments}</h4>
               <ul className="space-y-2.5 text-sm text-txt-muted">
                 {['footerCardiology', 'footerOrthopedics', 'footerNeurology', 'footerPediatrics'].map(dept => (
-                  <li key={dept}><button className="hover:text-primary transition-colors">{t[dept]}</button></li>
+                  <li key={dept}><button className="hover:text-primary transition-colors" onClick={() => scrollToSection('departments')}>{t[dept]}</button></li>
                 ))}
               </ul>
             </div>
@@ -158,8 +173,13 @@ export default function HomeSections({ hideFooter, hideWhyChooseUs, hideStats })
                 <li>{isRTL ? 'القاهرة، مصر' : 'Cairo, Egypt'}</li>
               </ul>
               <div className="flex gap-2 mt-4">
-                {['facebook', 'twitter', 'instagram', 'linkedin'].map(social => (
-                  <button key={social} className="w-9 h-9 rounded-lg bg-surface-hover flex items-center justify-center text-txt-muted hover:bg-primary hover:text-white transition-all">
+                {[
+                  { key: 'facebook', url: 'https://facebook.com/medibook' },
+                  { key: 'twitter', url: 'https://twitter.com/medibook' },
+                  { key: 'instagram', url: 'https://instagram.com/medibook' },
+                  { key: 'linkedin', url: 'https://linkedin.com/company/medibook' },
+                ].map(social => (
+                  <button key={social.key} className="w-9 h-9 rounded-lg bg-surface-hover flex items-center justify-center text-txt-muted hover:bg-primary hover:text-white transition-all" onClick={() => window.open(social.url, '_blank')}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/></svg>
                   </button>
                 ))}

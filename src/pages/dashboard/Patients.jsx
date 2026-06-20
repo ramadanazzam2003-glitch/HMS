@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Users, ChevronDown } from 'lucide-react'
+import { Search, Users, ChevronDown, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useLanguage } from '../../contexts/LanguageContext'
@@ -16,7 +16,40 @@ export default function Patients() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [deletingPhone, setDeletingPhone] = useState(null)
   const PAGE_SIZE = 25
+
+  const loadPatients = async () => {
+    const { data } = await supabase
+      .from('bookings')
+      .select('patient_name, phone, age, booking_date, status, departments(name_en, name_ar)')
+      .order('created_at', { ascending: false })
+
+    const uniquePatients = {}
+    data?.forEach(b => {
+      const key = b.phone
+      if (!uniquePatients[key]) {
+        uniquePatients[key] = {
+          name: b.patient_name,
+          phone: b.phone,
+          age: b.age,
+          lastVisit: b.booking_date,
+          department: b.departments,
+          totalVisits: 0,
+          activeBookings: 0,
+        }
+      }
+      uniquePatients[key].totalVisits++
+      if (b.status === 'active') uniquePatients[key].activeBookings++
+      if (b.booking_date > uniquePatients[key].lastVisit) {
+        uniquePatients[key].lastVisit = b.booking_date
+        uniquePatients[key].department = b.departments
+      }
+    })
+
+    setPatients(Object.values(uniquePatients))
+    setLoading(false)
+  }
 
   useEffect(() => {
     let ignore = false
@@ -53,6 +86,31 @@ export default function Patients() {
     load()
     return () => { ignore = true }
   }, [])
+
+  const handleDeletePatient = async (phone, name) => {
+    const confirmMsg = isRTL
+      ? `هل أنت متأكد من حذف المريض "${name}"؟ سيتم حذف جميع حجوزاته نهائيًا.`
+      : `Are you sure you want to delete patient "${name}"? All their bookings will be permanently deleted.`
+
+    if (!window.confirm(confirmMsg)) return
+
+    setDeletingPhone(phone)
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('phone', phone)
+
+      if (error) throw error
+
+      setPatients(prev => prev.filter(p => p.phone !== phone))
+    } catch (err) {
+      console.error('Error deleting patient:', err)
+      alert(isRTL ? 'حدث خطأ أثناء حذف المريض' : 'An error occurred while deleting the patient')
+    } finally {
+      setDeletingPhone(null)
+    }
+  }
 
   const filtered = patients.filter(p =>
     !search ||
@@ -117,8 +175,8 @@ export default function Patients() {
                 <thead>
                   <tr className="border-b border-border bg-surface-hover/50">
                     {(isRTL
-                      ? ['الاسم', 'الهاتف', 'العمر', 'القسم', 'آخر زيارة', 'الزيارات', 'الحجوزات النشطة']
-                      : ['Name', 'Phone', 'Age', 'Department', 'Last Visit', 'Total Visits', 'Active Bookings']
+                      ? ['الاسم', 'الهاتف', 'العمر', 'القسم', 'آخر زيارة', 'الزيارات', 'الحجوزات النشطة', 'إجراءات']
+                      : ['Name', 'Phone', 'Age', 'Department', 'Last Visit', 'Total Visits', 'Active Bookings', 'Actions']
                     ).map(col => (
                       <th key={col} className="px-4 py-3 text-start font-semibold text-txt-muted text-xs whitespace-nowrap">{col}</th>
                     ))}
@@ -154,6 +212,16 @@ export default function Patients() {
                         <Badge variant={p.activeBookings > 0 ? 'success' : 'secondary'} className="text-[10px]">
                           {p.activeBookings}
                         </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDeletePatient(p.phone, p.name)}
+                          disabled={deletingPhone === p.phone}
+                          title={isRTL ? 'حذف المريض' : 'Delete patient'}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-error hover:bg-error-light disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </td>
                     </motion.tr>
                   ))}
