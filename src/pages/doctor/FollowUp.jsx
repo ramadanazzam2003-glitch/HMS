@@ -127,7 +127,7 @@ export default function FollowUp() {
               <div className="flex flex-col gap-2.5">
                 {recentPatients.map((p, i) => (
                   <button key={p.phone} onClick={() => setSelectedPatient(p)}
-                    className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 text-left animate-fadeIn hover:shadow-md transition-all"
+                    className="rounded-2xl bg-surface border border-border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left animate-fadeIn hover:shadow-md transition-all"
                     style={{ animationDelay: `${i * 30}ms` }}>
                     <div>
                       <p className="font-semibold text-txt-primary text-sm">{p.name}</p>
@@ -162,7 +162,7 @@ export default function FollowUp() {
               {form.booking_date && (
                 <div>
                   <label className="text-xs font-medium text-txt-secondary mb-1.5 block">Available Slots *</label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {(doctor?.slots || []).map(slot => {
                       const isBooked = bookedSlots.includes(slot)
                       const isSelected = form.slot_time === slot
@@ -189,7 +189,7 @@ export default function FollowUp() {
                   placeholder="Follow-up reason or instructions..." />
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <Button variant="primary" size="md" className="flex-1" onClick={handleSchedule} disabled={saving || !form.slot_time}>
                   {saving ? 'Scheduling...' : 'Schedule Follow-Up'}
                 </Button>

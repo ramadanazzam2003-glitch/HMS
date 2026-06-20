@@ -107,7 +107,7 @@ export default function WalkInBooking() {
     <DashboardLayout>
       <div className="space-y-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="flex gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-6">
             {[1, 2, 3].map(s => (
               <div key={s} className={`flex-1 h-1.5 rounded-full ${step >= s ? 'bg-primary' : 'bg-border'}`} />
             ))}
@@ -189,7 +189,7 @@ export default function WalkInBooking() {
                     {form.booking_date && (
                       <div>
                         <label className="text-xs text-txt-muted mb-1 block flex items-center gap-1"><Clock size={12} /> Available Slots *</label>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                           {availableSlots.map(slot => {
                             const isBooked = bookedSlots.includes(slot)
                             const isSelected = form.slot_time === slot

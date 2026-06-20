@@ -130,20 +130,20 @@ export default function DoctorDashboard() {
           <div className="flex flex-col gap-3">
             {todayBookings.map(b => (
               <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
-                className="flex items-center justify-between p-4 rounded-xl bg-surface-hover border border-border">
-                <div className="flex items-center gap-4">
-                  <div className="text-center min-w-[56px]">
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-hover border border-border">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="text-center min-w-[50px] sm:min-w-[56px]">
                     <p className="text-sm font-bold text-primary">{b.slot_time}</p>
                     <p className="text-xs text-txt-muted">{calcEndTime(b.slot_time)}</p>
                   </div>
-                  <div className="border-s border-border ps-4">
-                    <p className="font-bold text-txt-primary text-sm">{b.patient_name}</p>
+                  <div className="border-s border-border ps-3 sm:ps-4 min-w-0 flex-1">
+                    <p className="font-bold text-txt-primary text-sm truncate">{b.patient_name}</p>
                     <p className="text-xs text-txt-muted">{b.phone} · #{b.queue_number}</p>
-                    <p className="text-xs text-txt-muted">{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</p>
+                    <p className="text-xs text-txt-muted truncate">{isRTL ? (b.departments?.name_ar || b.departments?.name_en) : b.departments?.name_en}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap shrink-0">
                   <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
                     {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
                   </Badge>

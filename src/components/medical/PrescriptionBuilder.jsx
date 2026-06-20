@@ -55,7 +55,7 @@ export default function PrescriptionBuilder({ prescriptions = [], onChange }) {
             placeholder="Medication name *"
           />
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <input
               value={med.dosage}
               onChange={(e) => update(i, 'dosage', e.target.value)}

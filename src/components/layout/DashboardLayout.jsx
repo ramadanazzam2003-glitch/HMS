@@ -311,7 +311,7 @@ export default function DashboardLayout({ children }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ duration: 0.15 }}
-              className="fixed top-[15%] left-1/2 -translate-x-1/2 w-full max-w-lg z-[101]"
+              className="fixed top-[10%] md:top-[15%] left-1/2 -translate-x-1/2 w-[calc(100%-32px)] sm:w-full max-w-lg z-[101]"
             >
               <div className="bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden">
                 <div className="flex items-center gap-3 px-4 h-14 border-b border-border">

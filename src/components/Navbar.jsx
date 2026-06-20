@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Menu, X, LogOut, ArrowLeft, ArrowRight, Building2, Sun, Moon, Globe } from 'lucide-react'
+import { Menu, X, LogOut, ArrowLeft, ArrowRight, Building2, Sun, Moon, Globe, User } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLanguage } from '../contexts/LanguageContext'
@@ -252,6 +252,21 @@ export default function Navbar({
                   </button>
                 )
               })}
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--border)', padding: '8px 0' }}>
+              <div style={{ display: 'flex', gap: 8, padding: '8px 16px' }}>
+                <button onClick={() => { toggleTheme(); setMobileOpen(false) }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-txt-secondary hover:bg-surface-hover flex-1 justify-center border border-border">
+                  {isDark ? <Sun size={14} /> : <Moon size={14} />}
+                  <span>{isDark ? 'Light' : 'Dark'}</span>
+                </button>
+                <button onClick={() => { toggleLang(); setMobileOpen(false) }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-txt-secondary hover:bg-surface-hover flex-1 justify-center border border-border">
+                  <Globe size={14} />
+                  <span>{lang === 'ar' ? 'EN' : 'AR'}</span>
+                </button>
+              </div>
             </div>
 
             <div style={{ borderTop: '1px solid var(--border)', padding: '8px 0' }}>

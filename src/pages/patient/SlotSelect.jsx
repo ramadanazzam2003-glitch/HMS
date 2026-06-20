@@ -110,10 +110,10 @@ export default function SlotSelect() {
       <div className="hero-gradient">
         <div className="hero-inner">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl shrink-0 bg-surface/15 backdrop-blur-md flex items-center justify-center border border-white/20">
-              {bookingType === 'consultant' ? <Stethoscope size={28} className="text-white" /> : <UserRound size={28} className="text-white" />}
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 bg-surface/15 backdrop-blur-md flex items-center justify-center border border-white/20">
+              {bookingType === 'consultant' ? <Stethoscope size={24} className="text-white" /> : <UserRound size={24} className="text-white" />}
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <span className="hero-chip mb-1.5">{bookingType}</span>
               <h1 className="text-xl md:text-2xl font-extrabold text-white leading-tight mb-1">{doctor.name}</h1>
               {doctor.working_days?.length > 0 && (

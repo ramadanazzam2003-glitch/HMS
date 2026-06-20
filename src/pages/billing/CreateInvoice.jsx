@@ -183,12 +183,12 @@ export default function CreateInvoice() {
               {items.map((item, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: i * 0.05 }}
                   className="flex gap-3 items-start bg-gray-50 rounded-xl p-3">
-                  <div className="flex-1 grid grid-cols-3 gap-2">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <Input value={item.name} onChange={e => updateItem(i, 'name', e.target.value)} placeholder="Item name" />
                     <Input value={item.amount} onChange={e => updateItem(i, 'amount', parseFloat(e.target.value) || 0)} type="number" placeholder="Amount" />
                     <Input value={item.quantity} onChange={e => updateItem(i, 'quantity', parseInt(e.target.value) || 1)} type="number" placeholder="Qty" min="1" />
                   </div>
-                  <div className="text-right min-w-[80px]">
+                  <div className="text-right min-w-[60px] sm:min-w-[80px]">
                     <p className="text-sm font-bold text-txt-primary">{formatCurrency(item.amount * item.quantity)}</p>
                   </div>
                   <motion.button onClick={() => removeItem(i)}
@@ -227,7 +227,7 @@ export default function CreateInvoice() {
                   <div className="flex justify-between items-center">
                     <span className="text-txt-muted">Tax</span>
                     <div className="flex items-center gap-2">
-                      <Input value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} type="number" className="w-20 text-right" min="0" max="100" />
+                      <Input value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} type="number" className="w-16 sm:w-20 text-right" min="0" max="100" />
                       <span className="text-txt-muted">%</span>
                     </div>
                   </div>

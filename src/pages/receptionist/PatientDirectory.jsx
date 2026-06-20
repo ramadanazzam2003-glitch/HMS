@@ -80,7 +80,7 @@ export default function PatientDirectory() {
         ) : (
           <div className="flex flex-col gap-2.5">
             {filtered.map((p, i) => (
-              <div key={p.phone} className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 shadow-card animate-fadeIn"
+              <div key={p.phone} className="rounded-2xl bg-surface border border-border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-card animate-fadeIn"
                 style={{ animationDelay: `${i * 30}ms` }}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-sm font-bold text-primary shrink-0">

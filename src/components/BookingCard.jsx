@@ -20,7 +20,7 @@ export default function BookingCard({ booking, onCancel, onReschedule }) {
             {booking.status}
           </span>
           {booking.status === 'active' && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button onClick={() => onReschedule(booking.id)} className="btn btn-ghost btn-sm text-blue-500 text-xs">
                 Reschedule
               </button>

@@ -13,7 +13,7 @@ export default function SlotPicker({ slots, bookedSlots, selectedSlot, onSelect,
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-4 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           {Array(8).fill(0).map((_, i) => <div key={i} className="skeleton h-11 rounded-xl" />)}
         </div>
       ) : !dateAllowed ? (
@@ -28,7 +28,7 @@ export default function SlotPicker({ slots, bookedSlots, selectedSlot, onSelect,
           <p className="text-gray-500">No slots configured for this doctor</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
           {slots.map(slot => {
             const isBooked = bookedSlots.includes(slot)
             const isSelected = selectedSlot === slot
@@ -39,7 +39,7 @@ export default function SlotPicker({ slots, bookedSlots, selectedSlot, onSelect,
                 onClick={() => onSelect(slot)}
                 whileHover={!isBooked ? { scale: 1.02 } : undefined}
                 whileTap={!isBooked ? { scale: 0.97 } : undefined}
-                className={`rounded-xl p-2.5 text-sm font-semibold border-2 transition-all duration-150 ${
+                className={`rounded-xl p-2 sm:p-2.5 text-xs sm:text-sm font-semibold border-2 transition-all duration-150 ${
                   isBooked
                     ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed line-through'
                     : isSelected
@@ -48,7 +48,7 @@ export default function SlotPicker({ slots, bookedSlots, selectedSlot, onSelect,
                 }`}
               >
                 <div>{slot}</div>
-                <div className="text-[10px] opacity-70 mt-0.5">
+                <div className="text-[9px] sm:text-[10px] opacity-70 mt-0.5">
                   {isBooked ? 'Booked' : `→ ${calcEndTime(slot)}`}
                 </div>
               </motion.button>

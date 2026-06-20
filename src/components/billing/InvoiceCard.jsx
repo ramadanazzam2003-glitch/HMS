@@ -21,7 +21,7 @@ export default function InvoiceCard({ invoice, onClick }) {
           <p className="font-bold text-gray-900 text-sm mb-1">{invoice.patient_name}</p>
           <p className="text-xs text-gray-400 mb-2">{invoice.patient_phone}</p>
 
-          <div className="flex items-center gap-4 text-xs text-gray-400">
+          <div className="flex items-center gap-4 flex-wrap text-xs text-gray-400">
             {invoice.doctors?.name && <span className="flex items-center gap-1"><Stethoscope size={12} /> Dr. {invoice.doctors?.name}</span>}
             {invoice.departments?.name_en && <span>{invoice.departments?.name_en}</span>}
             <span className="flex items-center gap-1"><CalendarDays size={12} />{invoice.created_at?.slice(0, 10)}</span>

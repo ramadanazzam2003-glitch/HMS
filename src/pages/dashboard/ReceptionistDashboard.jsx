@@ -56,12 +56,12 @@ export default function ReceptionistDashboard() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[1,2,3].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: t.todaysAppointments, value: stats.today, color: 'bg-surface', textColor: 'text-txt-primary', labelColor: 'text-txt-muted' },
                 { label: t.waiting, value: stats.waiting, color: 'bg-amber-50', textColor: 'text-amber-600', labelColor: 'text-amber-600' },

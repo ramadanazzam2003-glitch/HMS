@@ -135,7 +135,7 @@ export default function NurseTriage() {
                           placeholder="Observations, symptoms reported by patient..." />
                       </div>
 
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap gap-3">
                         <Button onClick={handleSaveVitals} disabled={saving} className="flex-1">
                           {saving ? 'Saving...' : 'Save Vitals'}
                         </Button>

@@ -124,7 +124,7 @@ export default function DoctorSchedule() {
               {dayBookings.map(b => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-surface-hover border border-border">
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-hover border border-border">
                   <div className="flex items-center gap-3">
                     <div className="text-center min-w-[55px]">
                       <p className="text-sm font-bold text-primary flex items-center gap-1"><Clock size={12} />{b.slot_time}</p>

@@ -103,7 +103,7 @@ export default function PatientRecord() {
                       {Object.keys(record.vitals || {}).length > 0 && (
                         <div>
                           <p className="text-xs font-semibold text-txt-muted mb-1">Vitals</p>
-                          <div className="flex gap-4 text-sm text-txt-primary">
+                          <div className="flex flex-wrap gap-4 text-sm text-txt-primary">
                             {record.vitals.bp && <span>BP: {record.vitals.bp}</span>}
                             {record.vitals.temp && <span>Temp: {record.vitals.temp}</span>}
                             {record.vitals.weight && <span>Weight: {record.vitals.weight}</span>}
@@ -119,7 +119,7 @@ export default function PatientRecord() {
                             {record.prescriptions.map((p, i) => (
                               <div key={i} className="bg-surface-hover rounded-lg p-3 text-sm">
                                 <p className="font-semibold text-txt-primary">{p.medication_name}</p>
-                                <div className="flex gap-3 text-xs text-txt-muted mt-1">
+                                  <div className="flex flex-wrap gap-3 text-xs text-txt-muted mt-1">
                                   {p.dosage && <span>Dosage: {p.dosage}</span>}
                                   {p.frequency && <span>Freq: {p.frequency}</span>}
                                   {p.duration && <span>Duration: {p.duration}</span>}

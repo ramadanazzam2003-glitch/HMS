@@ -189,8 +189,8 @@ export default function AdminPanel() {
 
             {/* Search & Filter */}
             <div className="flex gap-3 mb-4 flex-wrap">
-              <div className="relative flex-1 min-w-[200px]">
-                <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none left-3" />
+              <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+                <Search size={16} className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
                 <Input value={search} onChange={e => setSearch(e.target.value)} className="h-9 text-sm ps-9" placeholder={t.searchByNameEmail} />
               </div>
               <div className="flex gap-1.5 flex-wrap">
@@ -241,12 +241,12 @@ export default function AdminPanel() {
                             {editingUser === u.id ? (
                               <div className="flex gap-1.5 items-center">
                                 <select value={newRole} onChange={e => setNewRole(e.target.value)}
-                                  className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                  className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-full sm:w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/20">
                                   {roles.map(r => <option key={r.id} value={r.id}>{r.name.replace('_', ' ')}</option>)}
                                 </select>
                                 {parseInt(newRole) === DOCTOR_ROLE_ID && (
                                   <select value={newDoctorType} onChange={e => setNewDoctorType(e.target.value)}
-                                    className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-[110px] focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-full sm:w-[110px] focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="doctor">{isRTL ? 'دكتور' : 'Doctor'}</option>
                                     <option value="consultant">{isRTL ? 'استشاري' : 'Consultant'}</option>
                                   </select>

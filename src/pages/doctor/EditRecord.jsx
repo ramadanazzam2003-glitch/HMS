@@ -117,7 +117,7 @@ export default function EditRecord() {
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <h1 className="font-display text-lg font-bold text-txt-primary">Edit Medical Record</h1>
           <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
@@ -146,7 +146,7 @@ export default function EditRecord() {
 
         <div className="rounded-2xl bg-surface border border-border p-5">
           <h3 className="font-bold text-txt-primary text-sm mb-3">Vitals</h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
               { key: 'bp', label: 'Blood Pressure', placeholder: '120/80' },
               { key: 'temp', label: 'Temperature', placeholder: '37.0 C' },
@@ -178,7 +178,7 @@ export default function EditRecord() {
           <PrescriptionBuilder prescriptions={prescriptions} onChange={setPrescriptions} />
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button variant="primary" size="md" className="flex-1" onClick={handleSave} disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>

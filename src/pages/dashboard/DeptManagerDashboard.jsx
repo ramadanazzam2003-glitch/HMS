@@ -71,12 +71,12 @@ export default function DeptManagerDashboard() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[1,2,3].map(i => <Skeleton key={i} className="h-28 rounded-2xl" />)}
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { label: t.todaysBookings, value: stats.today, color: 'bg-surface', textColor: 'text-txt-primary', labelColor: 'text-txt-muted' },
                 { label: t.active, value: stats.active, color: 'bg-green-50', textColor: 'text-green-600', labelColor: 'text-green-600' },

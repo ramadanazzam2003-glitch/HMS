@@ -81,8 +81,8 @@ export default function Patients() {
         </div>
 
         <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface border border-border">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} />
+          <div className="relative flex-1 min-w-[150px] sm:min-w-[200px]">
+            <Search size={16} className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" />
             <Input
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1) }}

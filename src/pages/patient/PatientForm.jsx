@@ -189,7 +189,7 @@ const handleSubmit = async () => {
             >
               <Card className="p-4 bg-blue-50 border-blue-200">
                 <p className="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-1.5"><AlertCircle size={16} /> {t.tipsTitle}</p>
-                <ul className="text-xs text-txt-muted pl-4 leading-relaxed">
+                <ul className="text-xs text-txt-muted ps-4 leading-relaxed">
                   <li>{t.saveBookingRef}</li>
                   <li>{t.arriveEarly}</li>
                   <li>{t.cancelWithRef}</li>

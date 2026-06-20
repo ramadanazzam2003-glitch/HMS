@@ -131,9 +131,9 @@ export default function Consultation() {
   return (
     <DashboardLayout>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h1 className="font-display text-lg font-bold text-txt-primary">Patient Consultation</h1>
-          <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
             {saving ? 'Saving...' : 'Save Record'}
           </Button>
         </div>

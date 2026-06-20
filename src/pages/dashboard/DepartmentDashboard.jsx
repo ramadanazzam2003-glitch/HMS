@@ -109,13 +109,13 @@ export default function DepartmentDashboard() {
                           initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2, delay: i * 0.05 }}
-                          className="flex items-center justify-between p-3 bg-surface-hover rounded-xl"
+                          className="flex flex-wrap items-center justify-between gap-2 p-3 bg-surface-hover rounded-xl"
                         >
-                          <div>
-                            <p className="font-semibold text-txt-primary text-sm">{doc.name}</p>
-                            <p className="text-xs text-txt-muted capitalize">{doc.type} &middot; {doc.working_days?.length || 0} {t.daysPerWeek}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-txt-primary text-sm truncate">{doc.name}</p>
+                            <p className="text-xs text-txt-muted capitalize truncate">{doc.type} &middot; {doc.working_days?.length || 0} {t.daysPerWeek}</p>
                           </div>
-                          <Badge variant={doc.is_active ? 'success' : 'danger'}>
+                          <Badge variant={doc.is_active ? 'success' : 'danger'} className="shrink-0">
                             {doc.is_active ? t.active : t.inactive}
                           </Badge>
                         </motion.div>
@@ -140,13 +140,13 @@ export default function DepartmentDashboard() {
                           initial={{ opacity: 0, x: isRTL ? 8 : -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ duration: 0.2, delay: i * 0.05 }}
-                          className="flex items-center justify-between p-3 bg-surface-hover rounded-xl"
+                          className="flex flex-wrap items-center justify-between gap-2 p-3 bg-surface-hover rounded-xl"
                         >
-                          <div>
-                            <p className="font-semibold text-txt-primary text-sm">{b.patient_name}</p>
-                            <p className="text-xs text-txt-muted">{b.slot_time} &middot; {b.doctors?.name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-txt-primary text-sm truncate">{b.patient_name}</p>
+                            <p className="text-xs text-txt-muted truncate">{b.slot_time} &middot; {b.doctors?.name}</p>
                           </div>
-                          <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'}>
+                          <Badge variant={b.status === 'active' ? 'success' : b.status === 'completed' ? 'primary' : 'danger'} className="shrink-0">
                             {b.status === 'active' ? t.statusActive : b.status === 'completed' ? t.statusCompleted : t.statusCancelled}
                           </Badge>
                         </motion.div>

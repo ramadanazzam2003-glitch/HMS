@@ -1096,8 +1096,10 @@ a {
 }
 
 /* ══════════════════════════════════════════
-   21. RESPONSIVE UTILITIES
+    21. RESPONSIVE UTILITIES
 ══════════════════════════════════════════ */
+
+/* ── Responsive Container Padding ── */
 @media (max-width: 768px) {
   .page-content,
   .page-content-md { padding: var(--space-5) var(--space-4); }
@@ -1112,6 +1114,44 @@ a {
   .btn-lg { padding: 12px 20px; font-size: 14px; }
   .steps  { gap: 0; }
   .step-line { width: 24px; }
+}
+
+/* ── Root Responsive Font Scale ── */
+@media (max-width: 425px) {
+  html { font-size: 14px; }
+  .stat-card-value { font-size: 28px; }
+  .section-title { font-size: 18px; }
+}
+
+@media (min-width: 426px) and (max-width: 768px) {
+  html { font-size: 15px; }
+}
+
+/* ── Responsive Table Helpers ── */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.table-responsive table {
+  min-width: 600px;
+}
+
+/* ── Responsive Grid Helpers ── */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+/* ── Responsive Modal ── */
+.modal-responsive {
+  width: calc(100vw - 32px);
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+@media (min-width: 640px) {
+  .modal-responsive { width: 500px; }
 }
 
 /* ══════════════════════════════════════════

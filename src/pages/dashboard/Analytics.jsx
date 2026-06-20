@@ -93,7 +93,7 @@ export default function Analytics() {
         </div>
 
         {/* Period Filter */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {['all', 'week', 'month'].map(p => (
             <button
               key={p}
@@ -174,7 +174,7 @@ export default function Analytics() {
                     {stats.departments.map(dept => (
                       <div key={dept.name}>
                         <div className="flex justify-between text-xs mb-1.5">
-                          <span className="font-medium text-txt-primary">{dept.name}</span>
+                          <span className="font-medium text-txt-primary truncate min-w-0">{dept.name}</span>
                           <span className="text-txt-muted">{dept.completed} {t.completedSmall} / {dept.total} {t.totalSmall}</span>
                         </div>
                         <div className="w-full h-2 bg-border rounded-full overflow-hidden">

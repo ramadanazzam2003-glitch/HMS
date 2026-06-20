@@ -97,7 +97,7 @@ export default function InvoiceList() {
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none"><Search size={16} /></span>
               <Input value={search} onChange={e => setSearch(e.target.value)} className="pl-9" placeholder="Search by name, invoice #, or phone..." />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {['all', 'unpaid', 'paid', 'partial'].map(f => (
                 <motion.div key={f} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button variant={filter === f ? 'primary' : 'outline'} size="sm" className="capitalize" onClick={() => setFilter(f)}>

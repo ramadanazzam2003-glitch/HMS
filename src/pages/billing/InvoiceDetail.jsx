@@ -142,13 +142,13 @@ export default function InvoiceDetail() {
 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <Card className="print:shadow-none print:border-0">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-6">
               <div>
-                <h1 className="font-display text-2xl font-extrabold text-txt-primary flex items-center gap-2"><CreditCard size={24} /> Invoice</h1>
+                <h1 className="font-display text-xl sm:text-2xl font-extrabold text-txt-primary flex items-center gap-2"><CreditCard size={20} /> Invoice</h1>
                 <p className="font-mono text-blue-600 font-semibold mt-1">{invoice.invoice_number}</p>
                 <p className="text-xs text-txt-muted mt-1">Created: {invoice.created_at?.slice(0, 10)}</p>
               </div>
-              <div className="text-right">
+              <div className="text-start sm:text-right">
                 <PaymentStatusBadge status={invoice.payment_status} />
                 {invoice.payment_method && (
                   <p className="text-xs text-txt-muted mt-1 capitalize flex items-center gap-1 justify-end">
@@ -181,9 +181,8 @@ export default function InvoiceDetail() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <h3 className="font-bold text-txt-primary text-sm mb-3">Items</h3>
-              <table className="w-full border-collapse text-sm">
+            <div className="mb-6 overflow-x-auto">
+              <table className="w-full border-collapse text-sm min-w-[400px]">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left py-2 text-xs text-txt-muted font-semibold">Item</th>
@@ -195,10 +194,10 @@ export default function InvoiceDetail() {
                 <tbody>
                   {(invoice.items || []).map((item, i) => (
                     <tr key={i} className="border-b border-border">
-                      <td className="py-2 text-txt-primary">{item.name}</td>
-                      <td className="py-2 text-right text-txt-secondary">{formatCurrency(item.amount)}</td>
-                      <td className="py-2 text-right text-txt-secondary">{item.quantity}</td>
-                      <td className="py-2 text-right font-semibold text-txt-primary">{formatCurrency(item.amount * item.quantity)}</td>
+                      <td className="py-2 text-txt-primary whitespace-nowrap">{item.name}</td>
+                      <td className="py-2 text-right text-txt-secondary whitespace-nowrap">{formatCurrency(item.amount)}</td>
+                      <td className="py-2 text-right text-txt-secondary whitespace-nowrap">{item.quantity}</td>
+                      <td className="py-2 text-right font-semibold text-txt-primary whitespace-nowrap">{formatCurrency(item.amount * item.quantity)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -206,7 +205,7 @@ export default function InvoiceDetail() {
             </div>
 
             <div className="flex justify-end">
-              <div className="w-64 space-y-2 text-sm">
+              <div className="w-full sm:w-64 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-txt-muted">Subtotal</span>
                   <span className="font-semibold">{formatCurrency(invoice.subtotal)}</span>

@@ -44,7 +44,7 @@ export default function PatientQueue() {
     <DashboardLayout>
       <div className="space-y-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          <div className="grid grid-cols-3 gap-4 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
             <motion.div className="rounded-2xl p-5 bg-green-50 border border-green-200 text-center" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <p className="text-3xl font-extrabold text-green-600">{stats.active}</p>
               <p className="text-xs text-green-600 font-semibold mt-1">Waiting</p>
@@ -59,7 +59,7 @@ export default function PatientQueue() {
             </motion.div>
           </div>
 
-          <div className="flex gap-2 mb-5">
+          <div className="flex flex-wrap gap-2 mb-5">
             {['active', 'completed', 'cancelled', 'all'].map(f => (
               <Button key={f} variant={filter === f ? 'primary' : 'outline'} size="sm"
                 onClick={() => setFilter(f)} className="capitalize">
@@ -86,7 +86,7 @@ export default function PatientQueue() {
               {filtered.map((b, i) => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 shadow-card">
+                  className="rounded-2xl bg-surface border border-border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-card">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-sm font-bold text-primary shrink-0">
                       <Hash size={14} /> {b.queue_number || i + 1}

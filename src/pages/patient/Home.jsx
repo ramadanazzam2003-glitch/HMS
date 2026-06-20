@@ -177,8 +177,8 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <span className="text-xs text-txt-muted whitespace-nowrap">
-              {isRTL ? `عرض ${filteredDepts.length} من ${departments.length} قسم` : `Showing ${filteredDepts.lhgth} of ${departments.length} departments`}
+            <span className="text-xs text-txt-muted">
+              {isRTL ? `عرض ${filteredDepts.length} من ${departments.length} قسم` : `Showing ${filteredDepts.length} of ${departments.length} departments`}
             </span>
           </div>
 

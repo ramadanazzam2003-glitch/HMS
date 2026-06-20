@@ -95,7 +95,7 @@ export default function PatientProfile() {
     <div className="min-h-screen bg-gray-50">
       <PublicNavbar />
       <main className="pt-20 px-4 max-w-2xl mx-auto pb-8">
-        <div className="flex gap-2 mb-5">
+        <div className="flex gap-2 mb-5 flex-wrap">
           {['profile', 'security'].map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`h-10 px-5 rounded-xl text-sm font-semibold border transition-all capitalize ${tab === t ? 'bg-primary text-white border-primary' : 'bg-surface text-txt-secondary border-border'}`}>

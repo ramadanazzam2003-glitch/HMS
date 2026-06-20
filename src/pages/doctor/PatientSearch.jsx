@@ -61,7 +61,7 @@ export default function PatientSearch() {
             {results.map((b, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.05 }}
-                className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between">
+                className="rounded-2xl bg-surface border border-border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div className="space-y-1">
                   <p className="font-bold text-txt-primary text-sm flex items-center gap-1.5">
                     <User size={14} /> {b.patient_name}

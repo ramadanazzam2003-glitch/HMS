@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Moon, Sun, Globe } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Moon, Sun, Globe, Menu, X } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { supabase } from '../../lib/supabase'
@@ -168,20 +168,7 @@ export default function PublicNavbar({ back }) {
               onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden w-9 h-9 rounded-xl bg-surface-hover flex items-center justify-center text-txt-secondary"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {mobileOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
-                  </>
-                )}
-              </svg>
+              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
@@ -198,6 +185,19 @@ export default function PublicNavbar({ back }) {
                 {link.label}
               </button>
             ))}
+            <div className="border-t border-border my-2" />
+            <div className="flex gap-2 px-3 py-2">
+              <button onClick={() => { toggleTheme(); setMobileOpen(false) }}
+                className="flex items-center justify-center gap-2 flex-1 h-9 px-3 rounded-xl border border-border text-sm font-medium text-txt-secondary hover:bg-surface-hover transition-all">
+                {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                <span>{theme === 'dark' ? (isRTL ? 'نهاري' : 'Light') : (isRTL ? 'ليلي' : 'Dark')}</span>
+              </button>
+              <button onClick={() => { toggleLang(); setMobileOpen(false) }}
+                className="flex items-center justify-center gap-2 flex-1 h-9 px-3 rounded-xl border border-border text-sm font-medium text-txt-secondary hover:bg-surface-hover transition-all">
+                <Globe size={14} />
+                <span>{lang === 'ar' ? 'EN' : 'AR'}</span>
+              </button>
+            </div>
             <div className="border-t border-border my-2" />
             {user ? (
               <>

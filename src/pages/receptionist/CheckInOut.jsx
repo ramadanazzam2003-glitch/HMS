@@ -96,7 +96,7 @@ export default function CheckInOut() {
               {filtered.map((b, i) => (
                 <motion.div key={b.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: i * 0.03 }}
                   whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                  className="rounded-2xl bg-surface border border-border p-4 flex items-center justify-between gap-3 shadow-card">
+                  className="rounded-2xl bg-surface border border-border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-card">
                   <div className="flex items-center gap-4">
                     <div className="text-center min-w-[55px]">
                       <p className="text-sm font-bold text-primary">{b.slot_time}</p>

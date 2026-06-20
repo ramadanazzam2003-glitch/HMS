@@ -326,10 +326,12 @@ export default function Settings() {
                       <div className="flex items-center gap-2.5 pt-6">
                         <label className="text-xs text-txt-muted">Open for bookings</label>
                         <button onClick={() => setDeptForm({ ...deptForm, is_open: !deptForm.is_open })}
-                          className="relative w-11 h-6 rounded-full cursor-pointer transition-colors border-none"
-                          style={{ background: deptForm.is_open ? 'var(--color-primary)' : 'var(--color-border)' }}>
-                          <div className="absolute top-0.5 w-5 h-5 rounded-full bg-surface transition-all"
-                            style={{ left: deptForm.is_open ? 22 : 2 }} />
+                          className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors border-none ${
+                            deptForm.is_open ? 'bg-primary' : 'bg-border'
+                          }`}>
+                          <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-surface transition-all shadow-sm ${
+                            deptForm.is_open ? 'left-[22px]' : 'left-[2px]'
+                          }`} />
                         </button>
                       </div>
                     </div>

@@ -84,7 +84,7 @@ export default function LabOrders() {
                     <p className="text-xs text-primary font-semibold mb-2">Prescriptions ({record.prescriptions.length})</p>
                     <div className="flex flex-col gap-2">
                       {record.prescriptions.map((p, i) => (
-                        <div key={i} className="flex items-center justify-between bg-surface rounded-lg p-3 border border-blue-100">
+                        <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-surface rounded-lg p-3 border border-blue-100">
                           <div>
                             <p className="font-semibold text-txt-primary text-sm">{p.medication_name}</p>
                             <p className="text-xs text-txt-muted">
