@@ -38,6 +38,7 @@ const DirectorDashboard = lazy(() => import('./pages/dashboard/DirectorDashboard
 const DeptManagerDashboard = lazy(() => import('./pages/dashboard/DeptManagerDashboard'))
 const ReceptionistDashboard = lazy(() => import('./pages/dashboard/ReceptionistDashboard'))
 const Patients = lazy(() => import('./pages/dashboard/Patients'))
+const Doctors = lazy(() => import('./pages/dashboard/Doctors'))
 
 // Doctor Pages
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'))
@@ -112,6 +113,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Overview /></ProtectedRoute>} />
         <Route path="/dashboard/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
         <Route path="/dashboard/patients" element={<ProtectedRoute><Patients /></ProtectedRoute>} />
+        <Route path="/dashboard/doctors" element={<ProtectedRoute><Doctors /></ProtectedRoute>} />
         <Route path="/dashboard/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/dashboard/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
         <Route path="/dashboard/medical-records" element={<ProtectedRoute><MedicalRecords /></ProtectedRoute>} />

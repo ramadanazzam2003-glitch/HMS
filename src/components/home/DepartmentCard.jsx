@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 const DEPT_IMAGES = {
   'internal medicine': 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=800&q=82',
@@ -21,6 +22,7 @@ const getDeptImage = (name) => DEPT_IMAGES[name?.toLowerCase()] || DEPT_IMAGES['
 
 export default function DepartmentCard({ dept }) {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const bookedCount = dept.bookedCount || 0
   const remaining = dept.max_daily - bookedCount
   const isFull = remaining <= 0
@@ -39,7 +41,7 @@ export default function DepartmentCard({ dept }) {
       <div className={`absolute inset-0 ${isFull ? 'bg-slate-900/70' : 'bg-gradient-to-t from-blue-900/90 via-blue-900/50 to-transparent group-hover:from-blue-900/95'}`} />
       <div className="absolute top-3 right-3">
         <span className={`text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${isFull ? 'bg-red-500/90 text-white' : 'bg-green-500/90 text-white'}`}>
-          {isFull ? 'Full' : 'Open'}
+          {isFull ? t.deptFull : t.deptOpen}
         </span>
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -47,7 +49,7 @@ export default function DepartmentCard({ dept }) {
         <p className="text-blue-200 text-sm">{dept.name_ar}</p>
         <div className="mt-3">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-blue-200">{isFull ? 'No slots available' : `${remaining} slots left`}</span>
+            <span className="text-xs text-blue-200">{isFull ? t.noSlotsAvailable : `${remaining} ${t.slotsLeft}`}</span>
             <span className="text-xs text-blue-200">{Math.round(percent)}%</span>
           </div>
           <div className="w-full bg-white/20 rounded-full h-1">

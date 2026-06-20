@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle, User, Stethoscope, CalendarDays, Clock, AlertTriangle, CreditCard } from 'lucide-react'
+import { useLanguage } from '../../contexts/LanguageContext'
 import PublicNavbar from '../../components/layout/PublicNavbar'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
@@ -11,6 +12,7 @@ export default function Confirmation() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const { toast } = useUI()
+  const { t, isRTL } = useLanguage()
   const [paying, setPaying] = useState(false)
 
   const handlePayNow = async () => {
@@ -56,8 +58,8 @@ export default function Confirmation() {
           <div className="w-20 h-20 rounded-full bg-green-50 border-2 border-green-500 flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={40} className="text-green-500" />
           </div>
-          <h1 className="text-2xl font-bold text-txt-primary mb-2">Booking Confirmed!</h1>
-          <p className="text-txt-muted">Your appointment has been successfully booked</p>
+          <h1 className="text-2xl font-bold text-txt-primary mb-2">{t.bookingConfirmed}</h1>
+          <p className="text-txt-muted">{t.appointmentBooked}</p>
         </motion.div>
 
         {/* Queue Number */}
@@ -69,11 +71,11 @@ export default function Confirmation() {
           transition={{ duration: 0.3, delay: 0.1 }}
         >
           <Card className="p-7 text-center bg-gradient-to-br from-blue-800 to-blue-600 border-none">
-            <p className="text-xs text-white/70 font-semibold tracking-widest uppercase mb-2">Your Queue Number</p>
+            <p className="text-xs text-white/70 font-semibold tracking-widest uppercase mb-2">{t.yourQueueNumber}</p>
             <div className="text-7xl font-black text-white leading-none mb-2 drop-shadow-lg">
               #{state?.queueNumber}
             </div>
-            <p className="text-sm text-white/70">Please wait for your number to be called</p>
+            <p className="text-sm text-white/70">{t.waitForCall}</p>
           </Card>
         </motion.div>
 
@@ -87,7 +89,7 @@ export default function Confirmation() {
         >
           <Card className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-txt-primary text-sm">Booking Details</h2>
+              <h2 className="font-bold text-txt-primary text-sm">{t.bookingDetails}</h2>
               <span className="font-mono text-sm font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
                 {state?.bookingRef}
               </span>
@@ -95,14 +97,14 @@ export default function Confirmation() {
 
             <div className="flex flex-col">
               {[
-                { icon: <User size={14} />, label: 'Patient', value: state?.patientName },
-                { icon: <Stethoscope size={14} />, label: 'Doctor', value: state?.doctorName },
-                { icon: <CalendarDays size={14} />, label: 'Date', value: state?.date },
-                { icon: <Clock size={14} />, label: 'Time', value: state?.slotTime ? `${state.slotTime} → ${state.endTime}` : state?.slotTime },
-                { icon: <Clock size={14} />, label: 'Duration', value: '15 minutes' },
-              ].map(({ icon, label, value }, i) => (
-                <div key={label} className={`flex justify-between items-center py-3 ${i < 4 ? 'border-b border-border' : ''}`}>
-                  <span className="text-sm text-txt-muted flex items-center gap-1.5">{icon} {label}</span>
+                { icon: <User size={14} />, labelKey: 'patientLabel', value: state?.patientName },
+                { icon: <Stethoscope size={14} />, labelKey: 'doctor', value: state?.doctorName },
+                { icon: <CalendarDays size={14} />, labelKey: 'dateLabel', value: state?.date },
+                { icon: <Clock size={14} />, labelKey: 'timeLabel', value: state?.slotTime ? `${state.slotTime} → ${state.endTime}` : state?.slotTime },
+                { icon: <Clock size={14} />, labelKey: 'durationLabel', value: `15 ${t.minutesLabel}` },
+              ].map(({ icon, labelKey, value }, i) => (
+                <div key={labelKey} className={`flex justify-between items-center py-3 ${i < 4 ? 'border-b border-border' : ''}`}>
+                  <span className="text-sm text-txt-muted flex items-center gap-1.5">{icon} {t[labelKey]}</span>
                   <span className="text-sm font-semibold text-txt-primary">{value || '—'}</span>
                 </div>
               ))}
@@ -120,9 +122,11 @@ export default function Confirmation() {
         >
           <AlertTriangle size={20} />
           <div>
-            <p className="font-semibold mb-0.5">Save your booking reference</p>
+            <p className="font-semibold mb-0.5">{t.saveBookingRefTitle}</p>
             <p className="text-xs">
-              You'll need <strong>{state?.bookingRef}</strong> to cancel or modify your booking.
+              {isRTL
+                ? <>ستحتاج إلى <strong>{state?.bookingRef}</strong> لإلغاء أو تعديل حجزك.</>
+                : <>You'll need <strong>{state?.bookingRef}</strong> to cancel or modify your booking.</>}
             </p>
           </div>
         </motion.div>
@@ -132,16 +136,16 @@ export default function Confirmation() {
           <Button
             onClick={handlePayNow} disabled={paying} size="lg" className="w-full"
           >
-            {paying ? 'Processing...' : <span className="flex items-center justify-center gap-2"><CreditCard size={16} /> Pay Now (EGP 200)</span>}
+            {paying ? t.processingLabel : <span className="flex items-center justify-center gap-2"><CreditCard size={16} /> {t.payNow}</span>}
           </Button>
           <Button variant="secondary" size="lg" className="w-full" onClick={() => navigate('/my-bookings')}>
-            View My Bookings
+            {t.viewMyBookings}
           </Button>
           <Button variant="outline" size="lg" className="w-full" onClick={() => navigate('/')}>
-            Back to Home
+            {t.backToHome}
           </Button>
           <Button variant="ghost" className="w-full text-txt-muted text-sm py-2" onClick={() => navigate('/cancel')}>
-            Cancel this booking
+            {t.cancelThisBooking}
           </Button>
         </div>
       </div>

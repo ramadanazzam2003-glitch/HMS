@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Stethoscope, UserRound, Building2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useLanguage } from '../../contexts/LanguageContext'
 import PublicNavbar from '../../components/layout/PublicNavbar'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
@@ -10,7 +11,8 @@ import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
 import StepIndicator from '../../components/StepIndicator'
 
-function TypeCard({ icon, title, description, count, badgeVariant, ctaLabel, ctaColor, onClick, disabled, animDelay }) {
+function TypeCard({ icon, title, titleKey, description, count, badgeVariant, ctaLabel, ctaColor, onClick, disabled, animDelay }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       onClick={() => !disabled && onClick()}
@@ -32,11 +34,11 @@ function TypeCard({ icon, title, description, count, badgeVariant, ctaLabel, cta
 
         <p className="text-sm text-txt-muted leading-relaxed mb-4 min-h-10">
           {disabled
-            ? `No ${title.toLowerCase()}s are currently available in this department.`
+            ? (titleKey === 'consultant' ? t.consultantsNotAvailable : t.doctorsNotAvailable)
             : description}
         </p>
 
-        {!disabled && <Badge variant={badgeVariant}>{count} available</Badge>}
+        {!disabled && <Badge variant={badgeVariant}>{count} {t.availableLabel}</Badge>}
 
         {!disabled && (
           <Button className="w-full mt-5 text-white border-none" style={{ background: ctaColor }}>
@@ -51,6 +53,7 @@ function TypeCard({ icon, title, description, count, badgeVariant, ctaLabel, cta
 export default function BookingType() {
   const { departmentId } = useParams()
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const [counts, setCounts]         = useState({ consultant: 0, doctor: 0 })
   const [department, setDepartment] = useState(null)
   const [loading, setLoading]       = useState(true)
@@ -87,7 +90,7 @@ export default function BookingType() {
       <div className="flex-1 flex items-center justify-center p-10">
         <div className="text-center">
           <Skeleton className="w-12 h-12 rounded-full mx-auto mb-4" />
-          <p className="text-txt-muted font-medium">Loading…</p>
+          <p className="text-txt-muted font-medium">{t.loading}</p>
         </div>
       </div>
     </div>
@@ -100,8 +103,8 @@ export default function BookingType() {
       <div className="hero-gradient">
         <div className="hero-inner text-center">
           <span className="hero-chip">{department?.name_en} · {department?.name_ar}</span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Select Booking Type</h1>
-          <p className="text-white/65 text-sm">Choose how you want to book your appointment</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">{t.selectBookingType}</h1>
+          <p className="text-white/65 text-sm">{t.chooseBookingMethod}</p>
         </div>
       </div>
 
@@ -111,17 +114,17 @@ export default function BookingType() {
         {!hasAny ? (
           <Card className="text-center p-8">
             <div className="mb-4"><Building2 size={48} className="text-txt-muted mx-auto" /></div>
-            <h3 className="text-lg font-bold text-txt-primary mb-2">No Staff Available</h3>
-            <p className="text-sm text-txt-muted mb-6">No medical staff are currently assigned to this department.</p>
-            <Button variant="outline" onClick={() => navigate('/')}>← Back to Departments</Button>
+            <h3 className="text-lg font-bold text-txt-primary mb-2">{t.noStaffAvailable}</h3>
+            <p className="text-sm text-txt-muted mb-6">{t.noStaffMsg}</p>
+            <Button variant="outline" onClick={() => navigate('/')}>{t.backToDepartments}</Button>
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TypeCard icon={<Stethoscope size={32} className="text-blue-600" />} title="Consultant" description="See the next available consultant for expert specialist advice"
-              count={counts.consultant} badgeVariant="primary" ctaLabel="Book Consultant" ctaColor="var(--primary)"
+            <TypeCard icon={<Stethoscope size={32} className="text-blue-600" />} title={t.consultantLabel} titleKey="consultant" description={t.consultantDesc}
+              count={counts.consultant} badgeVariant="primary" ctaLabel={t.bookConsultant} ctaColor="var(--primary)"
               onClick={() => navigate(`/doctor-select/${departmentId}?type=consultant`)} disabled={counts.consultant === 0} animDelay={0} />
-            <TypeCard icon={<UserRound size={32} className="text-teal-600" />} title="Doctor" description="Choose a specific doctor for your appointment"
-              count={counts.doctor} badgeVariant="default" ctaLabel="Book Doctor" ctaColor="var(--secondary)"
+            <TypeCard icon={<UserRound size={32} className="text-teal-600" />} title={t.doctor} titleKey="doctor" description={t.doctorDesc}
+              count={counts.doctor} badgeVariant="default" ctaLabel={t.bookDoctor} ctaColor="var(--secondary)"
               onClick={() => navigate(`/doctor-select/${departmentId}?type=doctor`)} disabled={counts.doctor === 0} animDelay={80} />
           </div>
         )}

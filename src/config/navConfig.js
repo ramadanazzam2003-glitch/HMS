@@ -5,10 +5,10 @@ import {
   Shield,
   ClipboardList,
   CreditCard,
-  Bot,
+/*   Bot, */
   CalendarCheck,
   Users,
-  Stethoscope,
+  /* Stethoscope, */
   ClipboardCheck,
   BarChart3,
   FileText,
@@ -57,13 +57,15 @@ export const navItems = [
     icon: CreditCard,
     roles: ['admin', 'director', 'dept_manager'],
   },
-  {
+ 
+  /* {
+
     label: 'AI Triage',
     labelAr: 'الفرز الذكي',
     path: '/triage',
     icon: Bot,
     roles: ['admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist'],
-  },
+  }, */
   {
     label: 'My Schedule',
     labelAr: 'جدولي',
@@ -78,13 +80,13 @@ export const navItems = [
     icon: Users,
     roles: ['nurse'],
   },
-  {
+  /* {
     label: 'Triage',
     labelAr: 'الفرز',
     path: '/nurse/triage',
     icon: Stethoscope,
     roles: ['nurse'],
-  },
+  }, */
   {
     label: 'Walk-In Booking',
     labelAr: 'حجز مباشر',

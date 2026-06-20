@@ -8,7 +8,7 @@ import { useSalama } from './useSalama'
 
 const WELCOME = {
   role: 'assistant',
-  content: 'مرحباً! أنا سلامة، مساعدك الطبي. 👋\nHello! I\'m Salama, your medical triage assistant.\n\nأخبرني عن أعراضك وسأساعدك في تحديد القسم المناسب.\nTell me your symptoms and I\'ll help guide you to the right department.'
+  content: 'مرحباً! أنا المساعد الطبي. 👋\nHello! I\'m Salama, your medical triage assistant.\n\nأخبرني عن أعراضك وسأساعدك في تحديد القسم المناسب.\nTell me your symptoms and I\'ll help guide you to the right department.'
 }
 
 export default function Triage() {
@@ -58,15 +58,15 @@ export default function Triage() {
 
       <div className="border-t border-gray-100 px-4 py-3 bg-surface">
         <div className="flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKey}
-            placeholder="اكتب أعراضك... / Describe your symptoms..."
-            rows={1}
-            dir="auto"
-            className="flex-1 resize-none rounded-2xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 max-h-32"
-          />
+       <textarea
+  value={input}
+  onChange={e => setInput(e.target.value)}
+  onKeyDown={handleKey}
+  placeholder="اكتب أعراضك... / Describe your symptoms..."
+  rows={1}
+  dir="auto"
+  className="flex-1 resize-none rounded-2xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 px-4 py-2.5 text-sm focus:outline-none focus:border-blue-400 dark:focus:border-blue-500 max-h-32"
+/>
           <motion.button
             onClick={handleSend}
             disabled={!input.trim() || loading}

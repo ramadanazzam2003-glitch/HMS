@@ -182,7 +182,7 @@ export default function Consultation() {
                   { key: 'heartRate', label: 'Heart Rate', placeholder: '72 bpm', icon: <Heart size={14} /> },
                 ].map(({ key, label, placeholder, icon }) => (
                   <div key={key}>
-                    <label className="text-xs text-txt-muted mb-1 block flex items-center gap-1">{icon} {label}</label>
+                    <label className="text-xs text-txt-muted mb- flex items-center gap-1">{icon} {label}</label>
                     <Input
                       value={vitals[key]}
                       onChange={(e) => setVitals({ ...vitals, [key]: e.target.value })}

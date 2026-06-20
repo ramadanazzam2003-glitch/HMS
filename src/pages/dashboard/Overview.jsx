@@ -10,22 +10,22 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/ca
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
+
 function CountUp({ end, duration = 2 }) {
   const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
 
   useEffect(() => {
-    if (!started) { setStarted(true); return }
     let startTime
-    const startVal = 0
+    let rafId
     const step = (timestamp) => {
       if (!startTime) startTime = timestamp
       const progress = Math.min((timestamp - startTime) / (duration * 1000), 1)
-      setCount(Math.floor(startVal + (end - startVal) * progress))
-      if (progress < 1) requestAnimationFrame(step)
+      setCount(Math.floor(end * progress))
+      if (progress < 1) rafId = requestAnimationFrame(step)
     }
-    requestAnimationFrame(step)
-  }, [end, duration, started])
+    rafId = requestAnimationFrame(step)
+    return () => { if (rafId) cancelAnimationFrame(rafId) }
+  }, [end, duration])
 
   return count
 }
@@ -37,43 +37,59 @@ export default function Overview() {
 
   const [stats, setStats] = useState({ total: 0, active: 0, cancelled: 0, departments: [], todayBookings: 0, doctorCount: 0 })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [bookingRes, docRes] = await Promise.all([
-        supabase.from('bookings').select('status, department_id, departments(name_en, name_ar)').limit(1000),
-        supabase.from('doctors').select('id', { count: 'exact', head: true }),
-      ])
+      try {
+        const [bookingRes, docRes] = await Promise.all([
+          supabase.from('bookings').select('status, department_id, departments(name_en, name_ar)').limit(1000),
+          supabase.from('doctors').select('id', { count: 'exact', head: true }),
+        ])
 
-      const bookings = bookingRes.data || []
-      const total = bookings.length
-      const active = bookings.filter(b => b.status === 'active').length
-      const cancelled = bookings.filter(b => b.status === 'cancelled').length
-      const today = new Date().toISOString().slice(0, 10)
+        if (bookingRes.error) {
+          console.error('Bookings fetch error:', bookingRes.error)
+          throw bookingRes.error
+        }
+        if (docRes.error) {
+          console.error('Doctors fetch error:', docRes.error)
+          throw docRes.error
+        }
 
-      const deptMap = {}
-      bookings.forEach(b => {
-        const name = isRTL ? (b.departments?.name_ar || b.departments?.name_en || 'Unknown') : (b.departments?.name_en || 'Unknown')
-        if (!deptMap[name]) deptMap[name] = { total: 0, active: 0 }
-        deptMap[name].total++
-        if (b.status === 'active') deptMap[name].active++
-      })
+        const bookings = bookingRes.data || []
+        const total = bookings.length
+        const active = bookings.filter(b => b.status === 'active').length
+        const cancelled = bookings.filter(b => b.status === 'cancelled').length
+        const today = new Date().toISOString().slice(0, 10)
 
-      setStats({
-        total, active, cancelled,
-        departments: Object.entries(deptMap).map(([name, data]) => ({ name, ...data })),
-        todayBookings: bookings.filter(b => b.booking_date === today).length,
-        doctorCount: docRes.count || 0,
-      })
-      setLoading(false)
+        const deptMap = {}
+        bookings.forEach(b => {
+          const name = isRTL ? (b.departments?.name_ar || b.departments?.name_en || 'Unknown') : (b.departments?.name_en || 'Unknown')
+          if (!deptMap[name]) deptMap[name] = { total: 0, active: 0 }
+          deptMap[name].total++
+          if (b.status === 'active') deptMap[name].active++
+        })
+
+        setStats({
+          total, active, cancelled,
+          departments: Object.entries(deptMap).map(([name, data]) => ({ name, ...data })),
+          todayBookings: bookings.filter(b => b.booking_date === today).length,
+          doctorCount: docRes.count || 0,
+        })
+      } catch (err) {
+        console.error('fetchStats failed:', err)
+        setError(err)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchStats()
   }, [isRTL])
 
-  const container = {
-    hidden: { opacity: 0 },
-    visible: { transition: { staggerChildren: 0.08 } }
-  }
+ const container = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+}
 
   const item = {
     hidden: { opacity: 0, y: 16 },
@@ -97,6 +113,17 @@ export default function Overview() {
             ))}
           </div>
           <Skeleton className="h-80 rounded-2xl" />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="bg-danger-light border border-danger/20 rounded-2xl p-6 text-center">
+          <p className="text-danger font-semibold mb-1">{isRTL ? 'حدث خطأ في تحميل البيانات' : 'Failed to load dashboard data'}</p>
+          <p className="text-txt-muted text-sm">{error.message || String(error)}</p>
         </div>
       </DashboardLayout>
     )

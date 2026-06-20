@@ -1,45 +1,88 @@
 import { motion } from 'framer-motion'
-import { Building2, AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Building2, CheckCircle, ShieldAlert } from 'lucide-react'
 
 const severityConfig = {
-  low:       { color: 'bg-green-50 border-green-200',  badge: 'bg-green-100 text-green-700',  label: 'Low Risk • منخفض' },
-  medium:    { color: 'bg-yellow-50 border-yellow-200',badge: 'bg-yellow-100 text-yellow-700',label: 'Moderate • متوسط' },
-  high:      { color: 'bg-orange-50 border-orange-200',badge: 'bg-orange-100 text-orange-700',label: 'High • مرتفع' },
-  emergency: { color: 'bg-red-50 border-red-200',      badge: 'bg-red-100 text-red-700',      label: 'Emergency • طارئ' },
+  low: {
+    icon: CheckCircle,
+    bg: 'rgba(16,185,129,0.08)',
+    border: 'rgba(16,185,129,0.2)',
+    badge: { bg: 'rgba(16,185,129,0.15)', color: '#10b981' },
+    label: 'Low Risk • منخفض',
+    iconColor: '#10b981',
+  },
+  medium: {
+    icon: ShieldAlert,
+    bg: 'rgba(245,158,11,0.08)',
+    border: 'rgba(245,158,11,0.2)',
+    badge: { bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
+    label: 'Moderate • متوسط',
+    iconColor: '#f59e0b',
+  },
+  high: {
+    icon: AlertTriangle,
+    bg: 'rgba(249,115,22,0.08)',
+    border: 'rgba(249,115,22,0.2)',
+    badge: { bg: 'rgba(249,115,22,0.15)', color: '#f97316' },
+    label: 'High • مرتفع',
+    iconColor: '#f97316',
+  },
+  emergency: {
+    icon: AlertTriangle,
+    bg: 'rgba(239,68,68,0.08)',
+    border: 'rgba(239,68,68,0.25)',
+    badge: { bg: 'rgba(239,68,68,0.15)', color: '#ef4444' },
+    label: 'Emergency • طارئ',
+    iconColor: '#ef4444',
+  },
 }
 
 export default function RecommendCard({ recommendation }) {
   if (!recommendation) return null
   const { department, severity, advice } = recommendation
   const cfg = severityConfig[severity] ?? severityConfig.low
+  const Icon = cfg.icon
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.97 }}
+      initial={{ opacity: 0, y: 16, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
-      className={`mx-4 mb-4 p-4 rounded-2xl border-2 ${cfg.color}`}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="mx-0 mb-4 mt-2 rounded-2xl overflow-hidden"
+      style={{
+        background: cfg.bg,
+        border: `1px solid ${cfg.border}`,
+      }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-bold text-gray-800 text-base flex items-center gap-2">
-          {severity === 'emergency' ? <AlertTriangle size={16} className="text-red-500" /> : <Building2 size={16} />}
-          Recommendation • التوصية
-        </span>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${cfg.badge}`}>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: `1px solid ${cfg.border}` }}>
+        <div className="flex items-center gap-2">
+          <Icon size={16} style={{ color: cfg.iconColor }} />
+          <span className="text-sm font-semibold" style={{ color: '#f1f5f9' }}>
+            Recommendation • التوصية
+          </span>
+        </div>
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+          style={{ background: cfg.badge.bg, color: cfg.badge.color }}>
           {cfg.label}
         </span>
       </div>
-      {department && (
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-gray-500 text-sm">Department:</span>
-          <span className="font-semibold text-gray-800">{department}</span>
-        </div>
-      )}
-      {advice && (
-        <p className="text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-2 mt-2" dir="auto">
-          {advice}
-        </p>
-      )}
+
+      {/* Body */}
+      <div className="px-4 py-3 space-y-2.5">
+        {department && (
+          <div className="flex items-center gap-2">
+            <Building2 size={14} style={{ color: '#64748b' }} />
+            <span className="text-xs" style={{ color: '#64748b' }}>Department:</span>
+            <span className="text-sm font-semibold" style={{ color: '#f1f5f9' }}>{department}</span>
+          </div>
+        )}
+        {advice && (
+          <p className="text-sm leading-relaxed" style={{ color: '#94a3b8' }} dir="auto">
+            {advice}
+          </p>
+        )}
+      </div>
     </motion.div>
   )
 }

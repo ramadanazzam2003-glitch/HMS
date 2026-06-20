@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, CalendarDays, Users, Stethoscope, FileText,
-  Receipt, Bot, BarChart3, ScrollText, Settings, ChevronLeft,
+  Receipt,Bot,BarChart3, ScrollText, Settings, ChevronLeft,
   ChevronRight, LogOut, Bell, Search, Moon, Sun, Globe,
   Menu, User, Hospital, CalendarCheck, ClipboardList, FlaskConical, CalendarPlus, Shield, X, ArrowRight
 } from 'lucide-react'
@@ -33,8 +33,7 @@ const sidebarItems = [
   { icon: CalendarPlus, label: 'متابعة', labelEn: 'Follow-Up', path: '/doctor/follow-up', roles: ['doctor'] },
   { icon: CalendarDays, label: 'جدول المواعيد', labelEn: 'Schedule', path: '/doctor/schedule', roles: ['doctor'] },
 
-  // Shared items
-  { icon: Bot, label: 'الفرز الذكي', labelEn: 'AI Triage', path: '/triage', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin', 'doctor', 'nurse', 'receptionist'] },
+  
 
   // Nurse items
   { icon: Stethoscope, label: 'الفرز', labelEn: 'Triage', path: '/nurse/triage', roles: ['nurse'] },
@@ -46,8 +45,8 @@ const sidebarItems = [
   { icon: ClipboardList, label: 'حجز مباشر', labelEn: 'Walk-In', path: '/receptionist/walk-in', roles: ['receptionist'] },
   { icon: Users, label: 'دليل المرضى', labelEn: 'Patients', path: '/receptionist/patients', roles: ['receptionist'] },
   { icon: CalendarCheck, label: 'تسجيل الوصول', labelEn: 'Check-In/Out', path: '/receptionist/check-in-out', roles: ['receptionist'] },
+{ icon: Bot, label: 'الفرز الذكي', labelEn: 'AI Triage', path: '/triage', roles: ['patient'] },
 ]
-
 export default function DashboardLayout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -216,9 +215,7 @@ export default function DashboardLayout({ children }) {
                   <p className="text-sm font-medium text-white truncate">
                     {profile?.full_name || 'User'}
                   </p>
-                  <Badge variant="primary" className="mt-0.5 text-[10px] px-1.5 py-0">
-                    {profile?.role || 'Staff'}
-                  </Badge>
+                <Badge>{role || 'Staff'}</Badge>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -259,7 +256,7 @@ export default function DashboardLayout({ children }) {
               <Search size={15} />
               <span className="text-txt-muted/60">{isRTL ? 'بحث...' : 'Search...'}</span>
               <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-white border border-border text-[10px] text-txt-muted font-medium">
-                <span>Ctrl</span><span>K</span>
+             {/*    <span>Ctrl</span><span>K</span> */}
               </kbd>
             </button>
           </div>

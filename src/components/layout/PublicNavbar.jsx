@@ -29,7 +29,7 @@ export default function PublicNavbar({ back }) {
     ? [
         { label: 'الرئيسية', path: '/' },
         { label: 'الأقسام', path: '/#departments' },
-        { label: 'الفرز الذكي', path: '/triage' },
+        { label: 'المساعد الذكي ', path: '/triage' },
         { label: 'الأطباء', path: '/#doctors' },
       ]
     : [
@@ -85,7 +85,7 @@ export default function PublicNavbar({ back }) {
             <button
               onClick={() => navigate('/triage')}
               className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border text-sm font-medium text-txt-secondary hover:bg-primary-light hover:text-primary hover:border-primary/30 transition-all"
-              title={isRTL ? 'الفرز الذكي' : 'AI Triage'}
+              title={isRTL ? 'المساعد الذكي' : 'AI Triage'}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 8V4"/>
@@ -94,7 +94,7 @@ export default function PublicNavbar({ back }) {
                 <path d="M20 14h2"/>
                 <path d="M6 14h.01M10 14h.01M14 14h.01M18 14h.01"/>
               </svg>
-              <span className="hidden xl:inline">{isRTL ? 'الفرز الذكي' : 'AI Triage'}</span>
+              <span className="hidden xl:inline">{isRTL ? 'المساعد الذكي ' : 'AI Triage'}</span>
             </button>
 
             <button

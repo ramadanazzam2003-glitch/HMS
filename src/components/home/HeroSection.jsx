@@ -1,7 +1,9 @@
+// src/components/home/HeroSection.jsx
 import { motion } from 'framer-motion'
-import { Building2, ArrowRight } from 'lucide-react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function HeroSection({ departmentCount, openCount, onScrollToDepts }) {
+  const { t } = useLanguage()
   return (
     <div className="pt-14 relative z-1">
       <style>{`
@@ -22,10 +24,36 @@ export default function HeroSection({ departmentCount, openCount, onScrollToDept
           padding: 52px 56px; display: flex; flex-direction: column; justify-content: center;
           align-items: flex-start; text-align: left; height: 100%;
         }
-        .home-hero-eyebrow { color: #7DD3FC; font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; opacity: 0.98; }
-        .home-hero-headline { font-size: 3.2rem; font-weight: 900; margin-bottom: 12px; color: #FFFFFF; letter-spacing: -0.025em; line-height: 1.12; }
-        .home-hero-subtitle { color: #E0F2FE; font-size: 1.1rem; margin-bottom: 32px; max-width: 420px; line-height: 1.7; font-weight: 500; }
-        .home-hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+        .home-hero-eyebrow {
+          color: #7DD3FC; font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+          margin-bottom: 14px; opacity: 0.98; text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+        .home-hero-headline {
+          font-size: 3.2rem; font-weight: 900; margin-bottom: 12px; color: #FFFFFF; letter-spacing: -0.025em; line-height: 1.12;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.85);
+        }
+        .home-hero-subtitle {
+          color: #E0F2FE; font-size: 1.1rem; margin-bottom: 32px; max-width: 420px; line-height: 1.7; font-weight: 500;
+          text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+        }
+        .home-hero-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+        .home-hero-stat-pill {
+          display: flex; flex-direction: column; align-items: flex-start;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(125, 211, 252, 0.3);
+          border-radius: 14px;
+          padding: 14px 20px;
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          cursor: pointer;
+          transition: border-color 0.25s ease, background 0.25s ease;
+        }
+        .home-hero-stat-pill:hover {
+          border-color: rgba(125, 211, 252, 0.7);
+          background: rgba(255, 255, 255, 0.12);
+        }
+        .stat-main { font-size: 1.5rem; font-weight: 800; color: #FFFFFF; line-height: 1.2; }
+        .stat-label { font-size: 0.78rem; color: #BAE6FD; font-weight: 600; margin-top: 2px; white-space: nowrap; }
         .home-hero-wave { position: absolute; left: 0; right: 0; bottom: -1px; width: 100%; height: 60px; z-index: 5; }
         @media (max-width: 1024px) {
           .home-hero { min-height: 440px; background-position: center; }
@@ -58,19 +86,19 @@ export default function HeroSection({ departmentCount, openCount, onScrollToDept
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 0.98, y: 0 }}
             transition={{ duration: 0.5 }}
-          >WELCOME TO MEDIBOOK</motion.div>
+          >{t.welcomeToMedibook}</motion.div>
           <motion.div
             className="home-hero-headline"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-          >Book Your Appointment</motion.div>
+          >{t.heroHeadline}</motion.div>
           <motion.div
             className="home-hero-subtitle"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-          >Fast, easy online booking for all hospital departments</motion.div>
+          >{t.heroSubtitle}</motion.div>
           <motion.div
             className="home-hero-stats"
             initial={{ opacity: 0, y: 16 }}
@@ -80,32 +108,32 @@ export default function HeroSection({ departmentCount, openCount, onScrollToDept
             <motion.div
               className="home-hero-stat-pill"
               onClick={onScrollToDepts}
-              title="Scroll to departments"
-              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.15)' }}
+              title={t.heroSubtitle}
+              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.18)' }}
             >
               <div className="stat-main">{departmentCount}</div>
-              <div className="stat-label">Departments ↓</div>
+              <div className="stat-label">{t.departmentsDown}</div>
             </motion.div>
             <motion.div
               className="home-hero-stat-pill"
-              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.15)' }}
+              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.18)' }}
             >
               <div className="stat-main">{openCount}</div>
-              <div className="stat-label">Available Now</div>
+              <div className="stat-label">{t.availableNowTitle}</div>
             </motion.div>
             <motion.div
               className="home-hero-stat-pill"
-              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.15)' }}
+              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(125,211,252,0.18)' }}
             >
               <div className="stat-main">15m</div>
-              <div className="stat-label">Slot Duration</div>
+              <div className="stat-label">{t.slotDurationTitle}</div>
             </motion.div>
           </motion.div>
         </div>
 
         <div className="home-hero-wave">
           <svg viewBox="0 0 1440 60" width="100%" height="60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: '100%' }}>
-            <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f1f5f9" fillOpacity="1" />
+            <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--background)" fillOpacity="1" />
           </svg>
         </div>
       </div>

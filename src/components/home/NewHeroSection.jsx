@@ -57,7 +57,7 @@ export default function HeroSection() {
             <div className="flex items-center gap-6 mt-10 pt-8 border-t border-border">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-9 h-9 rounded-full border-2 border-white bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-xs font-bold text-primary">
+                  <div key={i} className="w-9 h-9 rounded-full border-2 border-surface bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-xs font-bold text-primary">
                     {i === 4 ? '+' : ''}
                   </div>
                 ))}
@@ -85,7 +85,7 @@ export default function HeroSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
               {/* Floating badge */}
-              <div className="absolute top-4 start-4 px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm shadow-lg text-xs font-semibold text-txt-primary flex items-center gap-1.5">
+              <div className="absolute top-4 start-4 px-3 py-1.5 rounded-lg bg-surface/90 backdrop-blur-sm shadow-lg text-xs font-semibold text-txt-primary flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 {isRTL ? 'مفتوح 24 ساعة' : 'Open 24/7'}
               </div>

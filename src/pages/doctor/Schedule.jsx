@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
@@ -19,7 +18,7 @@ const DAYS = [
 ]
 
 export default function DoctorSchedule() {
-  const navigate = useNavigate()
+
   const { user } = useAuth()
   const [doctor, setDoctor] = useState(null)
   const [weekBookings, setWeekBookings] = useState([])

@@ -65,7 +65,7 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(cached.role)
   const [roleLevel, setRoleLevel] = useState(cached.roleLevel)
   const [permissions, setPermissions] = useState(cached.permissions)
-  const [loading, setLoading] = useState(false)
+ const [loading, setLoading] = useState(!cached.user)
 
   const fetchingRef = useRef(false)
   const initDoneRef = useRef(!!cached.role)

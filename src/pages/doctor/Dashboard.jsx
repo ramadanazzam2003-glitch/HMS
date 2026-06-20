@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { calcEndTime } from '../../utils/booking'
 import { motion } from 'framer-motion'
-import { CalendarDays, Clock, CheckCircle, Stethoscope } from 'lucide-react'
+import { CalendarDays, CheckCircle, Stethoscope } from 'lucide-react' // ✅ حذف Clock
 import { useLanguage } from '../../contexts/LanguageContext'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -13,7 +13,7 @@ import { Skeleton } from '../../components/ui/skeleton'
 
 export default function DoctorDashboard() {
   const navigate = useNavigate()
-  const { user, profile } = useAuth()
+  const { user } = useAuth() // ✅ حذف profile من هنا لأنه غير مستخدم
   const { t, isRTL } = useLanguage()
 
   const [doctor, setDoctor] = useState(null)
@@ -24,12 +24,14 @@ export default function DoctorDashboard() {
   useEffect(() => {
     let ignore = false
     const load = async () => {
-      const { data: doctorData } = await supabase
-        .from('doctors')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single()
 
+      // ✅ التعديل الأول: جلب profile عبر auth user id أولاً
+    const { data: doctorData } = await supabase
+  .from('doctors')
+  .select('*')
+  .eq('user_id', user?.id)
+  .single()
+  
       if (ignore || !doctorData) { setLoading(false); return }
       setDoctor(doctorData)
 
@@ -86,6 +88,13 @@ export default function DoctorDashboard() {
 
   return (
     <DashboardLayout>
+        {/* ✅ هنا — قبل motion.div مباشرة */}
+      <div className="mb-4">
+        <h1 className="font-display text-xl font-bold text-txt-primary">
+          {t.welcome}, {doctor?.name}
+        </h1>
+      </div>
+    
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="rounded-2xl bg-surface border border-border p-5">

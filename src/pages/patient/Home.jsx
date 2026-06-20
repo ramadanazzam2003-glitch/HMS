@@ -33,7 +33,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
-  const { lang } = useLanguage()
+  const { lang, t } = useLanguage()
   const isRTL = lang === 'ar'
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -104,19 +104,19 @@ export default function Home() {
   }, [departments])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen">
       <PublicNavbar />
       <div className="flex items-center justify-center pt-32">
         <div className="text-center">
           <div className="spinner spinner-lg mx-auto mb-4" />
-          <p className="text-txt-muted font-medium">{isRTL ? 'جاري التحميل...' : 'Loading...'}</p>
+          <p className="text-txt-muted font-medium">{t.loading}</p>
         </div>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen">
       <PublicNavbar />
 
       {/* New Hero Section */}
@@ -139,13 +139,13 @@ export default function Home() {
             className="text-center mb-10"
           >
             <Badge variant="primary" className="mb-3">
-              {isRTL ? 'احجز موعدك' : 'Book Your Appointment'}
+              {t.bookYourAppointment}
             </Badge>
             <h2 className="text-3xl lg:text-4xl font-extrabold text-txt-primary mb-2">
-              {isRTL ? 'اختر القسم الطبي' : 'Select a Department'}
+              {t.selectDepartment}
             </h2>
             <p className="text-txt-muted">
-              {isRTL ? 'اختر التخصص المناسب لحجز موعد مع طبيب' : 'Choose the right specialty to book with a doctor'}
+              {t.chooseSpecialty}
             </p>
           </motion.div>
 
@@ -158,7 +158,7 @@ export default function Home() {
               <Input
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder={isRTL ? 'بحث عن قسم...' : 'Search departments...'}
+                placeholder={t.searchDepartments}
                 className="h-9 text-sm ps-9"
               />
             </div>
@@ -173,12 +173,12 @@ export default function Home() {
                       : 'bg-surface text-txt-secondary border border-border hover:bg-surface-hover'
                   }`}
                 >
-                  {f === 'all' ? (isRTL ? 'الكل' : 'All') : f === 'open' ? (isRTL ? 'متاح' : 'Open') : (isRTL ? 'ممتلئ' : 'Full')}
+                  {f === 'all' ? t.all : f === 'open' ? t.filterOpenHome : t.filterFull}
                 </button>
               ))}
             </div>
             <span className="text-xs text-txt-muted whitespace-nowrap">
-              {isRTL ? `عرض ${filteredDepts.length} من ${departments.length} قسم` : `Showing ${filteredDepts.length} of ${departments.length} departments`}
+              {isRTL ? `عرض ${filteredDepts.length} من ${departments.length} قسم` : `Showing ${filteredDepts.lhgth} of ${departments.length} departments`}
             </span>
           </div>
 
@@ -201,7 +201,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section from HomeSections is already there - skip duplicate */}
-      <div className="bg-[#F8FAFC]">
+      <div>
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -213,19 +213,17 @@ export default function Home() {
             <div className="absolute -bottom-20 -start-20 w-60 h-60 rounded-full bg-surface/5 pointer-events-none" />
             <div className="relative z-10">
               <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4">
-                {isRTL ? 'احجز موعدك الآن' : 'Book Your Appointment Now'}
+                {t.bookNowCta}
               </h2>
               <p className="text-lg text-white/80 mb-8 max-w-lg mx-auto">
-                {isRTL
-                  ? 'اختر الطبيب المناسب واحجز موعدك في دقائق'
-                  : 'Choose the right doctor and book your appointment in minutes'}
+                {t.chooseRightDoctor}
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button size="lg" className="bg-surface text-primary hover:bg-surface/90 shadow-xl" onClick={() => navigate('/register')}>
-                  {isRTL ? 'حجز موعد' : 'Book Now'}
+                  {t.bookNow}
                 </Button>
                 <Button variant="outline" size="lg" className="border-white/30 text-white bg-transparent hover:bg-surface/10">
-                  {isRTL ? 'اتصل بنا' : 'Call Us'}
+                  {t.callUs}
                 </Button>
               </div>
             </div>

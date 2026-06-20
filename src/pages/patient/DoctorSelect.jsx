@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Search, CalendarDays, Stethoscope, UserRound } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useLanguage } from '../../contexts/LanguageContext'
 import PublicNavbar from '../../components/layout/PublicNavbar'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
@@ -44,6 +45,7 @@ export default function DoctorSelect() {
   const [searchParams]    = useSearchParams()
   const bookingType       = searchParams.get('type')
   const navigate          = useNavigate()
+  const { t, isRTL } = useLanguage()
 
   const [doctors, setDoctors]       = useState([])
   const [loading, setLoading]       = useState(true)
@@ -104,14 +106,17 @@ export default function DoctorSelect() {
           <span className="hero-chip">{department?.name_en}</span>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2 flex items-center justify-center gap-2">
             {bookingType === 'consultant' ? (
-              <><Stethoscope size={24} /> Select Consultant</>
+              <><Stethoscope size={24} /> {t.selectConsultant}</>
             ) : (
-              <><UserRound size={24} /> Select Doctor</>
+              <><UserRound size={24} /> {t.selectDoctor}</>
             )}
           </h1>
           <p className="text-white/65 text-sm">
-            {doctors.length} {bookingType === 'consultant' ? 'consultant' : 'doctor'}{doctors.length !== 1 ? 's' : ''} available
-            {todayCount > 0 && ` · ${todayCount} available today`}
+            {isRTL
+              ? `${doctors.length} ${bookingType === 'consultant' ? 'استشاري' : 'طبيب'} ${doctors.length !== 1 ? 'ين' : ''} متاح`
+              : `${doctors.length} ${bookingType === 'consultant' ? 'consultant' : 'doctor'}${doctors.length !== 1 ? 's' : ''} available`
+            }
+            {todayCount > 0 && (isRTL ? ` · ${todayCount} متاح اليوم` : ` · ${todayCount} available today`)}
           </p>
         </div>
       </div>
@@ -127,7 +132,7 @@ export default function DoctorSelect() {
                 className="pl-9"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder={`Search ${bookingType === 'consultant' ? 'consultants' : 'doctors'}...`}
+                placeholder={bookingType === 'consultant' ? t.searchConsultants : t.searchDoctors}
               />
             </div>
 
@@ -136,7 +141,7 @@ export default function DoctorSelect() {
               onClick={() => setFilterToday(f => !f)}
               className={`gap-1.5 ${filterToday ? 'bg-green-50 text-green-600 border-green-200' : ''}`}
             >
-              <CalendarDays size={14} /> Available Today
+              <CalendarDays size={14} /> {t.availableToday}
               {filterToday && todayCount > 0 && (
                 <Badge variant="success" className="py-0.5 px-1.5 text-[10px]">{todayCount}</Badge>
               )}
@@ -154,17 +159,17 @@ export default function DoctorSelect() {
               {search || filterToday ? <Search size={48} className="text-txt-muted mx-auto" /> : <Stethoscope size={48} className="text-txt-muted mx-auto" />}
             </div>
             <h3 className="text-lg font-bold text-txt-primary mb-2">
-              {search || filterToday ? 'No Results Found' : `No ${bookingType === 'consultant' ? 'Consultants' : 'Doctors'} Available`}
+              {search || filterToday ? t.noResultsFound : (bookingType === 'consultant' ? t.noConsultantsDept : t.noDoctorsDept)}
             </h3>
             <p className="text-sm text-txt-muted mb-6">
               {search
-                ? `No results for "${search}". Try a different name.`
+                ? (isRTL ? `لا توجد نتائج لـ "${search}". جرب اسماً آخر.` : `No results for "${search}". Try a different name.`)
                 : filterToday
-                  ? 'No doctors are available today. Try removing the filter.'
-                  : `No ${bookingType === 'consultant' ? 'consultants' : 'doctors'} are currently available in this department.`}
+                  ? t.noDoctorsToday
+                  : (bookingType === 'consultant' ? t.consultantsNotAvailable : t.doctorsNotAvailable)}
             </p>
             {(search || filterToday) && (
-              <Button variant="outline" onClick={() => { setSearch(''); setFilterToday(false) }}>Clear Filters</Button>
+              <Button variant="outline" onClick={() => { setSearch(''); setFilterToday(false) }}>{t.clearFilters}</Button>
             )}
           </Card>
         ) : (

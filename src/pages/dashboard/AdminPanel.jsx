@@ -1,3 +1,4 @@
+// src/pages/dashboard/AdminPanel.jsx
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -12,6 +13,8 @@ import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Badge } from '../../components/ui/badge'
 import { Skeleton } from '../../components/ui/skeleton'
+
+const DOCTOR_ROLE_ID = 2
 
 export default function AdminPanel() {
   const navigate = useNavigate()
@@ -28,6 +31,7 @@ export default function AdminPanel() {
   const [filterRole, setFilterRole] = useState('all')
   const [editingUser, setEditingUser] = useState(null)
   const [newRole, setNewRole] = useState('')
+  const [newDoctorType, setNewDoctorType] = useState('doctor')
   const [editingRolePerms, setEditingRolePerms] = useState(null)
   const [selectedPerms, setSelectedPerms] = useState([])
 
@@ -69,7 +73,9 @@ export default function AdminPanel() {
   }, [])
 
   const handleRoleChange = async (userId, roleId) => {
-    const { error } = await supabase.from('profiles').update({ role_id: roleId }).eq('id', userId)
+    const payload = { role_id: roleId }
+    if (parseInt(roleId) === DOCTOR_ROLE_ID) payload.doctor_type = newDoctorType
+    const { error } = await supabase.from('profiles').update(payload).eq('id', userId)
     if (error) toast('Error: ' + error.message, { type: 'error' })
     else { setEditingUser(null); fetchData() }
   }
@@ -238,6 +244,13 @@ export default function AdminPanel() {
                                   className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/20">
                                   {roles.map(r => <option key={r.id} value={r.id}>{r.name.replace('_', ' ')}</option>)}
                                 </select>
+                                {parseInt(newRole) === DOCTOR_ROLE_ID && (
+                                  <select value={newDoctorType} onChange={e => setNewDoctorType(e.target.value)}
+                                    className="h-8 px-2 rounded-lg border border-border bg-surface text-xs w-[110px] focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="doctor">{isRTL ? 'دكتور' : 'Doctor'}</option>
+                                    <option value="consultant">{isRTL ? 'استشاري' : 'Consultant'}</option>
+                                  </select>
+                                )}
                                 <Button size="xs" onClick={() => handleRoleChange(u.id, parseInt(newRole))}>{t.save}</Button>
                                 <Button variant="ghost" size="xs" onClick={() => setEditingUser(null)}>{t.cancel}</Button>
                               </div>
@@ -248,7 +261,7 @@ export default function AdminPanel() {
                             {editingUser !== u.id && (
                               <div className="flex gap-1.5">
                                 <Button variant="ghost" size="xs" className="text-primary"
-                                  onClick={() => { setEditingUser(u.id); setNewRole(u.role_id) }}>
+                                  onClick={() => { setEditingUser(u.id); setNewRole(u.role_id); setNewDoctorType('doctor') }}>
                                   <Pencil size={12} /> {t.edit}
                                 </Button>
                                 <Button variant="ghost" size="xs" className="text-danger"

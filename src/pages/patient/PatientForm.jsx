@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, CalendarDays, Clock, Stethoscope, Building2, AlertCircle, CheckCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { useLanguage } from '../../contexts/LanguageContext'
 import PublicNavbar from '../../components/layout/PublicNavbar'
 import { Button } from '../../components/ui/button'
 import { Card } from '../../components/ui/card'
@@ -14,6 +15,7 @@ import StepIndicator from '../../components/StepIndicator'
 export default function PatientForm() {
   const navigate = useNavigate()
   const { state } = useLocation()
+  const { t, isRTL } = useLanguage()
 
   const [loading, setLoading] = useState(false)
   const { toast } = useUI()
@@ -35,10 +37,10 @@ export default function PatientForm() {
 
   const validate = () => {
     const errs = {}
-    if (!form.patient_name.trim()) errs.patient_name = 'Full name is required'
-    if (!form.phone.trim()) errs.phone = 'Phone number is required'
-    if (form.phone && !/^[0-9]{10,15}$/.test(form.phone.trim())) errs.phone = 'Invalid phone number'
-    if (form.age && (parseInt(form.age) < 1 || parseInt(form.age) > 120)) errs.age = 'Invalid age'
+    if (!form.patient_name.trim()) errs.patient_name = t.fullNameRequired
+    if (!form.phone.trim()) errs.phone = t.phoneRequired
+    if (form.phone && !/^[0-9]{10,15}$/.test(form.phone.trim())) errs.phone = t.invalidPhone
+    if (form.age && (parseInt(form.age) < 1 || parseInt(form.age) > 120)) errs.age = t.invalidAge
     return errs
   }
 
@@ -100,9 +102,9 @@ const handleSubmit = async () => {
       <div className="hero-gradient">
         <div className="absolute -top-10 -right-10 w-50 h-50 rounded-full bg-surface/5 pointer-events-none" />
         <div className="hero-inner text-center relative">
-          <span className="hero-chip">Almost Done!</span>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">Patient Information</h1>
-          <p className="text-white/70 text-sm">Fill in your details to confirm the booking</p>
+          <span className="hero-chip">{t.almostDone}</span>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-2">{t.patientInfo}</h1>
+          <p className="text-white/70 text-sm">{t.fillDetails}</p>
         </div>
       </div>
 
@@ -117,20 +119,20 @@ const handleSubmit = async () => {
             transition={{ duration: 0.3 }}
           >
             <Card className="p-6">
-              <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><User size={18} /> Your Details</h2>
+              <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><User size={18} /> {t.yourDetails}</h2>
 
               <div className="flex flex-col gap-4">
                 <div>
-                  <label className="input-label">Full Name *</label>
+                  <label className="input-label">{t.fullNameLabel}</label>
                   <Input name="patient_name" value={form.patient_name} onChange={handleChange}
                     onKeyDown={e => handleKeyDown(e, phoneRef)} autoFocus
-                    placeholder="Ahmed Mohamed"
+                    placeholder={isRTL ? 'أحمد محمد' : 'Ahmed Mohamed'}
                     className={errors.patient_name ? 'border-red-500' : ''} />
                   {errors.patient_name && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.patient_name}</p>}
                 </div>
 
                 <div>
-                  <label className="input-label">Phone Number *</label>
+                  <label className="input-label">{t.phoneLabel}</label>
                   <Input ref={phoneRef} name="phone" value={form.phone} onChange={handleChange}
                     onKeyDown={e => handleKeyDown(e, ageRef)}
                     placeholder="01012345678"
@@ -139,10 +141,10 @@ const handleSubmit = async () => {
                 </div>
 
                 <div>
-                  <label className="input-label">Age <span className="text-txt-muted font-normal">(optional)</span></label>
+                  <label className="input-label">{t.ageLabel} <span className="text-txt-muted font-normal">{t.optionalLabel}</span></label>
                   <Input ref={ageRef} name="age" type="number" value={form.age} onChange={handleChange}
                     onKeyDown={e => handleKeyDown(e, submitRef)}
-                    placeholder="30" min="1" max="120"
+                    placeholder={isRTL ? '٣٠' : '30'} min="1" max="120"
                     className={errors.age ? 'border-red-500' : ''} />
                   {errors.age && <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.age}</p>}
                 </div>
@@ -159,18 +161,18 @@ const handleSubmit = async () => {
               transition={{ duration: 0.3, delay: 0.06 }}
             >
               <Card className="p-6">
-                <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><CheckCircle size={18} /> Booking Summary</h2>
+                <h2 className="font-bold text-txt-primary text-base mb-5 flex items-center gap-2"><CheckCircle size={18} /> {t.bookingSummary}</h2>
 
                 <div className="flex flex-col gap-3">
                   {[
-                    { icon: <Stethoscope size={14} />, label: 'Doctor',   value: state?.doctor?.name },
-                    { icon: <Building2 size={14} />, label: 'Type',     value: state?.bookingType, capitalize: true },
-                    { icon: <CalendarDays size={14} />, label: 'Date',     value: state?.selectedDate },
-                    { icon: <Clock size={14} />, label: 'Time',     value: state?.selectedSlot ? `${state.selectedSlot} → ${endTime}` : '' },
-                    { icon: <Clock size={14} />, label: 'Duration', value: '15 minutes' },
-                  ].map(({ icon, label, value, capitalize }) => (
-                    <div key={label} className="flex justify-between items-center pb-3 border-b border-border">
-                      <span className="text-xs text-txt-muted flex items-center gap-1.5">{icon} {label}</span>
+                    { icon: <Stethoscope size={14} />, labelKey: 'doctorLabel',   value: state?.doctor?.name },
+                    { icon: <Building2 size={14} />, labelKey: 'typeLabel',     value: state?.bookingType, capitalize: true },
+                    { icon: <CalendarDays size={14} />, labelKey: 'dateLabel',     value: state?.selectedDate },
+                    { icon: <Clock size={14} />, labelKey: 'timeLabel',     value: state?.selectedSlot ? `${state.selectedSlot} → ${endTime}` : '' },
+                    { icon: <Clock size={14} />, labelKey: 'durationLabel', value: `15 ${t.minutesLabel}` },
+                  ].map(({ icon, labelKey, value, capitalize }) => (
+                    <div key={labelKey} className="flex justify-between items-center pb-3 border-b border-border">
+                      <span className="text-xs text-txt-muted flex items-center gap-1.5">{icon} {t[labelKey]}</span>
                       <span className={`text-xs font-semibold text-txt-primary ${capitalize ? 'capitalize' : ''}`}>{value || '—'}</span>
                     </div>
                   ))}
@@ -186,11 +188,11 @@ const handleSubmit = async () => {
               transition={{ duration: 0.3, delay: 0.12 }}
             >
               <Card className="p-4 bg-blue-50 border-blue-200">
-                <p className="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-1.5"><AlertCircle size={16} /> Tips</p>
+                <p className="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-1.5"><AlertCircle size={16} /> {t.tipsTitle}</p>
                 <ul className="text-xs text-txt-muted pl-4 leading-relaxed">
-                  <li>Save your booking reference after confirming</li>
-                  <li>Arrive 10 minutes before your slot</li>
-                  <li>You can cancel using your reference number</li>
+                  <li>{t.saveBookingRef}</li>
+                  <li>{t.arriveEarly}</li>
+                  <li>{t.cancelWithRef}</li>
                 </ul>
               </Card>
             </motion.div>
@@ -199,7 +201,7 @@ const handleSubmit = async () => {
 
         <div className="mt-5">
           <Button ref={submitRef} onClick={handleSubmit} disabled={loading} size="lg" className="w-full">
-            {loading ? 'Creating booking...' : 'Confirm Booking'}
+            {loading ? t.creatingBooking : t.confirmBooking}
           </Button>
         </div>
       </div>

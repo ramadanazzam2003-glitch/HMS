@@ -205,6 +205,144 @@ export const translations = {
     nurse: 'ممرض/ة',
     receptionist: 'موظف استقبال',
     patient: 'مريض',
+
+    // Patient Booking - Home
+    bookYourAppointment: 'احجز موعدك',
+    selectDepartment: 'اختر القسم الطبي',
+    chooseSpecialty: 'اختر التخصص المناسب لحجز موعد مع طبيب',
+    searchDepartments: 'بحث عن قسم...',
+    filterOpenHome: 'متاح',
+    filterFull: 'ممتلئ',
+    bookNow: 'حجز موعد',
+    callUs: 'اتصل بنا',
+    bookNowCta: 'احجز موعدك الآن',
+    chooseRightDoctor: 'اختر الطبيب المناسب واحجز موعدك في دقائق',
+
+    // Patient Booking - BookingType
+    selectBookingType: 'اختر نوع الحجز',
+    chooseBookingMethod: 'اختر طريقة الحجز المناسبة لك',
+    consultantLabel: 'استشاري',
+    consultantDesc: 'استشر استشارياً متاحاً للحصول على استشارة طبية متخصصة',
+    doctorDesc: 'اختر طبيباً محدداً لحجز موعدك',
+    bookConsultant: 'حجز استشاري',
+    bookDoctor: 'حجز طبيب',
+    noStaffAvailable: 'لا يوجد موظفون متاحون',
+    noStaffMsg: 'لا يوجد طاقم طبي معيّن لهذا القسم حالياً',
+    backToDepartments: '→ العودة إلى الأقسام',
+
+    // Patient Booking - DoctorSelect
+    selectConsultant: 'اختر الاستشاري',
+    selectDoctor: 'اختر الطبيب',
+    availableToday: 'متاح اليوم',
+    searchConsultants: 'بحث عن استشاريين...',
+    searchDoctors: 'بحث عن أطباء...',
+    noResultsFound: 'لا توجد نتائج',
+    noConsultantsDept: 'لا يوجد استشاريون متاحون',
+    noDoctorsDept: 'لا يوجد أطباء متاحون',
+    tryDifferentName: 'جرب اسماً آخر',
+    noDoctorsToday: 'لا يوجد أطباء متاحون اليوم. حاول إزالة الفلتر',
+    clearFilters: 'مسح الفلتر',
+
+    // Patient Booking - PatientForm
+    almostDone: 'خطوات قليلة متبقية!',
+    patientInfo: 'معلومات المريض',
+    fillDetails: 'أدخل بياناتك لتأكيد الحجز',
+    yourDetails: 'بياناتك',
+    fullNameLabel: 'الاسم الكامل *',
+    phoneLabel: 'رقم الهاتف *',
+    ageLabel: 'العمر',
+    optionalLabel: '(اختياري)',
+    fullNameRequired: 'الاسم الكامل مطلوب',
+    phoneRequired: 'رقم الهاتف مطلوب',
+    invalidPhone: 'رقم هاتف غير صحيح',
+    invalidAge: 'العمر غير صحيح',
+    confirmBooking: 'تأكيد الحجز',
+    creatingBooking: 'جاري إنشاء الحجز...',
+    bookingSummary: 'ملخص الحجز',
+    doctorLabel: 'الطبيب',
+    typeLabel: 'النوع',
+    dateLabel: 'التاريخ',
+    timeLabel: 'الوقت',
+    durationLabel: 'المدة',
+    minutesLabel: 'دقيقة',
+    tipsTitle: 'نصائح',
+    saveBookingRef: 'احتفظ برقم الحجز بعد التأكيد',
+    arriveEarly: 'احضر قبل الموعد بـ 10 دقائق',
+    cancelWithRef: 'يمكنك الإلغاء باستخدام رقم الحجز',
+
+    // Patient Booking - Confirmation
+    bookingConfirmed: 'تم تأكيد الحجز!',
+    appointmentBooked: 'تم حجز موعدك بنجاح',
+    yourQueueNumber: 'رقم دورك',
+    waitForCall: 'يرجى انتظار مناداة رقمك',
+    bookingDetails: 'تفاصيل الحجز',
+    patientLabel: 'المريض',
+    saveBookingRefTitle: 'احتفظ برقم الحجز',
+    processingLabel: 'جاري المعالجة...',
+    payNow: 'ادفع الآن (200 ج.م)',
+    viewMyBookings: 'عرض حجوزاتي',
+    backToHome: 'العودة إلى الرئيسية',
+    cancelThisBooking: 'إلغاء هذا الحجز',
+
+    // Patient Booking - HeroSection
+    welcomeToMedibook: 'مرحباً بكم في ميديبوك',
+    heroHeadline: 'احجز موعدك',
+    heroSubtitle: 'حجز إلكتروني سريع وسهل لجميع الأقسام الطبية',
+    departmentsDown: 'الأقسام ↓',
+    availableNowTitle: 'متاح الآن',
+    slotDurationTitle: 'مدة الموعد',
+
+    // Patient Booking - HomeSections
+    yearsExperience: 'سنوات خبرة',
+    deptStats: 'أقسام طبية',
+    specialists: 'أطباء متخصصون',
+    happyPatients: 'مرضى سعداء',
+    whyChooseUs: 'لماذا نحن؟',
+    bestHealthcare: 'أفضل رعاية صحية في بيئة متكاملة',
+    distinguishedStaff: 'كوادر طبية متميزة',
+    distinguishedStaffDesc: 'نخبة من الأطباء والاستشاريين ذوي الخبرة',
+    latestTech: 'أحدث التقنيات',
+    latestTechDesc: 'أجهزة طبية متطورة وفق أحدث المعايير العالمية',
+    service247: 'خدمة على مدار الساعة',
+    service247Desc: 'خدمات طبية طارئة على مدار الساعة طوال أيام الأسبوع',
+    patientsTrustUs: 'مريض وثقوا بنا',
+    medibookDesc: 'نظام متكامل لإدارة المستشفيات والمواعيد الطبية',
+    quickLinks: 'روابط سريعة',
+    contactUs: 'تواصل معنا',
+    allRightsReserved: 'جميع الحقوق محفوظة.',
+
+    // Patient Booking - NextAppointment
+    yourNextAppointment: 'موعدك القادم',
+    viewDetails: 'عرض التفاصيل',
+
+    // Patient Booking - DepartmentCard
+    slotsLeft: 'موعد متبقي',
+    noSlotsAvailable: 'لا توجد مواعيد متاحة',
+    deptFull: 'ممتلئ',
+    deptOpen: 'متاح',
+
+    // Patient Booking - CancelBanner
+    cancelExistingBooking: 'إلغاء حجز قائم',
+
+    // Patient Booking - DoctorCard
+    slotsPerDay: 'موعد/يوم',
+    todayBadge: 'اليوم',
+    futureBadge: 'موعد آخر',
+
+    // Patient Booking - BookingType dynamic messages
+    availableLabel: 'متاح',
+    consultantsNotAvailable: 'لا يوجد استشاريون متاحون في هذا القسم حالياً',
+    doctorsNotAvailable: 'لا يوجد أطباء متاحون في هذا القسم حالياً',
+
+    // Patient Booking - Footer
+    footerHome: 'الرئيسية',
+    footerDepartments: 'الأقسام',
+    footerDoctors: 'الأطباء',
+    footerServices: 'الخدمات',
+    footerCardiology: 'القلب',
+    footerOrthopedics: 'العظام',
+    footerNeurology: 'الأعصاب',
+    footerPediatrics: 'الأطفال',
   },
 
   en: {
@@ -413,5 +551,143 @@ export const translations = {
     nurse: 'Nurse',
     receptionist: 'Receptionist',
     patient: 'Patient',
+
+    // Patient Booking - Home
+    bookYourAppointment: 'Book Your Appointment',
+    selectDepartment: 'Select a Department',
+    chooseSpecialty: 'Choose the right specialty to book with a doctor',
+    searchDepartments: 'Search departments...',
+    filterOpenHome: 'Open',
+    filterFull: 'Full',
+    bookNow: 'Book Now',
+    callUs: 'Call Us',
+    bookNowCta: 'Book Your Appointment Now',
+    chooseRightDoctor: 'Choose the right doctor and book your appointment in minutes',
+
+    // Patient Booking - BookingType
+    selectBookingType: 'Select Booking Type',
+    chooseBookingMethod: 'Choose how you want to book your appointment',
+    consultantLabel: 'Consultant',
+    consultantDesc: 'See the next available consultant for expert specialist advice',
+    doctorDesc: 'Choose a specific doctor for your appointment',
+    bookConsultant: 'Book Consultant',
+    bookDoctor: 'Book Doctor',
+    noStaffAvailable: 'No Staff Available',
+    noStaffMsg: 'No medical staff are currently assigned to this department.',
+    backToDepartments: '← Back to Departments',
+
+    // Patient Booking - DoctorSelect
+    selectConsultant: 'Select Consultant',
+    selectDoctor: 'Select Doctor',
+    availableToday: 'Available Today',
+    searchConsultants: 'Search consultants...',
+    searchDoctors: 'Search doctors...',
+    noResultsFound: 'No Results Found',
+    noConsultantsDept: 'No Consultants Available',
+    noDoctorsDept: 'No Doctors Available',
+    tryDifferentName: 'Try a different name.',
+    noDoctorsToday: 'No doctors are available today. Try removing the filter.',
+    clearFilters: 'Clear Filters',
+
+    // Patient Booking - PatientForm
+    almostDone: 'Almost Done!',
+    patientInfo: 'Patient Information',
+    fillDetails: 'Fill in your details to confirm the booking',
+    yourDetails: 'Your Details',
+    fullNameLabel: 'Full Name *',
+    phoneLabel: 'Phone Number *',
+    ageLabel: 'Age',
+    optionalLabel: '(optional)',
+    fullNameRequired: 'Full name is required',
+    phoneRequired: 'Phone number is required',
+    invalidPhone: 'Invalid phone number',
+    invalidAge: 'Invalid age',
+    confirmBooking: 'Confirm Booking',
+    creatingBooking: 'Creating booking...',
+    bookingSummary: 'Booking Summary',
+    doctorLabel: 'Doctor',
+    typeLabel: 'Type',
+    dateLabel: 'Date',
+    timeLabel: 'Time',
+    durationLabel: 'Duration',
+    minutesLabel: 'minutes',
+    tipsTitle: 'Tips',
+    saveBookingRef: 'Save your booking reference after confirming',
+    arriveEarly: 'Arrive 10 minutes before your slot',
+    cancelWithRef: 'You can cancel using your reference number',
+
+    // Patient Booking - Confirmation
+    bookingConfirmed: 'Booking Confirmed!',
+    appointmentBooked: 'Your appointment has been successfully booked',
+    yourQueueNumber: 'Your Queue Number',
+    waitForCall: 'Please wait for your number to be called',
+    bookingDetails: 'Booking Details',
+    patientLabel: 'Patient',
+    saveBookingRefTitle: 'Save your booking reference',
+    processingLabel: 'Processing...',
+    payNow: 'Pay Now (EGP 200)',
+    viewMyBookings: 'View My Bookings',
+    backToHome: 'Back to Home',
+    cancelThisBooking: 'Cancel this booking',
+
+    // Patient Booking - HeroSection
+    welcomeToMedibook: 'WELCOME TO MEDIBOOK',
+    heroHeadline: 'Book Your Appointment',
+    heroSubtitle: 'Fast, easy online booking for all hospital departments',
+    departmentsDown: 'Departments ↓',
+    availableNowTitle: 'Available Now',
+    slotDurationTitle: 'Slot Duration',
+
+    // Patient Booking - HomeSections
+    yearsExperience: 'Years Experience',
+    deptStats: 'Departments',
+    specialists: 'Specialists',
+    happyPatients: 'Happy Patients',
+    whyChooseUs: 'Why Choose Us?',
+    bestHealthcare: 'Best Healthcare in an Integrated Environment',
+    distinguishedStaff: 'Distinguished Medical Staff',
+    distinguishedStaffDesc: 'Elite doctors and consultants with experience',
+    latestTech: 'Latest Technologies',
+    latestTechDesc: 'Advanced medical devices with global standards',
+    service247: '24/7 Service',
+    service247Desc: 'Emergency medical services around the clock',
+    patientsTrustUs: 'Patients Trust Us',
+    medibookDesc: 'Integrated hospital and appointment management system',
+    quickLinks: 'Quick Links',
+    contactUs: 'Contact Us',
+    allRightsReserved: 'All rights reserved.',
+
+    // Patient Booking - NextAppointment
+    yourNextAppointment: 'Your Next Appointment',
+    viewDetails: 'View Details',
+
+    // Patient Booking - DepartmentCard
+    slotsLeft: 'slots left',
+    noSlotsAvailable: 'No slots available',
+    deptFull: 'Full',
+    deptOpen: 'Open',
+
+    // Patient Booking - CancelBanner
+    cancelExistingBooking: 'Cancel Existing Booking',
+
+    // Patient Booking - DoctorCard
+    slotsPerDay: 'slots/day',
+    todayBadge: 'Today',
+    futureBadge: 'Future',
+
+    // Patient Booking - BookingType dynamic messages
+    availableLabel: 'available',
+    consultantsNotAvailable: 'No consultants are currently available in this department.',
+    doctorsNotAvailable: 'No doctors are currently available in this department.',
+
+    // Patient Booking - Footer
+    footerHome: 'Home',
+    footerDepartments: 'Departments',
+    footerDoctors: 'Doctors',
+    footerServices: 'Services',
+    footerCardiology: 'Cardiology',
+    footerOrthopedics: 'Orthopedics',
+    footerNeurology: 'Neurology',
+    footerPediatrics: 'Pediatrics',
   },
 }

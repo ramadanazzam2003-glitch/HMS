@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { CalendarX, ArrowRight } from 'lucide-react'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 export default function CancelBanner() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
 
   return (
-    <div className="text-center mt-10 pt-6 border-t border-slate-100">
+    <div className="text-center mt-10 pt-6 border-t border-border">
       <style>{`
         .home-cancel-banner {
           width: 100%; max-width: 1200px; margin: 0 auto; height: 64px;
@@ -29,7 +31,7 @@ export default function CancelBanner() {
       >
         <span className="left">
           <CalendarX size={20} className="mr-1.5" />
-          Cancel Existing Booking
+          {t.cancelExistingBooking}
         </span>
         <span className="right" aria-hidden="true"><ArrowRight size={18} /></span>
       </motion.button>
