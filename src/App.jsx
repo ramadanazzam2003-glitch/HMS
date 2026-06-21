@@ -16,6 +16,7 @@ const Reschedule = lazy(() => import('./pages/patient/Reschedule'))
 const PatientProfile = lazy(() => import('./pages/patient/Profile'))
 const PatientMedicalHistory = lazy(() => import('./pages/patient/MedicalHistory'))
 const PatientPayments = lazy(() => import('./pages/patient/Payments'))
+const PatientDashboard = lazy(() => import('./pages/patient/Dashboard'))
 
 // Auth Pages
 const Register = lazy(() => import('./pages/auth/Register'))
@@ -98,6 +99,7 @@ function App() {
         <Route path="/confirmation" element={<PatientRoute><Confirmation /></PatientRoute>} />
         <Route path="/cancel" element={<PatientRoute><Cancel /></PatientRoute>} />
         <Route path="/triage" element={<PatientRoute><Triage /></PatientRoute>} />
+        <Route path="/patient" element={<PatientRoute><PatientDashboard /></PatientRoute>} />
         <Route path="/reschedule/:bookingId" element={<PatientRoute><Reschedule /></PatientRoute>} />
         <Route path="/profile" element={<PatientRoute><PatientProfile /></PatientRoute>} />
         <Route path="/medical-history" element={<PatientRoute><PatientMedicalHistory /></PatientRoute>} />

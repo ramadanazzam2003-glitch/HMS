@@ -126,6 +126,18 @@ export default function PublicNavbar({ back }) {
             {user ? (
               <>
                 <button
+                  onClick={() => navigate('/patient')}
+                  className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                  </svg>
+                  {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+                </button>
+                <button
                   onClick={() => navigate('/my-bookings')}
                   className="hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border text-sm font-medium text-txt-secondary hover:bg-surface-hover transition-all"
                 >
@@ -211,6 +223,10 @@ export default function PublicNavbar({ back }) {
             <div className="border-t border-border my-2" />
             {user ? (
               <>
+                <button onClick={() => { navigate('/patient'); setMobileOpen(false) }}
+                  className="block w-full text-start px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-primary hover:bg-primary-hover">
+                  {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+                </button>
                 <button onClick={() => { navigate('/my-bookings'); setMobileOpen(false) }}
                   className="block w-full text-start px-3 py-2.5 rounded-xl text-sm font-medium text-txt-secondary hover:bg-surface-hover">
                   {isRTL ? 'حجوزاتي' : 'My Bookings'}
