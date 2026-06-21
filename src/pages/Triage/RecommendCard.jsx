@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle, Building2, CheckCircle, ShieldAlert } from 'lucide-react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 const severityConfig = {
   low: {
@@ -37,6 +38,9 @@ const severityConfig = {
 }
 
 export default function RecommendCard({ recommendation }) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
   if (!recommendation) return null
   const { department, severity, advice } = recommendation
   const cfg = severityConfig[severity] ?? severityConfig.low
@@ -58,7 +62,7 @@ export default function RecommendCard({ recommendation }) {
         style={{ borderBottom: `1px solid ${cfg.border}` }}>
         <div className="flex items-center gap-2">
           <Icon size={16} style={{ color: cfg.iconColor }} />
-          <span className="text-sm font-semibold" style={{ color: '#f1f5f9' }}>
+          <span className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
             Recommendation • التوصية
           </span>
         </div>
@@ -72,13 +76,13 @@ export default function RecommendCard({ recommendation }) {
       <div className="px-4 py-3 space-y-2.5">
         {department && (
           <div className="flex items-center gap-2">
-            <Building2 size={14} style={{ color: '#64748b' }} />
-            <span className="text-xs" style={{ color: '#64748b' }}>Department:</span>
-            <span className="text-sm font-semibold" style={{ color: '#f1f5f9' }}>{department}</span>
+            <Building2 size={14} className={isDark ? 'text-slate-400' : 'text-slate-500'} />
+            <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Department:</span>
+            <span className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>{department}</span>
           </div>
         )}
         {advice && (
-          <p className="text-sm leading-relaxed" style={{ color: '#94a3b8' }} dir="auto">
+          <p className={`text-sm leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-600'}`} dir="auto">
             {advice}
           </p>
         )}

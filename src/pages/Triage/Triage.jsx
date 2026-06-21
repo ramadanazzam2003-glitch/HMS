@@ -4,6 +4,7 @@ import { Send, Stethoscope, RotateCcw, ChevronRight } from 'lucide-react'
 import ChatBubble from './ChatBubble'
 import RecommendCard from './RecommendCard'
 import { useSalama } from './useSalama'
+import { useTheme } from '../../contexts/ThemeContext'
 /* import Navbar from '../../components/Navbar' */
 
 const WELCOME = {
@@ -24,6 +25,8 @@ export default function Triage() {
   const [lang, setLang] = useState('ar')
   const bottomRef = useRef(null)
   const textareaRef = useRef(null)
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -51,20 +54,28 @@ export default function Triage() {
   return (
     <div className="flex flex-col h-screen" style={{ background: 'var(--triage-bg)' }}>
       <style>{`
-        :root {
+        ${isDark ? `
           --triage-bg: #0a0e1a;
           --triage-surface: #111827;
           --triage-card: #1a2235;
           --triage-border: rgba(255,255,255,0.07);
-          --triage-accent: #3b82f6;
-          --triage-accent-glow: rgba(59,130,246,0.15);
-          --triage-green: #10b981;
-          --triage-green-glow: rgba(16,185,129,0.12);
           --triage-text: #f1f5f9;
           --triage-muted: #64748b;
-          --triage-user-bubble: linear-gradient(135deg,#2563eb,#3b82f6);
           --triage-ai-bubble: #1e293b;
-        }
+        ` : `
+          --triage-bg: #f8fafc;
+          --triage-surface: #ffffff;
+          --triage-card: #f1f5f9;
+          --triage-border: rgba(0,0,0,0.08);
+          --triage-text: #1e293b;
+          --triage-muted: #64748b;
+          --triage-ai-bubble: #e2e8f0;
+        `}
+        --triage-accent: #3b82f6;
+        --triage-accent-glow: rgba(59,130,246,0.15);
+        --triage-green: #10b981;
+        --triage-green-glow: rgba(16,185,129,0.12);
+        --triage-user-bubble: linear-gradient(135deg,#2563eb,#3b82f6);
       `}</style>
 
       {/* Header */}

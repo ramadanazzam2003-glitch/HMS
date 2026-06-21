@@ -1,7 +1,10 @@
 import { motion } from 'framer-motion'
 import { Stethoscope } from 'lucide-react'
+import { useTheme } from '../../contexts/ThemeContext'
 
 export default function ChatBubble({ message }) {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
   const isUser = message.role === 'user'
 
   return (
@@ -31,10 +34,10 @@ export default function ChatBubble({ message }) {
           color: '#fff',
           borderRadius: '18px 18px 4px 18px',
         } : {
-          background: '#1e293b',
-          color: '#e2e8f0',
+          background: isDark ? '#1e293b' : '#e2e8f0',
+          color: isDark ? '#e2e8f0' : '#1e293b',
           borderRadius: '18px 18px 18px 4px',
-          border: '1px solid rgba(255,255,255,0.06)',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
         }}
       >
         {message.content}
