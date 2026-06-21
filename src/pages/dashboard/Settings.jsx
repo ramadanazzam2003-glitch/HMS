@@ -159,7 +159,7 @@ export default function Settings() {
     return () => { ignore = true }
   }, [])
 
-  if (!hasPermission('settings:manage')) {
+  if (!hasPermission('settings:manage') && !hasPermission('departments:manage')) {
     return (
       <DashboardLayout>
         <Card>

@@ -24,7 +24,7 @@ const sidebarItems = [
   { icon: BarChart3, label: 'التقارير', labelEn: 'Analytics', path: '/dashboard/analytics', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
   { icon: ScrollText, label: 'سجل النشاط', labelEn: 'Audit Log', path: '/dashboard/audit-log', roles: ['admin', 'director', 'manager', 'super_admin'] },
   { icon: Shield, label: 'لوحة الإدارة', labelEn: 'Admin Panel', path: '/dashboard/admin', roles: ['admin', 'director', 'manager', 'super_admin'] },
-  { icon: Settings, label: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', roles: ['admin', 'director', 'manager', 'super_admin'] },
+  { icon: Settings, label: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
 
   // Doctor-specific items
   { icon: CalendarCheck, label: 'جدولي', labelEn: 'My Schedule', path: '/doctor', roles: ['doctor'] },
