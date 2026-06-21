@@ -226,8 +226,6 @@ export default function Overview() {
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { icon: CalendarDays, labelAr: 'حجز جديد', labelEn: 'New Booking', color: 'text-primary', bg: 'bg-primary-light', path: '/dashboard/bookings' },
-                    { icon: Users, labelAr: 'مريض جديد', labelEn: 'New Patient', color: 'text-success', bg: 'bg-success-light', path: '/dashboard/medical-records' },
                     { icon: CreditCard, labelAr: 'فاتورة جديدة', labelEn: 'New Invoice', color: 'text-secondary', bg: 'bg-secondary/10', path: '/dashboard/billing/new' },
                     { icon: FileText, labelAr: 'سجل طبي', labelEn: 'Medical Record', color: 'text-purple-500', bg: 'bg-purple-50', path: '/dashboard/medical-records' },
                     { icon: BarChart3, labelAr: 'تقارير', labelEn: 'Reports', color: 'text-orange-500', bg: 'bg-orange-50', path: '/dashboard/analytics' },
