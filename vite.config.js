@@ -29,11 +29,6 @@ export default defineConfig(({ mode }) => {
             })
           },
         },
-        '/api/paymob': {
-          target: 'https://accept.paymob.com',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/paymob/, '/api'),
-        },
       },
     },
   }

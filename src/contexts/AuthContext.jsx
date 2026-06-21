@@ -11,7 +11,7 @@ const PERMS_CACHE_KEY = 'medibook-permissions'
 const USER_CACHE_KEY = 'medibook-user'
 const PROFILE_CACHE_KEY = 'medibook-profile'
 
-function withTimeout(promise, ms = 15000) {
+function withTimeout(promise, ms = 30000) {
   let timeoutId
   const timeout = new Promise((_, reject) => {
     timeoutId = setTimeout(() => reject(new Error(`Query timed out after ${ms}ms`)), ms)
@@ -79,6 +79,9 @@ export function AuthProvider({ children }) {
     clearCachedAuth()
   }, [])
 
+  const userRef = useRef(user)
+  userRef.current = user
+
   const fetchProfile = useCallback(async (userId) => {
     if (!userId || fetchingRef.current) return
 
@@ -91,7 +94,7 @@ export function AuthProvider({ children }) {
           .select('*')
           .eq('user_id', userId)
           .maybeSingle(),
-        12000
+        25000
       )
 
       if (profileError) throw profileError
@@ -101,7 +104,7 @@ export function AuthProvider({ children }) {
         setRole(newRole)
         setRoleLevel(0)
         setPermissions([])
-        setCachedAuth(newRole, 0, [], user, null)
+        setCachedAuth(newRole, 0, [], { id: userId }, null)
         return
       }
 
@@ -114,7 +117,7 @@ export function AuthProvider({ children }) {
             .select('*')
             .eq('id', profileData.role_id)
             .maybeSingle(),
-          10000
+          20000
         ),
 
         withTimeout(
@@ -122,7 +125,7 @@ export function AuthProvider({ children }) {
             .from('role_permissions')
             .select('permissions(name)')
             .eq('role_id', profileData.role_id),
-          10000
+          20000
         )
       ])
 
@@ -139,7 +142,7 @@ export function AuthProvider({ children }) {
       setRole(newRole)
       setRoleLevel(newLevel)
       setPermissions(permNames)
-      setCachedAuth(newRole, newLevel, permNames, user, profileData)
+      setCachedAuth(newRole, newLevel, permNames, userRef.current || { id: userId }, profileData)
 
     } catch (err) {
       console.error('fetchProfile error:', err)
@@ -153,7 +156,7 @@ export function AuthProvider({ children }) {
     } finally {
       fetchingRef.current = false
     }
-  }, [user])
+  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -163,7 +166,7 @@ export function AuthProvider({ children }) {
         const {
           data: { session },
           error
-        } = await withTimeout(supabase.auth.getSession(), 15000)
+        } = await withTimeout(supabase.auth.getSession(), 30000)
 
         if (!mounted) return
 
@@ -219,16 +222,16 @@ export function AuthProvider({ children }) {
   }, [fetchProfile, resetAuthState])
 
   function hasPermission(permission) {
-    return permissions.includes('*') || permissions.includes(permission)
+    return roleLevel >= 8 || permissions.includes('*') || permissions.includes(permission)
   }
 
   function hasAnyPermission(perms) {
-    return permissions.includes('*') ||
+    return roleLevel >= 8 || permissions.includes('*') ||
       perms.some(p => permissions.includes(p))
   }
 
   function hasAllPermissions(perms) {
-    return permissions.includes('*') ||
+    return roleLevel >= 8 || permissions.includes('*') ||
       perms.every(p => permissions.includes(p))
   }
 
@@ -252,6 +255,7 @@ export function AuthProvider({ children }) {
   }
 
   const staffRoles = [
+    'super_admin',
     'manager',
     'admin',
     'director',
@@ -262,6 +266,7 @@ export function AuthProvider({ children }) {
   ]
 
   const adminRoles = [
+    'super_admin',
     'manager',
     'admin',
     'director'

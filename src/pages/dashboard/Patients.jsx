@@ -4,6 +4,7 @@ import { Search, Users, ChevronDown, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useUI } from '../../hooks/useUI'
 import { Card, CardContent } from '../../components/ui/card'
 import { Badge } from '../../components/ui/badge'
 import { Input } from '../../components/ui/input'
@@ -11,6 +12,7 @@ import { Skeleton } from '../../components/ui/skeleton'
 
 export default function Patients() {
   const { isRTL } = useLanguage()
+  const { confirm } = useUI()
 
   const [patients, setPatients] = useState([])
   const [loading, setLoading] = useState(true)
@@ -92,7 +94,7 @@ export default function Patients() {
       ? `هل أنت متأكد من حذف المريض "${name}"؟ سيتم حذف جميع حجوزاته نهائيًا.`
       : `Are you sure you want to delete patient "${name}"? All their bookings will be permanently deleted.`
 
-    if (!window.confirm(confirmMsg)) return
+    if (!await confirm(confirmMsg, { danger: true })) return
 
     setDeletingPhone(phone)
     try {

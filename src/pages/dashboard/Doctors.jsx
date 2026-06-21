@@ -152,7 +152,7 @@ export default function Doctors() {
     return () => { ignore = true }
   }, [])
 
-  if (!hasPermission('settings:manage')) {
+  if (!hasPermission('doctors:manage') && !hasPermission('doctors:view_all')) {
     return (
       <DashboardLayout>
         <div className="rounded-2xl bg-surface border border-border p-16 text-center">

@@ -65,15 +65,16 @@ export default function BookingType() {
         .from('departments').select('*')
         .eq('id', departmentId).single()
 
+      // بنجيب is_active كمان عشان الدكتور الـ inactive ميتحسبش "متاح"
       const { data: docs } = await supabase
-        .from('doctors').select('type')
+        .from('doctors').select('type, is_active')
         .eq('department_id', departmentId)
 
       if (!ignore) {
         setDepartment(dept)
         setCounts({
-          consultant: docs?.filter(d => d.type === 'consultant').length || 0,
-          doctor:     docs?.filter(d => d.type === 'doctor').length     || 0,
+          consultant: docs?.filter(d => d.type === 'consultant' && d.is_active !== false).length || 0,
+          doctor:     docs?.filter(d => d.type === 'doctor' && d.is_active !== false).length     || 0,
         })
         setLoading(false)
       }
@@ -82,7 +83,8 @@ export default function BookingType() {
     return () => { ignore = true }
   }, [departmentId])
 
-  const hasAny = counts.consultant > 0 || counts.doctor > 0
+  const isDeptClosed = department?.is_open === false
+  const hasAny = !isDeptClosed && (counts.consultant > 0 || counts.doctor > 0)
 
   if (loading) return (
     <div className="page pt-[72px]">
@@ -111,7 +113,14 @@ export default function BookingType() {
       <div className="page-content">
         <StepIndicator currentStep={1} />
 
-        {!hasAny ? (
+        {isDeptClosed ? (
+          <Card className="text-center p-8">
+            <div className="mb-4"><Building2 size={48} className="text-txt-muted mx-auto" /></div>
+            <h3 className="text-lg font-bold text-txt-primary mb-2">{t.deptClosedTitle}</h3>
+            <p className="text-sm text-txt-muted mb-6">{t.deptClosedMsg}</p>
+            <Button variant="outline" onClick={() => navigate('/')}>{t.backToDepartments}</Button>
+          </Card>
+        ) : !hasAny ? (
           <Card className="text-center p-8">
             <div className="mb-4"><Building2 size={48} className="text-txt-muted mx-auto" /></div>
             <h3 className="text-lg font-bold text-txt-primary mb-2">{t.noStaffAvailable}</h3>

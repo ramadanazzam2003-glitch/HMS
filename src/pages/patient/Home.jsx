@@ -89,18 +89,19 @@ export default function Home() {
   const filteredDepts = useMemo(() => {
     return departments.filter(dept => {
       const remaining = dept.max_daily - (dept.bookedCount || 0)
+      const isAvailable = dept.is_open !== false && remaining > 0
       const matchSearch = !searchTerm ||
         dept.name_en?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         dept.name_ar?.includes(searchTerm)
       const matchFilter = activeFilter === 'all' ||
-        (activeFilter === 'open' && remaining > 0) ||
-        (activeFilter === 'full' && remaining <= 0)
+        (activeFilter === 'open' && isAvailable) ||
+        (activeFilter === 'full' && !isAvailable)
       return matchSearch && matchFilter
     })
   }, [departments, searchTerm, activeFilter])
 
   const openCount = useMemo(() => {
-    return departments.filter(d => (d.max_daily - d.bookedCount) > 0).length
+    return departments.filter(d => d.is_open !== false && (d.max_daily - d.bookedCount) > 0).length
   }, [departments])
 
   if (loading) return (
@@ -119,17 +120,14 @@ export default function Home() {
     <div className="min-h-screen">
       <PublicNavbar />
 
-      {/* New Hero Section */}
       <HeroSection
         departmentCount={departments.length}
         openCount={openCount}
         onScrollToDepts={scrollToDepartments}
       />
 
-      {/* Statistics + Marketing Sections (without footer, without why choose us) */}
       <HomeSections hideFooter hideWhyChooseUs />
 
-      {/* Departments Section with Real Data */}
       <section id="departments" ref={departmentsSectionRef} className="py-16 lg:py-20 bg-surface">
         <div className="max-w-7xl mx-auto px-4 lg:px-6" dir={isRTL ? 'rtl' : 'ltr'}>
           <motion.div
@@ -151,7 +149,6 @@ export default function Home() {
 
           {!apptLoading && nextBooking && <NextAppointmentCard booking={nextBooking} />}
 
-          {/* Search & Filter */}
           <div className="flex flex-wrap items-center gap-3 mb-8 p-4 rounded-2xl bg-surface-hover border border-border">
             <div className="relative flex-1 min-w-[200px]">
               <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-txt-muted pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} />
@@ -182,7 +179,6 @@ export default function Home() {
             </span>
           </div>
 
-          {/* Department Grid */}
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
             variants={containerVariants}
@@ -200,7 +196,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section from HomeSections is already there - skip duplicate */}
       <div>
         <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8" dir={isRTL ? 'rtl' : 'ltr'}>
           <motion.div
@@ -231,7 +226,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer */}
       <HomeSections hideFooter={false} hideStats />
     </div>
   )

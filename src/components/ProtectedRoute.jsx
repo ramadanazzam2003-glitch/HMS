@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (user && role) {
-    const staffRoles = ['manager', 'admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist']
+    const staffRoles = ['super_admin', 'manager', 'admin', 'director', 'dept_manager', 'doctor', 'nurse', 'receptionist']
     if (!staffRoles.includes(role)) {
       return <Navigate to="/" replace />
     }

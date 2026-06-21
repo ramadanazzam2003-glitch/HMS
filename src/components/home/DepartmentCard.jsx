@@ -25,38 +25,56 @@ export default function DepartmentCard({ dept }) {
   const { t } = useLanguage()
   const bookedCount = dept.bookedCount || 0
   const remaining = dept.max_daily - bookedCount
-  const isFull = remaining <= 0
+
+  // dept.is_open === false يعني الأدمن قفل القسم من الإعدادات
+  const isInactive = dept.is_open === false
+  const isFull = !isInactive && remaining <= 0
+  const isUnavailable = isInactive || isFull
+
   const percent = Math.min((bookedCount / dept.max_daily) * 100, 100)
 
   return (
     <motion.div
-      onClick={() => !isFull && navigate(`/booking-type/${dept.id}`)}
+      onClick={() => !isUnavailable && navigate(`/booking-type/${dept.id}`)}
       className={`relative rounded-2xl overflow-hidden h-48 transition-all duration-300 group ${
-        isFull ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer shadow-md'
+        isUnavailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer shadow-md'
       }`}
-      whileHover={!isFull ? { y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' } : undefined}
+      whileHover={!isUnavailable ? { y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.15)' } : undefined}
     >
-      <div className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-        style={{ backgroundImage: `url(${getDeptImage(dept.name_en)})` }} />
-      <div className={`absolute inset-0 ${isFull ? 'bg-slate-900/70' : 'bg-gradient-to-t from-blue-900/90 via-blue-900/50 to-transparent group-hover:from-blue-900/95'}`} />
+      <div
+        className={`absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105 ${isInactive ? 'grayscale' : ''}`}
+        style={{ backgroundImage: `url(${getDeptImage(dept.name_en)})` }}
+      />
+      <div className={`absolute inset-0 ${
+        isUnavailable ? 'bg-slate-900/70' : 'bg-gradient-to-t from-blue-900/90 via-blue-900/50 to-transparent group-hover:from-blue-900/95'
+      }`} />
+
       <div className="absolute top-3 right-3">
-        <span className={`text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${isFull ? 'bg-red-500/90 text-white' : 'bg-green-500/90 text-white'}`}>
-          {isFull ? t.deptFull : t.deptOpen}
+        <span className={`text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+          isInactive ? 'bg-gray-500/90 text-white' : isFull ? 'bg-red-500/90 text-white' : 'bg-green-500/90 text-white'
+        }`}>
+          {isInactive ? t.deptInactive : isFull ? t.deptFull : t.deptOpen}
         </span>
       </div>
+
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h3 className="font-bold text-white text-lg leading-tight">{dept.name_en}</h3>
         <p className="text-blue-200 text-sm">{dept.name_ar}</p>
-        <div className="mt-3">
-          <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-blue-200">{isFull ? t.noSlotsAvailable : `${remaining} ${t.slotsLeft}`}</span>
-            <span className="text-xs text-blue-200">{Math.round(percent)}%</span>
+
+        {isInactive ? (
+          <p className="text-xs text-blue-200 mt-3">{t.deptInactiveMsg}</p>
+        ) : (
+          <div className="mt-3">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs text-blue-200">{isFull ? t.noSlotsAvailable : `${remaining} ${t.slotsLeft}`}</span>
+              <span className="text-xs text-blue-200">{Math.round(percent)}%</span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-1">
+              <div className={`h-1 rounded-full transition-all ${isFull ? 'bg-red-400' : percent > 70 ? 'bg-orange-400' : 'bg-blue-300'}`}
+                style={{ width: `${percent}%` }} />
+            </div>
           </div>
-          <div className="w-full bg-white/20 rounded-full h-1">
-            <div className={`h-1 rounded-full transition-all ${isFull ? 'bg-red-400' : percent > 70 ? 'bg-orange-400' : 'bg-blue-300'}`}
-              style={{ width: `${percent}%` }} />
-          </div>
-        </div>
+        )}
       </div>
     </motion.div>
   )

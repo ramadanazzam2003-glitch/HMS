@@ -5,7 +5,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout'
 import { useAuth } from '../../hooks/useAuth'
 import { calcEndTime } from '../../utils/booking'
 import { motion } from 'framer-motion'
-import { CalendarDays, CheckCircle, Stethoscope } from 'lucide-react' // ✅ حذف Clock
+import { CalendarDays, CheckCircle, Stethoscope, Users } from 'lucide-react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
@@ -23,21 +23,19 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     let ignore = false
-    const load = async () => {
+    const loadData = async () => {
+      const { data: doctorData } = await supabase
+        .from('doctors')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single()
 
-      // ✅ التعديل الأول: جلب profile عبر auth user id أولاً
-    const { data: doctorData } = await supabase
-  .from('doctors')
-  .select('*')
-  .eq('user_id', user?.id)
-  .single()
-  
       if (ignore || !doctorData) { setLoading(false); return }
       setDoctor(doctorData)
 
       const today = new Date().toISOString().slice(0, 10)
 
-      const { data: bookings } = await supabase
+      const { data: todayRes } = await supabase
         .from('bookings')
         .select('*, departments(name_en, name_ar)')
         .eq('doctor_id', doctorData.id)
@@ -45,17 +43,18 @@ export default function DoctorDashboard() {
         .order('slot_time', { ascending: true })
 
       if (!ignore) {
-        const all = bookings || []
-        setTodayBookings(all)
+        const todayBookingsData = todayRes || []
+        setTodayBookings(todayBookingsData)
         setStats({
-          today: all.length,
-          active: all.filter(b => b.status === 'active').length,
-          completed: all.filter(b => b.status === 'completed').length,
+          today: todayBookingsData.length,
+          active: todayBookingsData.filter(b => b.status === 'active').length,
+          completed: todayBookingsData.filter(b => b.status === 'completed').length,
         })
         setLoading(false)
       }
     }
-    load()
+
+    loadData()
     return () => { ignore = true }
   }, [user?.id])
 
@@ -106,10 +105,17 @@ export default function DoctorDashboard() {
   return (
     <DashboardLayout>
         {/* ✅ هنا — قبل motion.div مباشرة */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <h1 className="font-display text-xl font-bold text-txt-primary">
           {t.welcome}, {doctor?.name}
         </h1>
+        <button
+          onClick={() => navigate('/doctor/patients')}
+          className="flex items-center gap-2 h-9 px-4 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
+        >
+          <Users size={16} />
+          {isRTL ? 'كل المرضى' : 'All Patients'}
+        </button>
       </div>
     
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
@@ -180,6 +186,8 @@ export default function DoctorDashboard() {
           </div>
         )}
       </div>
+
+
     </DashboardLayout>
   )
 }

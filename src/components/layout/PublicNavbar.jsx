@@ -25,6 +25,16 @@ export default function PublicNavbar({ back }) {
     navigate('/')
   }
 
+  const handleNav = (path) => {
+    if (path.startsWith('/#')) {
+      const id = path.slice(2)
+      navigate('/')
+      setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }), 150)
+    } else {
+      navigate(path)
+    }
+  }
+
   const navLinks = isRTL
     ? [
         { label: 'الرئيسية', path: '/' },
@@ -71,7 +81,7 @@ export default function PublicNavbar({ back }) {
             {navLinks.map((link) => (
               <button
                 key={link.path}
-                onClick={() => navigate(link.path)}
+                onClick={() => handleNav(link.path)}
                 className="px-4 py-2 rounded-xl text-sm font-medium text-txt-secondary hover:text-txt-primary hover:bg-surface-hover transition-all duration-200"
               >
                 {link.label}

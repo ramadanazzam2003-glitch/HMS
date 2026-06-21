@@ -228,6 +228,8 @@ export const translations = {
     bookDoctor: 'حجز طبيب',
     noStaffAvailable: 'لا يوجد موظفون متاحون',
     noStaffMsg: 'لا يوجد طاقم طبي معيّن لهذا القسم حالياً',
+    deptClosedTitle: 'القسم غير متاح حالياً',
+    deptClosedMsg: 'هذا القسم متوقف مؤقتاً عن استقبال الحجوزات',
     backToDepartments: '→ العودة إلى الأقسام',
 
     // Patient Booking - DoctorSelect
@@ -320,6 +322,8 @@ export const translations = {
     noSlotsAvailable: 'لا توجد مواعيد متاحة',
     deptFull: 'ممتلئ',
     deptOpen: 'متاح',
+    deptInactive: 'غير متاح',
+    deptInactiveMsg: 'هذا القسم متوقف عن استقبال الحجوزات حالياً',
 
     // Patient Booking - CancelBanner
     cancelExistingBooking: 'إلغاء حجز قائم',
@@ -328,6 +332,7 @@ export const translations = {
     slotsPerDay: 'موعد/يوم',
     todayBadge: 'اليوم',
     futureBadge: 'موعد آخر',
+    doctorInactive: 'غير متاح',
 
     // Patient Booking - BookingType dynamic messages
     availableLabel: 'متاح',
@@ -574,6 +579,8 @@ export const translations = {
     bookDoctor: 'Book Doctor',
     noStaffAvailable: 'No Staff Available',
     noStaffMsg: 'No medical staff are currently assigned to this department.',
+    deptClosedTitle: 'Department Currently Unavailable',
+    deptClosedMsg: 'This department is temporarily not accepting bookings',
     backToDepartments: '← Back to Departments',
 
     // Patient Booking - DoctorSelect
@@ -666,6 +673,8 @@ export const translations = {
     noSlotsAvailable: 'No slots available',
     deptFull: 'Full',
     deptOpen: 'Open',
+    deptInactive: 'Not Available',
+    deptInactiveMsg: 'This department is currently not accepting bookings',
 
     // Patient Booking - CancelBanner
     cancelExistingBooking: 'Cancel Existing Booking',
@@ -674,6 +683,7 @@ export const translations = {
     slotsPerDay: 'slots/day',
     todayBadge: 'Today',
     futureBadge: 'Future',
+    doctorInactive: 'Not Available',
 
     // Patient Booking - BookingType dynamic messages
     availableLabel: 'available',

@@ -148,7 +148,7 @@ export default function AdminPanel() {
   // ─── User Actions ─────────────────────────────────────────────────────────────
 
   const startEditUser = (u) => {
-    if (u.id === user?.id) {
+    if (u.user_id === user?.id) {
       toast(isRTL ? 'لا يمكنك تعديل دورك الخاص' : 'You cannot edit your own role', { type: 'error' })
       return
     }
@@ -157,8 +157,8 @@ export default function AdminPanel() {
     setNewDoctorType(u.doctor_type || 'doctor')
   }
 
-  const handleRoleChange = async (userId, roleId) => {
-    if (userId === user?.id) {
+  const handleRoleChange = async (targetUser, roleId) => {
+    if (targetUser.user_id === user?.id) {
       toast(isRTL ? 'لا يمكنك تعديل دورك الخاص' : 'You cannot edit your own role', { type: 'error' })
       setEditingUser(null)
       return
@@ -170,13 +170,13 @@ export default function AdminPanel() {
     const payload = { role_id: parseInt(roleId) }
     if (parseInt(roleId) === DOCTOR_ROLE_ID) payload.doctor_type = newDoctorType
 
-    const { error } = await supabase.from('profiles').update(payload).eq('id', userId)
+    const { error } = await supabase.from('profiles').update(payload).eq('id', targetUser.id)
     if (error) toast('Error: ' + error.message, { type: 'error' })
     else { setEditingUser(null); fetchData(true) }
   }
 
   const handleDeleteUser = async (targetUser) => {
-    if (targetUser.id === user?.id) {
+    if (targetUser.user_id === user?.id) {
       toast(isRTL ? 'لا يمكنك حذف حسابك الخاص' : 'You cannot delete your own account', { type: 'error' })
       return
     }
@@ -516,7 +516,7 @@ export default function AdminPanel() {
                     </thead>
                     <tbody>
                       {filtered.map((u, i) => {
-                        const isSelf = u.id === user?.id
+                        const isSelf = u.user_id === user?.id
                         return (
                           <motion.tr
                             key={u.id}
@@ -560,7 +560,7 @@ export default function AdminPanel() {
                                       <option value="consultant">{isRTL ? 'استشاري' : 'Consultant'}</option>
                                     </select>
                                   )}
-                                  <Button size="xs" onClick={() => handleRoleChange(u.id, newRole)}>{t.save}</Button>
+                                  <Button size="xs" onClick={() => handleRoleChange(u, newRole)}>{t.save}</Button>
                                   <Button variant="ghost" size="xs" onClick={() => setEditingUser(null)}>{t.cancel}</Button>
                                 </div>
                               ) : getRoleBadge(u.roles?.name)}

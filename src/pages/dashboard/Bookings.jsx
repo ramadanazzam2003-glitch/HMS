@@ -54,7 +54,7 @@ export default function Bookings() {
   }, []);
 
   const handleCancel = async (id) => {
-    if (!confirm(t.cancel + "?")) return;
+    if (!await confirm(t.cancel + "?")) return;
     await supabase
       .from("bookings")
       .update({ status: "cancelled", cancelled_by: user?.id })
@@ -63,7 +63,7 @@ export default function Bookings() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm(t.delete + "?")) return;
+    if (!await confirm(t.delete + "?", { danger: true })) return;
     const { error } = await supabase.from("bookings").delete().eq("id", id);
     if (error) {
       console.error(error);

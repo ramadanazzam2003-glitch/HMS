@@ -23,6 +23,7 @@ export default function InvoiceDetail() {
   const [invoice, setInvoice] = useState(null)
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [paymentRef, setPaymentRef] = useState('')
 
   useEffect(() => {
     let ignore = false
@@ -46,19 +47,21 @@ export default function InvoiceDetail() {
     if (!await confirm(`Mark as paid via ${method}?`)) return
 
     setUpdating(true)
+    const payload = {
+      payment_status: 'paid',
+      payment_method: method,
+      paid_at: new Date().toISOString(),
+    }
+    if (paymentRef.trim()) payload.paymob_order_id = paymentRef.trim()
     const { error } = await supabase
       .from('bills')
-      .update({
-        payment_status: 'paid',
-        payment_method: method,
-        paid_at: new Date().toISOString(),
-      })
+      .update(payload)
       .eq('id', invoiceId)
 
     if (error) {
       toast('Error updating: ' + error.message, { type: 'error' })
     } else {
-      setInvoice({ ...invoice, payment_status: 'paid', payment_method: method, paid_at: new Date().toISOString() })
+      setInvoice({ ...invoice, ...payload })
       toast('Payment recorded', { type: 'success' })
     }
     setUpdating(false)
@@ -66,12 +69,14 @@ export default function InvoiceDetail() {
 
   const handlePayOnline = async () => {
     setUpdating(true)
-    await supabase.from('bills').update({
+    const payload = {
       payment_status: 'paid',
       payment_method: 'online',
       paid_at: new Date().toISOString(),
-    }).eq('id', invoiceId)
-    setInvoice({ ...invoice, payment_status: 'paid', payment_method: 'online', paid_at: new Date().toISOString() })
+    }
+    if (paymentRef.trim()) payload.paymob_order_id = paymentRef.trim()
+    await supabase.from('bills').update(payload).eq('id', invoiceId)
+    setInvoice({ ...invoice, ...payload })
     toast('Payment recorded', { type: 'success' })
     setUpdating(false)
   }
@@ -141,6 +146,9 @@ export default function InvoiceDetail() {
                 )}
                 {invoice.paid_at && (
                   <p className="text-xs text-txt-muted mt-1">Paid: {invoice.paid_at?.slice(0, 10)}</p>
+                )}
+                {invoice.paymob_order_id && (
+                  <p className="text-xs text-txt-muted mt-1">Ref: {invoice.paymob_order_id}</p>
                 )}
               </div>
             </div>
@@ -215,6 +223,14 @@ export default function InvoiceDetail() {
           {invoice.payment_status !== 'paid' && hasPermission('bookings:update') && (
             <Card>
               <h3 className="font-bold text-txt-primary text-sm mb-3">Record Payment</h3>
+              <div className="flex gap-3 mb-3">
+                <Input
+                  value={paymentRef}
+                  onChange={e => setPaymentRef(e.target.value)}
+                  placeholder="Reference number (optional)"
+                  className="flex-1 h-10 text-sm"
+                />
+              </div>
               <div className="flex gap-3 flex-wrap">
                 <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button variant="secondary" onClick={() => handleMarkPaid('cash')} disabled={updating}>

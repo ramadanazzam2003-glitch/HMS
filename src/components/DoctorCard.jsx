@@ -4,20 +4,27 @@ import { useLanguage } from "../contexts/LanguageContext";
 
 export default function DoctorCard({ doc, bookingType, isAvailableToday, onSelect, animDelay }) {
   const { t } = useLanguage()
-  const available = isAvailableToday(doc)
+
+  // doc.is_active === false يعني الأدمن عطّل الدكتور من الإعدادات
+  const isInactive = doc.is_active === false
+  const available = !isInactive && isAvailableToday(doc)
 
   return (
     <motion.div
-      onClick={() => onSelect(doc)}
-      className="card animate-fadeIn p-5 flex items-center gap-4 cursor-pointer transition-all duration-150"
+      onClick={() => !isInactive && onSelect(doc)}
+      className={`card animate-fadeIn p-5 flex items-center gap-4 transition-all duration-150 ${
+        isInactive ? 'opacity-55 cursor-not-allowed' : 'cursor-pointer'
+      }`}
       style={{ animationDelay: `${animDelay}ms` }}
-      whileHover={{ y: -2, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={!isInactive ? { y: -2, boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } : undefined}
+      whileTap={!isInactive ? { scale: 0.98 } : undefined}
     >
       <div className={`w-15 h-15 rounded-2xl shrink-0 flex items-center justify-center border-2 transition-all ${
-        available ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+        isInactive ? 'bg-gray-50 border-gray-200 grayscale' : available ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
       }`}>
-        {bookingType === 'consultant' ? <Stethoscope size={24} className="text-blue-600" /> : <UserRound size={24} className="text-teal-600" />}
+        {bookingType === 'consultant'
+          ? <Stethoscope size={24} className={isInactive ? 'text-gray-400' : 'text-blue-600'} />
+          : <UserRound size={24} className={isInactive ? 'text-gray-400' : 'text-teal-600'} />}
       </div>
 
       <div className="flex-1 min-w-0">
@@ -32,11 +39,13 @@ export default function DoctorCard({ doc, bookingType, isAvailableToday, onSelec
       </div>
 
       <div className="flex flex-col items-end gap-2 shrink-0">
-        {available
-          ? <span className="badge badge-success">{t.todayBadge}</span>
-          : <span className="badge badge-warning">{t.futureBadge}</span>
+        {isInactive
+          ? <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-200 text-gray-500">{t.doctorInactive}</span>
+          : available
+            ? <span className="badge badge-success">{t.todayBadge}</span>
+            : <span className="badge badge-warning">{t.futureBadge}</span>
         }
-        <span className="text-gray-400"><ArrowRight size={16} /></span>
+        {!isInactive && <span className="text-gray-400"><ArrowRight size={16} /></span>}
       </div>
     </motion.div>
   )

@@ -5,41 +5,60 @@ import { CheckCircle, User, Stethoscope, CalendarDays, Clock, AlertTriangle, Cre
 import { useLanguage } from '../../contexts/LanguageContext'
 import PublicNavbar from '../../components/layout/PublicNavbar'
 import { Button } from '../../components/ui/button'
+import { Input } from '../../components/ui/input'
 import { Card } from '../../components/ui/card'
 import { useUI } from '../../hooks/useUI'
+import { supabase } from '../../lib/supabase'
+import { generateInvoiceNumber } from '../../utils/invoice'
 
 export default function Confirmation() {
   const { state } = useLocation()
   const navigate = useNavigate()
   const { toast } = useUI()
   const { t, isRTL } = useLanguage()
-  const [paying, setPaying] = useState(false)
+  const [paymentRef, setPaymentRef] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [paid, setPaid] = useState(false)
 
-  const handlePayNow = async () => {
-    setPaying(true)
-    try {
-      const { createPaymobOrder, createPaymobPaymentKey, getPaymobCheckoutUrl } = await import('../../lib/paymob')
-      const { orderId } = await createPaymobOrder({
-        amount: 200,
-        items: [{ name: 'Consultation', amount: 200, quantity: 1 }],
-      })
-
-      const paymentKey = await createPaymobPaymentKey({
-        orderId,
-        billingData: {
-          amount: 200,
-          firstName: state?.patientName?.split(' ')[0] || 'Patient',
-          phone: 'N/A',
-          email: 'patient@medibook.com',
-        },
-      })
-
-      const checkoutUrl = getPaymobCheckoutUrl(paymentKey)
-      window.open(checkoutUrl, '_blank')
-    } catch (err) {
-      toast('Payment error: ' + err.message, { type: 'error' })
+  const handleConfirmPayment = async () => {
+    if (!paymentRef.trim()) {
+      toast(isRTL ? 'الرجاء إدخال رقم المرجع' : 'Please enter a reference number', { type: 'error' })
+      return
     }
-    setPaying(false)
+    setSaving(true)
+    try {
+      const total = 200
+      const taxRate = 14
+      const taxAmount = total * taxRate / 100
+      const { error } = await supabase.from('bills').insert({
+        invoice_number: generateInvoiceNumber(),
+        patient_name: state?.patientName || 'Patient',
+        patient_phone: state?.phone || 'N/A',
+        doctor_id: state?.doctorId || null,
+        department_id: state?.deptId || null,
+        booking_id: state?.bookingId || null,
+        items: [{ name: 'Consultation', amount: total, quantity: 1 }],
+        subtotal: total,
+        tax_rate: taxRate,
+        tax_amount: taxAmount,
+        total: total + taxAmount,
+        payment_status: 'paid',
+        payment_method: 'manual',
+        paymob_order_id: paymentRef.trim(),
+        paid_at: new Date().toISOString(),
+      })
+      if (error) throw error
+      setPaid(true)
+      toast(isRTL ? 'تم تسجيل الدفع بنجاح ✓' : 'Payment recorded successfully ✓', { type: 'success' })
+    } catch (err) {
+      if (err.message?.includes('relation') || err.code === '42P01') {
+        toast(isRTL ? 'تم تسجيل الحجز، سيتم إضافة الفاتورة لاحقاً' : 'Booking saved, invoice will be added later', { type: 'success' })
+        setPaid(true)
+      } else {
+        toast(isRTL ? 'فشل تسجيل الدفع: ' + err.message : 'Payment failed: ' + err.message, { type: 'error' })
+      }
+    }
+    setSaving(false)
   }
 
   return (
@@ -131,13 +150,52 @@ export default function Confirmation() {
           </div>
         </motion.div>
 
+        {/* Payment */}
+        {!paid ? (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+            className="rounded-2xl bg-surface border border-border p-5 mb-4"
+          >
+            <h3 className="font-bold text-txt-primary text-sm mb-1">
+              {isRTL ? 'تأكيد الدفع' : 'Payment Confirmation'}
+            </h3>
+            <p className="text-xs text-txt-muted mb-3">
+              {isRTL
+                ? 'أدخل رقم المرجع (تحويل بنكي / محفظة) لتأكيد الدفع'
+                : 'Enter the reference number (bank transfer / wallet) to confirm payment'}
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={paymentRef}
+                onChange={e => setPaymentRef(e.target.value)}
+                placeholder={isRTL ? 'رقم المرجع' : 'Reference number'}
+                className="flex-1 h-10 text-sm"
+              />
+              <Button
+                onClick={handleConfirmPayment} disabled={saving} className="shrink-0"
+              >
+                {saving
+                  ? (isRTL ? 'جارٍ الحفظ...' : 'Saving...')
+                  : <span className="flex items-center gap-1.5"><CreditCard size={15} /> {isRTL ? 'تأكيد' : 'Confirm'}</span>}
+              </Button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl bg-green-50 border border-green-200 p-5 mb-4 text-center"
+          >
+            <p className="text-green-700 font-semibold text-sm">
+              {isRTL ? '✓ تم تأكيد الدفع' : '✓ Payment confirmed'}
+            </p>
+          </motion.div>
+        )}
+
         {/* Actions */}
         <div className="flex flex-col gap-2.5 mt-2">
-          <Button
-            onClick={handlePayNow} disabled={paying} size="lg" className="w-full"
-          >
-            {paying ? t.processingLabel : <span className="flex items-center justify-center gap-2"><CreditCard size={16} /> {t.payNow}</span>}
-          </Button>
           <Button variant="secondary" size="lg" className="w-full" onClick={() => navigate('/my-bookings')}>
             {t.viewMyBookings}
           </Button>

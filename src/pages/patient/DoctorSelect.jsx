@@ -68,7 +68,12 @@ export default function DoctorSelect() {
 
       if (!ignore) {
         setDepartment(dept)
-        setDoctors(docs || [])
+        // الدكاترة النشطين الأول، وبعدين الـ inactive في الآخر
+        const sorted = [...(docs || [])].sort((a, b) => {
+          if (a.is_active === b.is_active) return 0
+          return a.is_active === false ? 1 : -1
+        })
+        setDoctors(sorted)
         setLoading(false)
       }
     }
@@ -77,6 +82,7 @@ export default function DoctorSelect() {
   }, [departmentId, bookingType])
 
   const isAvailableToday = (doc) => {
+    if (doc.is_active === false) return false
     if (!doc.working_days || doc.working_days.length === 0) return false
     return doc.working_days.includes(todayName)
   }

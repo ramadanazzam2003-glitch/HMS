@@ -63,7 +63,7 @@ const handleSubmit = async () => {
   const nextQueue = (existing?.[0]?.queue_number || 0) + 1
   const slotTime  = state.selectedSlot
 
-  const { error } = await supabase.from('bookings').insert({
+  const { data: newBooking, error } = await supabase.from('bookings').insert({
     booking_ref:   bookingRef,
     department_id: state.deptId,
     doctor_id:     state.doctor?.id,
@@ -75,7 +75,7 @@ const handleSubmit = async () => {
     slot_time:     slotTime,
     status:        'active',
     user_id:       session?.user?.id || null,
-  })
+  }).select('id').single()
 
     if (error) {
       toast('Error creating booking: ' + error.message, { type: 'error' })
@@ -85,6 +85,7 @@ const handleSubmit = async () => {
 
     navigate('/confirmation', {
       state: {
+        bookingId: newBooking?.id, phone: form.phone,
         bookingRef, doctorName: state.doctor?.name,
         slotTime, endTime: calcEndTime(slotTime), date: state.selectedDate,
         patientName: form.patient_name, queueNumber: nextQueue,

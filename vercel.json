@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/paymob/auth", "destination": "/api/paymob/auth.js" },
-    { "source": "/api/paymob/orders", "destination": "/api/paymob/orders.js" },
-    { "source": "/api/paymob/payment_keys", "destination": "/api/paymob/payment_keys.js" },
     { "source": "/api/resend/emails", "destination": "/api/resend.js" },
     { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]

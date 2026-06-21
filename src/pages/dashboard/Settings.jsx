@@ -258,7 +258,8 @@ export default function Settings() {
 
   const deleteDoc = async (id) => {
     if (!await confirm('Delete this doctor?', { danger: true, confirmLabel: 'Delete' })) return
-    await supabase.from('doctors').delete().eq('id', id)
+    const { error } = await supabase.from('doctors').delete().eq('id', id)
+    if (error) return toast('Error deleting doctor: ' + error.message, { type: 'error' })
     fetchAll()
   }
 

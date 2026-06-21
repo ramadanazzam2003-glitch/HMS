@@ -15,12 +15,12 @@ import { useLanguage } from '../../contexts/LanguageContext'
 
 const sidebarItems = [
   // Admin / Dashboard items
-  { icon: LayoutDashboard, label: 'الرئيسية', labelEn: 'Dashboard', path: '/dashboard', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
+  { icon: LayoutDashboard, label: 'الرئيسية', labelEn: 'Dashboard', path: '/dashboard', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin', 'nurse'] },
   { icon: CalendarDays, label: 'الحجوزات', labelEn: 'Bookings', path: '/dashboard/bookings', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
-  { icon: Users, label: 'المرضى', labelEn: 'Patients', path: '/dashboard/patients', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
+  { icon: Users, label: 'المرضى', labelEn: 'Patients', path: '/dashboard/patients', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin', 'nurse'] },
   { icon: Stethoscope, label: 'الأطباء', labelEn: 'Doctors', path: '/dashboard/doctors', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
-  { icon: FileText, label: 'السجلات الطبية', labelEn: 'Medical Records', path: '/dashboard/medical-records', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin', 'doctor'] },
-  { icon: Receipt, label: 'الفواتير', labelEn: 'Billing', path: '/dashboard/billing', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
+  { icon: FileText, label: 'السجلات الطبية', labelEn: 'Medical Records', path: '/dashboard/medical-records', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin', 'doctor', 'nurse'] },
+  { icon: Receipt, label: 'الفواتير', labelEn: 'Billing', path: '/dashboard/billing', roles: ['admin', 'director', 'manager', 'super_admin'] },
   { icon: BarChart3, label: 'التقارير', labelEn: 'Analytics', path: '/dashboard/analytics', roles: ['admin', 'director', 'dept_manager', 'manager', 'super_admin'] },
   { icon: ScrollText, label: 'سجل النشاط', labelEn: 'Audit Log', path: '/dashboard/audit-log', roles: ['admin', 'director', 'manager', 'super_admin'] },
   { icon: Shield, label: 'لوحة الإدارة', labelEn: 'Admin Panel', path: '/dashboard/admin', roles: ['admin', 'director', 'manager', 'super_admin'] },
@@ -28,7 +28,8 @@ const sidebarItems = [
 
   // Doctor-specific items
   { icon: CalendarCheck, label: 'جدولي', labelEn: 'My Schedule', path: '/doctor', roles: ['doctor'] },
-  { icon: Search, label: 'بحث عن مريض', labelEn: 'Search Patient', path: '/doctor/search', roles: ['doctor'] },
+  { icon: Users, label: 'المرضى', labelEn: 'Patients', path: '/doctor/patients', roles: ['doctor'] },
+  { icon: Search, label: 'بحث عن مريض', labelEn: 'Search Patient', path: '/doctor/search', roles: ['doctor', 'nurse'] },
   { icon: FlaskConical, label: 'المعمل', labelEn: 'Lab Orders', path: '/doctor/lab-orders', roles: ['doctor'] },
   { icon: CalendarPlus, label: 'متابعة', labelEn: 'Follow-Up', path: '/doctor/follow-up', roles: ['doctor'] },
   { icon: CalendarDays, label: 'جدول المواعيد', labelEn: 'Schedule', path: '/doctor/schedule', roles: ['doctor'] },
@@ -216,9 +217,9 @@ export default function DashboardLayout({ children }) {
                   className="flex-1 min-w-0"
                 >
                   <p className="text-sm font-medium text-white truncate">
-                    {profile?.full_name || 'User'}
+                    {role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || profile?.full_name || 'User'}
                   </p>
-                <Badge>{role || 'Staff'}</Badge>
+                <Badge>{role?.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Staff'}</Badge>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -42,6 +42,7 @@ const Doctors = lazy(() => import('./pages/dashboard/Doctors'))
 
 // Doctor Pages
 const DoctorDashboard = lazy(() => import('./pages/doctor/Dashboard'))
+const DoctorPatients = lazy(() => import('./pages/doctor/Patients'))
 const Consultation = lazy(() => import('./pages/doctor/Consultation'))
 const PatientRecord = lazy(() => import('./pages/doctor/PatientRecord'))
 const DoctorSchedule = lazy(() => import('./pages/doctor/Schedule'))
@@ -67,6 +68,7 @@ const CreateInvoice = lazy(() => import('./pages/billing/CreateInvoice'))
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute'
+import RoleGuard from './components/RoleGuard'
 import PatientRoute from './components/PatientRoute'
 import DoctorRoute from './components/DoctorRoute'
 
@@ -120,9 +122,9 @@ function App() {
         <Route path="/dashboard/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
         <Route path="/dashboard/audit-log" element={<ProtectedRoute><AuditLog /></ProtectedRoute>} />
         <Route path="/dashboard/department" element={<ProtectedRoute><DepartmentDashboard /></ProtectedRoute>} />
-        <Route path="/dashboard/billing" element={<ProtectedRoute><InvoiceList /></ProtectedRoute>} />
-        <Route path="/dashboard/billing/new" element={<ProtectedRoute><CreateInvoice /></ProtectedRoute>} />
-        <Route path="/dashboard/billing/:invoiceId" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
+        <Route path="/dashboard/billing" element={<ProtectedRoute><RoleGuard allowedRoles={['admin','director','manager','super_admin']}><InvoiceList /></RoleGuard></ProtectedRoute>} />
+        <Route path="/dashboard/billing/new" element={<ProtectedRoute><RoleGuard allowedRoles={['admin','director','manager','super_admin']}><CreateInvoice /></RoleGuard></ProtectedRoute>} />
+        <Route path="/dashboard/billing/:invoiceId" element={<ProtectedRoute><RoleGuard allowedRoles={['admin','director','manager','super_admin']}><InvoiceDetail /></RoleGuard></ProtectedRoute>} />
 
         {/* Director Route */}
         <Route path="/director" element={<ProtectedRoute><DirectorDashboard /></ProtectedRoute>} />
@@ -138,6 +140,7 @@ function App() {
 
         {/* Doctor Routes */}
         <Route path="/doctor" element={<DoctorRoute><DoctorDashboard /></DoctorRoute>} />
+        <Route path="/doctor/patients" element={<DoctorRoute><DoctorPatients /></DoctorRoute>} />
         <Route path="/doctor/consultation/:bookingId" element={<DoctorRoute><Consultation /></DoctorRoute>} />
         <Route path="/doctor/patient/:patientPhone" element={<DoctorRoute><PatientRecord /></DoctorRoute>} />
         <Route path="/doctor/schedule" element={<DoctorRoute><DoctorSchedule /></DoctorRoute>} />

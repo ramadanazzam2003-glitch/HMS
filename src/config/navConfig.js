@@ -55,7 +55,7 @@ export const navItems = [
     labelAr: 'الفواتير',
     path: '/dashboard/billing',
     icon: CreditCard,
-    roles: ['admin', 'director', 'dept_manager'],
+    roles: ['admin', 'director'],
   },
  
   /* {
